@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CR Laser® — Gerador de Ofertas</title>
+  <meta property="og:title" content="CR Laser® — Gerador de Ofertas">
+<meta property="og:description" content="Gerador de ofertas CR Laser®">
+<meta property="og:image" content="https://clinicacrlaser.netlify.app/logo.png">
+<meta property="og:url" content="https://clinicacrlaser.netlify.app">
+<meta property="og:type" content="website">
+
+<!-- WhatsApp / compatibilidade -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://clinicacrlaser.netlify.app/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="page">
+    <div class="app-card">
+
+      <!-- ════ HEADER ════ -->
+      <header class="app-header">
+        <div class="logo">
+          <img src="./logo.png.png" alt="CR Laser" width="108" height="108" />
+        </div>
+
+        <h1 class="title">Clínica CR Laser<sup>®</sup></h1>
+        <p class="subtitle">Gerador de Ofertas</p>
+      </header>
+
+      <!-- ════ DIVISOR ════ -->
+      <div class="divider"></div>
+
+      <!-- ════ FORMULÁRIO ════ -->
+      <section class="form-section">
+
+        <div class="fields-row">
+
+          <!-- Procedimento -->
+          <div class="form-group">
+            <label for="procedimento">Procedimento</label>
+            <div class="field-wrap">
+              <svg class="field-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a6 6 0 100 12A6 6 0 0010 2zm0 10.5A4.5 4.5 0 1110 3.5a4.5 4.5 0 010 9zm0-7a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" fill="#1E5FAF"/>
+                <path d="M10 17.5v-2M14.95 14.95l-1.41-1.41M17.5 10h-2M14.95 5.05l-1.41 1.41" stroke="#18C7D1" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              <select id="procedimento">
+                <option value="" disabled selected>Selecione o procedimento</option>
+                <optgroup label="Botox">
+                  <option value="0">Botox Facial Terço Superior Com Retorno</option>
+                  <option value="1">Botox Suor Axilar</option>
+                </optgroup>
+                <optgroup label="Preenchedor">
+                  <option value="2">Preenchedor Facial</option>
+                </optgroup>
+                <optgroup label="Bioestimulador">
+                  <option value="3">Bioestimulador Diamond</option>
+                </optgroup>
+                <optgroup label="Ultraformer MPT">
+                  <option value="4">Ultraformer MPT Full Face</option>
+                  <option value="5">Ultraformer MPT Pálpebras</option>
+                  <option value="6">Ultraformer MPT Pescoço (Pega Papada com Foco em Flacidez)</option>
+                  <option value="7">Ultraformer MPT Papada</option>
+                  <option value="8">Ultraformer MPT Bichectomia</option>
+                  <option value="9">Ultraformer MPT Terço Inferior</option>
+                  <option value="10">Ultraformer MPT Abdome</option>
+                  <option value="11">Ultraformer MPT Flancos</option>
+                  <option value="12">Ultraformer MPT Colo</option>
+                  <option value="13">Ultraformer MPT Gordura do Sutiã</option>
+                  <option value="14">Ultraformer MPT Gordura Pré-Axilar</option>
+                  <option value="15">Ultraformer MPT Monte de Vênus</option>
+                  <option value="16">Ultraformer MPT Bananinha</option>
+                  <option value="17">Ultraformer MPT Braços Região do Tchau</option>
+                  <option value="18">Ultraformer MPT Joelho</option>
+                  <option value="19">Ultraformer MPT Interno de Coxa</option>
+                  <option value="20">Ultraformer MPT Mãos</option>
+                  <option value="21">Ultraformer MPT Rejuvenescimento Íntimo</option>
+                  <option value="22">Ultraformer MPT Bumbum Up</option>
+                </optgroup>
+                <optgroup label="Scizer">
+                  <option value="23">Scizer Corporal Por Região</option>
+                </optgroup>
+                <optgroup label="Laser Lavieen">
+                  <option value="24">Lavieen BB Laser Facial - 3 sessões</option>
+                  <option value="25">Lavieen Facial Completo - 3 sessões</option>
+                  <option value="26">Lavieen Melasma Facial - 3 sessões</option>
+                  <option value="27">Lavieen Face + Pescoço + Colo - 3 sessões</option>
+                  <option value="28">Lavieen Facial + Pescoço - 3 sessões</option>
+                  <option value="29">Lavieen Olheiras - 3 sessões</option>
+                  <option value="30">Lavieen Pescoço + Colo - 3 sessões</option>
+                  <option value="31">Lavieen Capilar - 3 sessões</option>
+                  <option value="32">Lavieen Mãos - 3 sessões</option>
+                </optgroup>
+                <optgroup label="Microagulhamento">
+                  <option value="33">Microagulhamento Robótico - 3 sessões</option>
+                </optgroup>
+                <optgroup label="Endymed">
+                  <option value="34">Endymed Radiofrequência 3DEEP - 6 sessões</option>
+                </optgroup>
+                <optgroup label="Luz Pulsada &amp; Laser">
+                  <option value="35">Hollywood Peel - 2 sessões</option>
+                  <option value="36">Despigmentação a Laser - 2 sessões</option>
+                  <option value="37">Laser Fracionado Pixel - 1 Sessão</option>
+                  <option value="38">Laser Fracionado Código de Barras - 2 sessões</option>
+                  <option value="39">Laser Fracionado Pálpebras - 2 sessões</option>
+                  <option value="40">Laser Fracionado Glabela - 2 sessões</option>
+                  <option value="41">Luz Pulsada Facial - 2 sessões</option>
+                  <option value="42">Luz Pulsada Colo - 2 sessões</option>
+                  <option value="43">Luz Pulsada Mãos - 2 sessões</option>
+                </optgroup>
+                <optgroup label="Depilação a Laser">
+                  <option value="44">Axilas</option>
+                  <option value="45">Virilha Completa (Incl. região perianal)</option>
+                  <option value="46">Buço e Mento</option>
+                  <option value="47">Barba Completa</option>
+                  <option value="48">Barba Delimitada</option>
+                  <option value="49">Rosto</option>
+                  <option value="50">Perna Completa</option>
+                  <option value="51">Antebraço</option>
+                  <option value="52">Meia Perna</option>
+                  <option value="53">Coxa</option>
+                  <option value="54">Costas</option>
+                  <option value="55">Tórax e Abdome</option>
+                  <option value="56">Braço Completo</option>
+                  <option value="57">Bumbum</option>
+                  <option value="58">Virilha Delimitada</option>
+                  <option value="59">Pescoço Feminino</option>
+                </optgroup>
+              </select>
+              <span class="chevron">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#18C7D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Faixa de Oferta -->
+          <div class="form-group">
+            <label for="faixaOferta">Faixa de Oferta</label>
+            <div class="field-wrap">
+              <svg class="field-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 10l2 2 4-4" stroke="#18C7D1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="3" y="3" width="14" height="14" rx="3" stroke="#1E5FAF" stroke-width="1.4"/>
+              </svg>
+              <select id="faixaOferta">
+                <option value="" disabled selected>Selecione a faixa</option>
+                <option value="0">Oferta da Semana</option>
+                <option value="1">Oferta Especial</option>
+                <option value="2">Sextouu com Desconto</option>
+                <option value="3">Close Friends</option>
+              </select>
+              <span class="chevron">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#18C7D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Botão gerar -->
+        <button class="primary-btn" onclick="generateOffer()">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 3v14M3 10h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Gerar Oferta
+        </button>
+
+      </section>
+
+      <!-- ════ RESULTADO ════ -->
+      <section class="result-section" id="resultSection">
+
+        <div class="divider"></div>
+
+        <div class="discount-box" id="discountBadge">
+          Desconto aplicado: —
+        </div>
+
+        <div class="result-box" id="offerText"></div>
+
+        <button id="btnCopiar" class="secondary-btn" onclick="copyOffer()">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="7" y="7" width="10" height="10" rx="2" stroke="#fff" stroke-width="1.6"/>
+            <path d="M5 13H4a2 2 0 01-2-2V4a2 2 0 012-2h7a2 2 0 012 2v1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          COPIAR OFERTA
+        </button>
+
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ════ TIRE DÚVIDAS ════ -->
+  <div class="page qa-page">
+    <div class="app-card">
+
+      <header class="app-header qa-header">
+        <p class="qa-label">CR Laser®</p>
+        <h2 class="qa-title">TIRE DÚVIDAS</h2>
+      </header>
+
+      <div class="divider"></div>
+
+      <section class="form-section">
+
+        <div class="fields-row">
+
+          <!-- Procedimento -->
+          <div class="form-group">
+            <label for="qaProcedimento">Procedimento</label>
+            <div class="field-wrap">
+              <svg class="field-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a6 6 0 100 12A6 6 0 0010 2zm0 10.5A4.5 4.5 0 1110 3.5a4.5 4.5 0 010 9zm0-7a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" fill="#1E5FAF"/>
+                <path d="M10 17.5v-2M14.95 14.95l-1.41-1.41M17.5 10h-2M14.95 5.05l-1.41 1.41" stroke="#18C7D1" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              <select id="duvidaProcedimento" onchange="carregarPerguntasDuvidas()">
+                <option value="" disabled selected>Selecione o procedimento</option>
+                <option value="Bioestimulador">Bioestimulador</option>
+                <option value="Botox">Botox</option>
+                <option value="Endymed">Endymed</option>
+                <option value="Lavieen">Lavieen</option>
+                <option value="Preenchedor">Preenchedor</option>
+                <option value="Ultraformer MPT Corpo">Ultraformer MPT Corpo</option>
+                <option value="Ultraformer MPT Face">Ultraformer MPT Face</option>
+                <option value="Scizer">Scizer</option>
+                <option value="Por que escolher a CR Laser®">Por que escolher a CR Laser®</option>
+                <option value="Endereço">Endereço</option>
+              </select>
+              <span class="chevron">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#18C7D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- Pergunta -->
+          <div class="form-group">
+            <label for="qaPergunta">Pergunta</label>
+            <div class="field-wrap">
+              <svg class="field-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="8" stroke="#1E5FAF" stroke-width="1.4"/>
+                <path d="M10 11.5v-1a2 2 0 10-2-2" stroke="#18C7D1" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="10" cy="13.5" r="0.75" fill="#18C7D1"/>
+              </svg>
+              <select id="duvidaPergunta" onchange="mostrarRespostaDuvida()">
+                <option value="" disabled selected>Selecione a pergunta</option>
+              </select>
+              <span class="chevron">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="#18C7D1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Resposta -->
+        <div id="duvidaRespostaBox" style="display:none; flex-direction:column; gap:16px;">
+          <div class="result-box" id="duvidaRespostaTexto"></div>
+          <button id="btnCopiarQA" class="secondary-btn" onclick="qaCopiarResposta()">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="7" y="7" width="10" height="10" rx="2" stroke="#fff" stroke-width="1.6"/>
+              <path d="M5 13H4a2 2 0 01-2-2V4a2 2 0 012-2h7a2 2 0 012 2v1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            COPIAR RESPOSTA
+          </button>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
