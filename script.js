@@ -93,7 +93,7 @@ const DISCOUNT_RATES = {
   botox:            [0.25, 0.30, 0.35, 0.40],
   preenchedor:      [0.25, 0.30, 0.35, 0.40],
   diamond:          [0.30, 0.35, 0.40, 0.45],
-  scizer:           [0.40, 0.45, 0.50, 0.55],
+  scizer:           [0.45, 0.50, 0.55, 0.60],
   endymed:          [0.45, 0.50, 0.55, 0.60],
   microagulhamento: [0.05, 0.10, 0.15, 0.25],
   luzpulsada:       [0.35, 0.40, 0.45, 0.50],
@@ -108,6 +108,7 @@ const SUGGESTION_MAP = {
   '2': { idx: 0, name: 'Botox Facial Terço Superior Com Retorno' },
   '3': { idx: 4, name: 'Ultraformer MPT Full Face' },
   '4': { idx: 3, name: 'Bioestimulador Diamond' },
+  '23': { idx: 34, name: 'Endymed Radiofrequência 3DEEP 6 sessões' },
 };
 
 let currentMainProcIdx = null;
@@ -382,12 +383,12 @@ function addSecondProcedure() {
   const totalCard = totalPix / 10;
 
   let combinedText = `Aproveite a Oferta CR Laser®\n`;
-  combinedText += `\n➖➖\n\n`;
+  combinedText += `\n➖➖\n`;
 
   combinedText += `🟢 ${mainProc.name}. De R$ ${fmt(mainProc.pix)} no Pix ou 12x de R$ ${fmt(mainOriginalCard)} no cartão por:\n\n`;
   combinedText += `\u{1F4B0} Pix: R$ ${fmt(mainDiscountedPix)}\n`;
   combinedText += `\u{1F4B3} Cartão: 12x de R$ ${fmt(mainDiscountedCard)}\n`;
-  combinedText += `\n➖➖\n\n`;
+  combinedText += `\n➖➖\n`;
 
   combinedText += `🟢 ${secondProc.name}. De R$ ${fmt(secondProc.pix)} no Pix ou 12x de R$ ${fmt(secondOriginalCard)} no cartão por:\n\n`;
   combinedText += `\u{1F4B0} Pix: R$ ${fmt(secondDiscountedPix)}\n`;
@@ -395,13 +396,14 @@ function addSecondProcedure() {
   combinedText += `\n➖➖\n`;
 
   if (isBotoxHighlightActive && currentMainProcIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
-    combinedText += `\n🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED\n`;
-    combinedText += `\n➖➖\n`;
+    combinedText += `🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED\n\n`;
+    combinedText += `➖➖\n`;
   }
 
-  combinedText += `\n\u{1F4B0} Total no Pix: R$ ${fmt(totalPix)}\n`;
-  combinedText += `\u{1F4B3} Total no Cartão: 12x de R$ ${fmt(totalCard)}\n`;
-  combinedText += `\n\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
+  combinedText += `\u{1F4B0} Total no Pix: R$ ${fmt(totalPix)}\n`;
+  combinedText += `\u{1F4B3} Total no Cartão: 12x de R$ ${fmt(totalCard)}\n\n`;
+  combinedText += `➖➖\n`;
+  combinedText += `\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
 
   document.getElementById('offerText').textContent = combinedText;
   secondProcedureAdded = true;
