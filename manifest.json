@@ -1,6 +1,6 @@
 {
   "name": "CR Laser® - Gerador de Ofertas",
-  "short_name": "CR Laser",
+  "short_name": "CR Laser®",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -8,14 +8,16 @@
   "theme_color": "#18C7D1",
   "icons": [
     {
-      "src": "./logo.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "./logo.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
