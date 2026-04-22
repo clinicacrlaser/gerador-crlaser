@@ -1,0 +1,920 @@
+/* ══════════════════════════════════════════
+   CR LASER® — GERADOR DE OFERTAS
+   Visual Premium v2
+══════════════════════════════════════════ */
+
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── TOKENS ── */
+:root {
+  --bg:          #070B14;
+  --card:        #0D1321;
+  --card-inner:  #0A1020;
+  --blue:        #1E5FAF;
+  --blue-mid:    #0F6CBD;
+  --teal:        #18C7D1;
+  --text:        #F5F7FA;
+  --text-muted:  #B8C2D1;
+  --border:      rgba(24, 199, 209, 0.22);
+  --border-focus:rgba(24, 199, 209, 0.55);
+  --green-bg:    rgba(22, 163, 74, 0.12);
+  --green-border:rgba(34, 197, 94, 0.35);
+  --green-text:  #4ade80;
+  --radius:      18px;
+  --radius-sm:   12px;
+  --shadow:
+    0 0 0 1px rgba(30, 95, 175, 0.18),
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 32px 80px rgba(0, 0, 0, 0.35),
+    0 0 60px rgba(24, 199, 209, 0.04);
+  --t: 0.22s ease;
+}
+
+/* ── BODY ── */
+body {
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -5%,  rgba(30, 95, 175, 0.22) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 35% at 90% 95%,  rgba(24, 199, 209, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 10% 80%,  rgba(15, 108, 189, 0.07) 0%, transparent 60%);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 40px 16px 60px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PÁGINA ── */
+.page {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── BARRA DE CONTAGEM DA OFERTA ── */
+.offer-countdown-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  background: linear-gradient(100deg, rgba(7, 11, 20, 0.96) 0%, rgba(10, 16, 32, 0.96) 100%);
+  border: 1px solid rgba(24, 199, 209, 0.26);
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(30, 95, 175, 0.14), 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.offer-countdown-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.offer-countdown-value {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  color: var(--teal);
+  font-variant-numeric: tabular-nums;
+}
+
+.offer-countdown-bar.is-ended .offer-countdown-value {
+  color: #8ce8ee;
+  letter-spacing: 1.2px;
+}
+
+.day-highlight {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(24, 199, 209, 0.24);
+  border-radius: 14px;
+  background: linear-gradient(110deg, rgba(7, 11, 20, 0.94) 0%, rgba(10, 16, 32, 0.94) 100%);
+  box-shadow: 0 0 0 1px rgba(30, 95, 175, 0.10), 0 6px 20px rgba(0, 0, 0, 0.24);
+}
+
+.day-highlight-title {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.day-highlight-card {
+  width: 100%;
+  border: 1px solid rgba(24, 199, 209, 0.34);
+  border-radius: 12px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.20) 0%, rgba(24, 199, 209, 0.12) 100%);
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--t), box-shadow var(--t), transform var(--t), background var(--t);
+}
+
+.day-highlight-card:hover {
+  border-color: rgba(24, 199, 209, 0.56);
+  box-shadow: 0 0 18px rgba(24, 199, 209, 0.12);
+  transform: translateY(-1px);
+}
+
+.day-highlight-card:active {
+  transform: translateY(0);
+}
+
+.day-highlight-card.is-active {
+  border-color: rgba(24, 199, 209, 0.72);
+  box-shadow: 0 0 18px rgba(24, 199, 209, 0.2);
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.28) 0%, rgba(24, 199, 209, 0.18) 100%);
+}
+
+.day-highlight-name {
+  display: block;
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--text);
+}
+
+.day-highlight-bonus {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.install-app-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid rgba(24, 199, 209, 0.36);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.18) 0%, rgba(24, 199, 209, 0.14) 100%);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(30, 95, 175, 0.10);
+  transition: opacity var(--t), transform var(--t), border-color var(--t), box-shadow var(--t), background var(--t);
+}
+
+.install-app-btn:hover {
+  border-color: rgba(24, 199, 209, 0.56);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22), 0 0 16px rgba(24, 199, 209, 0.10);
+  transform: translateY(-1px);
+}
+
+.install-app-btn:active {
+  transform: translateY(0);
+}
+
+.install-app-btn[hidden] {
+  display: none;
+}
+
+.ios-install-hint {
+  position: fixed;
+  top: 84px;
+  right: 16px;
+  width: min(340px, calc(100vw - 24px));
+  padding: 14px 14px 12px;
+  background: linear-gradient(120deg, rgba(10, 16, 32, 0.98) 0%, rgba(13, 19, 33, 0.98) 100%);
+  border: 1px solid rgba(24, 199, 209, 0.30);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32), 0 0 24px rgba(24, 199, 209, 0.08);
+  z-index: 9997;
+}
+
+.ios-install-hint p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  padding-right: 24px;
+}
+
+.ios-install-hint-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ios-install-hint-close:hover {
+  color: var(--teal);
+}
+
+.ios-install-hint-ok {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(24, 199, 209, 0.38);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.16) 0%, rgba(24, 199, 209, 0.14) 100%);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ios-install-hint-ok:hover {
+  border-color: rgba(24, 199, 209, 0.56);
+}
+
+.ios-install-hint[hidden] {
+  display: none;
+}
+
+/* ── CARD PRINCIPAL ── */
+.app-card {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Linha decorativa topo */
+.app-card::before {
+  content: '';
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #1E5FAF 25%, #18C7D1 75%, transparent 100%);
+  opacity: 0.85;
+}
+
+/* ── HEADER ── */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 44px 40px 32px;
+  text-align: center;
+}
+
+/* ── LOGO ── */
+.logo {
+  margin-bottom: 22px;
+  filter:
+    drop-shadow(0 0 18px rgba(24, 199, 209, 0.30))
+    drop-shadow(0 0  6px rgba(30, 95, 175, 0.45));
+  transition: filter var(--t);
+}
+
+.logo img {
+  display: block;
+  width: 108px;
+  height: 108px;
+  object-fit: contain;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow:
+    0 0 20px rgba(0, 200, 255, 0.40),
+    0 0 40px rgba(0, 200, 255, 0.25),
+    0 0 70px rgba(0, 200, 255, 0.15);
+}
+
+.logo:hover {
+  filter:
+    drop-shadow(0 0 26px rgba(24, 199, 209, 0.50))
+    drop-shadow(0 0  8px rgba(30, 95, 175, 0.60));
+}
+
+/* ── TÍTULO ── */
+.title {
+  font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.title sup {
+  font-size: 0.55em;
+  vertical-align: super;
+  color: var(--teal);
+  font-weight: 600;
+}
+
+/* ── SUBTÍTULO ── */
+.subtitle {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  opacity: 0.85;
+}
+
+/* ── DIVISOR ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  margin: 0 28px;
+}
+
+/* ── SEÇÃO DO FORMULÁRIO ── */
+.form-section {
+  padding: 36px 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ── LINHA DE CAMPOS (DOIS LADO A LADO) ── */
+.fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* ── GRUPO DE CAMPO ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── WRAPPER DE CAMPO ── */
+.field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-icon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  pointer-events: none;
+  opacity: 0.75;
+  z-index: 1;
+}
+
+/* ── SELECT ── */
+.field-wrap select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--card-inner);
+  border: 1px solid rgba(30, 95, 175, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 400;
+  padding: 13px 40px 13px 42px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+}
+
+.field-wrap select:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(24, 199, 209, 0.13), inset 0 1px 0 rgba(24, 199, 209, 0.06);
+  background: #0c1526;
+}
+
+.field-wrap select option {
+  background: #0d1828;
+  color: var(--text);
+}
+
+.result-box a {
+  color: var(--teal);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.result-box a:hover {
+  opacity: 0.8;
+}
+
+/* ── OPTGROUP ── */
+.field-wrap select optgroup {
+  background: #07101e;
+  color: #18C7D1;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ── CHEVRON ── */
+.chevron {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* ── INPUT TEXTO ── */
+.field-wrap input[type="text"] {
+  width: 100%;
+  background: var(--card-inner);
+  border: 1px solid rgba(30, 95, 175, 0.35);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 13px 16px 13px 42px;
+  outline: none;
+  transition: border-color var(--t), box-shadow var(--t), background var(--t);
+}
+
+.field-wrap input[type="text"]::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.field-wrap input[type="text"]:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(24, 199, 209, 0.13), inset 0 1px 0 rgba(24, 199, 209, 0.06);
+  background: #0c1526;
+}
+
+/* ── BOTÃO PRINCIPAL ── */
+.primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 28px;
+  background: linear-gradient(100deg, #1E5FAF 0%, #0F6CBD 50%, #18C7D1 100%);
+  background-size: 200% auto;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 4px 20px rgba(30, 95, 175, 0.40),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  transition: background-position var(--t), box-shadow var(--t), transform var(--t);
+}
+
+.primary-btn:hover {
+  background-position: right center;
+  box-shadow:
+    0 6px 30px rgba(24, 199, 209, 0.38),
+    0 2px 8px rgba(30, 95, 175, 0.50),
+    0 1px 0 rgba(255, 255, 255, 0.10) inset;
+  transform: translateY(-1px);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 3px 14px rgba(30, 95, 175, 0.38),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+/* ── SEÇÃO RESULTADO ── */
+.result-section {
+  display: none;
+  padding: 0 40px 36px;
+  flex-direction: column;
+  gap: 20px;
+  animation: slideUp 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.result-section .divider {
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CAIXA DESCONTO ── */
+.discount-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 20px;
+  color: var(--green-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  width: fit-content;
+}
+
+.discount-box::before {
+  content: '✦';
+  font-size: 0.65em;
+  opacity: 0.8;
+}
+
+/* ── CAIXA RESULTADO ── */
+.result-box {
+  background: var(--card-inner);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--radius-sm);
+  padding: 22px 22px 22px 24px;
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.85;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+/* ── BOTÃO COPIAR ── */
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.18) 0%, rgba(24, 199, 209, 0.10) 100%);
+  border: 1px solid var(--teal);
+  border-radius: var(--radius-sm);
+  color: var(--teal);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--t), box-shadow var(--t), color var(--t), border-color var(--t), transform var(--t);
+}
+
+.secondary-btn:hover {
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.30) 0%, rgba(24, 199, 209, 0.18) 100%);
+  box-shadow: 0 0 18px rgba(24, 199, 209, 0.22);
+  transform: translateY(-1px);
+}
+
+.secondary-btn:active {
+  transform: translateY(0);
+}
+
+.secondary-btn.copied {
+  color: var(--green-text);
+  border-color: var(--green-text);
+  background: var(--green-bg);
+  box-shadow: 0 0 14px rgba(74, 222, 128, 0.18);
+}
+
+.whatsapp-send-btn {
+  letter-spacing: 1.4px;
+}
+
+.whatsapp-send-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.whatsapp-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 5, 12, 0.74);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+}
+
+.whatsapp-overlay.is-open {
+  display: flex;
+}
+
+.whatsapp-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(140deg, rgba(10, 16, 32, 0.98), rgba(13, 19, 33, 0.98));
+  border: 1px solid rgba(24, 199, 209, 0.34);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.48), 0 0 26px rgba(24, 199, 209, 0.14);
+  padding: 24px 20px 20px;
+  position: relative;
+}
+
+.whatsapp-card h3 {
+  margin: 0;
+  font-size: 1.03rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+.whatsapp-card p {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.whatsapp-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(24, 199, 209, 0.26);
+  background: rgba(24, 199, 209, 0.08);
+  color: var(--text-muted);
+  border-radius: 10px;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t), background var(--t);
+}
+
+.whatsapp-close:hover {
+  color: var(--teal);
+  border-color: rgba(24, 199, 209, 0.55);
+  background: rgba(24, 199, 209, 0.16);
+}
+
+.whatsapp-units-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.whatsapp-unit-btn {
+  width: 100%;
+  border: 1px solid rgba(24, 199, 209, 0.42);
+  border-radius: 11px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.22) 0%, rgba(24, 199, 209, 0.14) 100%);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 12px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--t), border-color var(--t), box-shadow var(--t), background var(--t);
+}
+
+.whatsapp-unit-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(24, 199, 209, 0.68);
+  box-shadow: 0 0 20px rgba(24, 199, 209, 0.16);
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.30) 0%, rgba(24, 199, 209, 0.20) 100%);
+}
+
+.whatsapp-unit-btn:active {
+  transform: translateY(0);
+}
+
+/* ════════════════════════════════════════════
+   SUGESTÃO INTELIGENTE
+════════════════════════════════════════════ */
+.suggestion-container {
+  padding: 20px 0 0;
+}
+
+.suggestion-label {
+  margin: 0 0 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.suggestion-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.16) 0%, rgba(24, 199, 209, 0.08) 100%);
+  border: 1px solid rgba(24, 199, 209, 0.26);
+  border-radius: var(--radius-sm);
+}
+
+.suggestion-name {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.suggestion-btn {
+  padding: 11px 14px;
+  font-size: 0.8rem;
+  letter-spacing: 1.2px;
+}
+
+/* ══════════════════════════════════════════   TIRE DÚVIDAS
+════════════════════════════════════════════ */
+.qa-page {
+  margin-top: 40px;
+}
+
+.qa-header {
+  padding-bottom: 24px;
+}
+
+.qa-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.qa-title {
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #1E5FAF, #18C7D1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ════════════════════════════════════════════   RESPONSIVO
+══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  body {
+    padding: 20px 10px 48px;
+  }
+
+  .offer-countdown-bar {
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 12px;
+    margin-bottom: 12px;
+  }
+
+  .day-highlight {
+    margin-bottom: 12px;
+    padding: 11px 12px;
+  }
+
+  .day-highlight-title {
+    font-size: 0.7rem;
+    letter-spacing: 1.1px;
+  }
+
+  .day-highlight-card {
+    padding: 12px;
+  }
+
+  .day-highlight-name {
+    font-size: 0.9rem;
+  }
+
+  .day-highlight-bonus {
+    font-size: 0.8rem;
+  }
+
+  .offer-countdown-label {
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+  }
+
+  .offer-countdown-value {
+    font-size: 0.88rem;
+    letter-spacing: 1.5px;
+  }
+
+  .install-app-btn {
+    padding: 8px 11px;
+    font-size: 0.76rem;
+  }
+
+  .ios-install-hint {
+    top: 72px;
+    right: 12px;
+    width: calc(100vw - 24px);
+    padding: 12px 12px 10px;
+  }
+
+  .ios-install-hint p {
+    font-size: 0.8rem;
+  }
+
+  .app-header {
+    padding: 34px 24px 26px;
+  }
+
+  .form-section {
+    padding: 28px 20px 24px;
+  }
+
+  .result-section {
+    padding: 0 20px 28px;
+  }
+
+  .divider {
+    margin: 0 16px;
+  }
+
+  .fields-row {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .result-box {
+    font-size: 0.87rem;
+    padding: 18px 16px 18px 18px;
+  }
+
+  .primary-btn {
+    font-size: 0.88rem;
+    padding: 15px 20px;
+  }
+
+  .secondary-btn {
+    font-size: 0.8rem;
+    padding: 13px 18px;
+  }
+
+  .whatsapp-card {
+    max-width: 100%;
+    padding: 22px 16px 16px;
+  }
+
+  .whatsapp-unit-btn {
+    font-size: 0.92rem;
+    padding: 13px 14px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 760px) {
+  .form-section {
+    padding: 32px 28px;
+  }
+
+  .result-section {
+    padding: 0 28px 30px;
+  }
+
+  .app-header {
+    padding: 38px 28px 28px;
+  }
+}
