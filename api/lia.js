@@ -53,6 +53,34 @@ Regras de comportamento:
 - Lavieen
 - Tratamentos de flacidez e gordura localizada`;
 
+function isBotoxQuestion(pergunta) {
+  return String(pergunta || '').toLowerCase().includes('botox');
+}
+
+function buildBotoxExplanation() {
+  return 'O Botox é indicado para suavizar rugas e prevenir marcas de expressão.\n\nSe quiser, te explico como funciona ou te passo o valor 😉';
+}
+
+function buildBotoxPriceAnswer(body) {
+  const selectedOffer = body && body.faixaOferta ? String(body.faixaOferta) : '';
+  const highlightAtivo = Boolean(body && body.highlightAtivo);
+  const offerIdx = selectedOffer || '1';
+  const calculated = calculateProcedureOffer('0', offerIdx);
+
+  if (!calculated) {
+    return 'Posso te ajudar melhor se você me disser qual procedimento deseja.';
+  }
+
+  let resposta = `O Botox Facial hoje está por R$ ${formatBRL(calculated.discountedPix)} no Pix ou 12x de R$ ${formatBRL(calculated.discountedCard)} no cartão.`;
+
+  if (highlightAtivo) {
+    resposta += ` Bônus ativo de hoje: ${HIGHLIGHT_BONUS_TEXT}.`;
+  }
+
+  resposta += '\n\nSe quiser, já te explico como funciona 😉';
+  return resposta;
+}
+
 function buildPriceAnswer(pergunta, body) {
   const selectedProcedure = body && body.procedimento ? String(body.procedimento) : '';
   const selectedOffer = body && body.faixaOferta ? String(body.faixaOferta) : '';
@@ -89,6 +117,18 @@ export default async function handler(req, res) {
     if (!pergunta) {
       return res.status(200).json({
         resposta: 'Posso te ajudar melhor se você me disser qual procedimento deseja.',
+      });
+    }
+
+    if (isBotoxQuestion(pergunta)) {
+      if (isPriceQuestion(pergunta)) {
+        return res.status(200).json({
+          resposta: buildBotoxPriceAnswer(req.body),
+        });
+      }
+
+      return res.status(200).json({
+        resposta: buildBotoxExplanation(),
       });
     }
 

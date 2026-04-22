@@ -198,7 +198,10 @@
 
   function isPriceQuestion(question) {
     const normalized = normalizeText(question);
-    return /(preco|valor|custa|quanto|pix|cartao|parcela|12x|oferta|promocao)/.test(normalized);
+    return normalized.includes('preco')
+      || normalized.includes('valor')
+      || normalized.includes('quanto custa')
+      || normalized.includes('quanto e');
   }
 
   const shared = {
