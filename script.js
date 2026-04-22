@@ -262,7 +262,7 @@ function generateOffer() {
     `\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
 
   if (isBotoxHighlightActive && procIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
-    offerText += `\n\n🎁 Bônus exclusivo do destaque:\nPeeling Facial + Máscara de LED`;
+    offerText += `\n\n🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED`;
   }
 
   /* Exibição */
