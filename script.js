@@ -100,6 +100,9 @@ const DISCOUNT_RATES = {
   depilacao:        [0.40, 0.50, 0.50, 0.50],
 };
 
+const HIGHLIGHT_BOTOX_PROC_IDX = '0';
+let isBotoxHighlightActive = false;
+
 /* ── FORMATAÇÃO ── */
 
 /**
@@ -166,6 +169,49 @@ function initOfferCountdown() {
 
 document.addEventListener('DOMContentLoaded', initOfferCountdown);
 
+function renderBotoxHighlightState() {
+  const highlightBtn = document.getElementById('botoxHighlightBtn');
+  if (!highlightBtn) {
+    return;
+  }
+
+  highlightBtn.classList.toggle('is-active', isBotoxHighlightActive);
+}
+
+function activateBotoxHighlight() {
+  const procedureSelect = document.getElementById('procedimento');
+  if (!procedureSelect) {
+    return;
+  }
+
+  procedureSelect.value = HIGHLIGHT_BOTOX_PROC_IDX;
+  isBotoxHighlightActive = true;
+  renderBotoxHighlightState();
+}
+
+function handleProcedureChangeForHighlight() {
+  const procedureSelect = document.getElementById('procedimento');
+  if (!procedureSelect) {
+    return;
+  }
+
+  if (isBotoxHighlightActive && procedureSelect.value !== HIGHLIGHT_BOTOX_PROC_IDX) {
+    isBotoxHighlightActive = false;
+  }
+
+  renderBotoxHighlightState();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const procedureSelect = document.getElementById('procedimento');
+
+  if (procedureSelect) {
+    procedureSelect.addEventListener('change', handleProcedureChangeForHighlight);
+  }
+
+  renderBotoxHighlightState();
+});
+
 
 
 /* ── GERAÇÃO DA OFERTA ── */
@@ -204,7 +250,7 @@ function generateOffer() {
   const discountedCard = discountedPix / 10;
 
   /* Montagem do texto da oferta */
-  const offerText =
+  let offerText =
     `${procedure.name} de R$ ${fmt(originalPix)} no Pix ou 12x de R$ ${fmt(originalCard)} no cartão.\n` +
     `\n` +
     `POR:\n` +
@@ -214,6 +260,10 @@ function generateOffer() {
     `\n` +
     `➖➖\n` +
     `\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
+
+  if (isBotoxHighlightActive && procIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
+    offerText += `\n\n🎁 Bônus exclusivo do destaque:\nPeeling Facial + Máscara de LED`;
+  }
 
   /* Exibição */
   document.getElementById('offerText').textContent   = offerText;
