@@ -178,15 +178,52 @@ function renderBotoxHighlightState() {
   highlightBtn.classList.toggle('is-active', isBotoxHighlightActive);
 }
 
+function clearOfferResult() {
+  const resultSection = document.getElementById('resultSection');
+  const offerTextEl = document.getElementById('offerText');
+  const discountBadgeEl = document.getElementById('discountBadge');
+
+  if (offerTextEl) {
+    offerTextEl.textContent = '';
+  }
+
+  if (discountBadgeEl) {
+    discountBadgeEl.textContent = 'Desconto aplicado: —';
+  }
+
+  if (resultSection) {
+    resultSection.style.display = 'none';
+  }
+}
+
+function ensureOfferRangeSelected() {
+  const rangeSelect = document.getElementById('faixaOferta');
+  if (!rangeSelect || rangeSelect.value !== '') {
+    return;
+  }
+
+  const firstAvailableOption = Array.from(rangeSelect.options).find((option) => !option.disabled && option.value !== '');
+  if (firstAvailableOption) {
+    rangeSelect.value = firstAvailableOption.value;
+  }
+}
+
 function activateBotoxHighlight() {
   const procedureSelect = document.getElementById('procedimento');
   if (!procedureSelect) {
     return;
   }
 
+  if (navigator.vibrate) {
+    navigator.vibrate(30);
+  }
+
   procedureSelect.value = HIGHLIGHT_BOTOX_PROC_IDX;
+  ensureOfferRangeSelected();
+  clearOfferResult();
   isBotoxHighlightActive = true;
   renderBotoxHighlightState();
+  generateOffer();
 }
 
 function handleProcedureChangeForHighlight() {
