@@ -102,6 +102,9 @@
     <div class="offer-countdown-bar" aria-live="polite">
       <span class="offer-countdown-label">Oferta termina em:</span>
       <span class="offer-countdown-value" id="offerCountdown">00 : 00 : 00 : 00</span>
+      <button id="installAppBtn" class="install-app-btn" type="button" hidden>
+        Instalar App
+      </button>
     </div>
     <div class="app-card">
 
@@ -365,14 +368,10 @@
     </div>
   </div>
 
-  <button id="installAppButton" class="install-app-btn" type="button" hidden>
-    Instalar app
-  </button>
-
   <script src="script.js?v=2"></script>
   <script>
     var deferredPrompt;
-    var installAppButton = document.getElementById('installAppButton');
+    var installBtn = document.getElementById('installAppBtn');
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -381,14 +380,14 @@
     }
 
     function hideInstallButton() {
-      if (installAppButton) {
-        installAppButton.hidden = true;
+      if (installBtn) {
+        installBtn.style.display = 'none';
       }
     }
 
     function showInstallButton() {
-      if (installAppButton) {
-        installAppButton.hidden = false;
+      if (installBtn) {
+        installBtn.style.display = 'inline-flex';
       }
     }
 
@@ -409,12 +408,6 @@
       e.preventDefault();
       deferredPrompt = e;
       showInstallButton();
-
-      setTimeout(function() {
-        if (deferredPrompt) {
-          promptPwaInstall();
-        }
-      }, 3000);
     });
 
     window.addEventListener('appinstalled', function() {
@@ -422,8 +415,8 @@
       hideInstallButton();
     });
 
-    if (installAppButton) {
-      installAppButton.addEventListener('click', function() {
+    if (installBtn) {
+      installBtn.addEventListener('click', function() {
         promptPwaInstall();
       });
     }
