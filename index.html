@@ -106,6 +106,13 @@
         Instalar App
       </button>
     </div>
+
+    <div id="iosInstallHint" class="ios-install-hint" hidden>
+      <button id="iosInstallHintClose" class="ios-install-hint-close" type="button" aria-label="Fechar">&times;</button>
+      <p>Para instalar no iPhone: toque no botão de compartilhar e depois em "Adicionar à Tela de Início".</p>
+      <button id="iosInstallHintOk" class="ios-install-hint-ok" type="button">Entendi</button>
+    </div>
+
     <div class="app-card">
 
       <!-- ════ HEADER ════ -->
@@ -372,11 +379,27 @@
   <script>
     var deferredPrompt;
     var installBtn = document.getElementById('installAppBtn');
+    var iosInstallHint = document.getElementById('iosInstallHint');
+    var iosInstallHintClose = document.getElementById('iosInstallHintClose');
+    var iosInstallHintOk = document.getElementById('iosInstallHintOk');
+    var iosInstallHintTimer;
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js');
       });
+    }
+
+    function isIOSSafari() {
+      var ua = window.navigator.userAgent;
+      var isIOS = /iP(hone|od|ad)/.test(ua);
+      var isWebkit = /WebKit/.test(ua);
+      var isOtherBrowser = /CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+      return isIOS && isWebkit && !isOtherBrowser;
+    }
+
+    function isStandaloneMode() {
+      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
 
     function hideInstallButton() {
@@ -389,6 +412,33 @@
       if (installBtn) {
         installBtn.style.display = 'inline-flex';
       }
+    }
+
+    function hideIosInstallHint() {
+      if (iosInstallHintTimer) {
+        clearTimeout(iosInstallHintTimer);
+        iosInstallHintTimer = null;
+      }
+
+      if (iosInstallHint) {
+        iosInstallHint.hidden = true;
+      }
+    }
+
+    function showIosInstallHint() {
+      if (!iosInstallHint) {
+        return;
+      }
+
+      iosInstallHint.hidden = false;
+
+      if (iosInstallHintTimer) {
+        clearTimeout(iosInstallHintTimer);
+      }
+
+      iosInstallHintTimer = setTimeout(function() {
+        hideIosInstallHint();
+      }, 8000);
     }
 
     function promptPwaInstall() {
@@ -413,17 +463,35 @@
     window.addEventListener('appinstalled', function() {
       deferredPrompt = null;
       hideInstallButton();
+      hideIosInstallHint();
     });
 
     if (installBtn) {
       installBtn.addEventListener('click', function() {
+        if (isIOSSafari()) {
+          showIosInstallHint();
+          return;
+        }
+
         promptPwaInstall();
       });
+    }
+
+    if (iosInstallHintClose) {
+      iosInstallHintClose.addEventListener('click', hideIosInstallHint);
+    }
+
+    if (iosInstallHintOk) {
+      iosInstallHintOk.addEventListener('click', hideIosInstallHint);
     }
 
     document.addEventListener('DOMContentLoaded', function() {
       var overlay = document.getElementById('popupOverlay');
       if (overlay) overlay.style.display = 'flex';
+
+      if (isIOSSafari() && !isStandaloneMode()) {
+        showInstallButton();
+      }
     });
     document.getElementById('popupClose').addEventListener('click', function() {
       document.getElementById('popupOverlay').style.display = 'none';

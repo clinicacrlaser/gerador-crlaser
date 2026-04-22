@@ -133,6 +133,69 @@ body {
   display: none;
 }
 
+.ios-install-hint {
+  position: fixed;
+  top: 84px;
+  right: 16px;
+  width: min(340px, calc(100vw - 24px));
+  padding: 14px 14px 12px;
+  background: linear-gradient(120deg, rgba(10, 16, 32, 0.98) 0%, rgba(13, 19, 33, 0.98) 100%);
+  border: 1px solid rgba(24, 199, 209, 0.30);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32), 0 0 24px rgba(24, 199, 209, 0.08);
+  z-index: 9997;
+}
+
+.ios-install-hint p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  padding-right: 24px;
+}
+
+.ios-install-hint-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ios-install-hint-close:hover {
+  color: var(--teal);
+}
+
+.ios-install-hint-ok {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid rgba(24, 199, 209, 0.38);
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.16) 0%, rgba(24, 199, 209, 0.14) 100%);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ios-install-hint-ok:hover {
+  border-color: rgba(24, 199, 209, 0.56);
+}
+
+.ios-install-hint[hidden] {
+  display: none;
+}
+
 /* ── CARD PRINCIPAL ── */
 .app-card {
   width: 100%;
@@ -550,6 +613,17 @@ body {
   .install-app-btn {
     padding: 8px 11px;
     font-size: 0.76rem;
+  }
+
+  .ios-install-hint {
+    top: 72px;
+    right: 12px;
+    width: calc(100vw - 24px);
+    padding: 12px 12px 10px;
+  }
+
+  .ios-install-hint p {
+    font-size: 0.8rem;
   }
 
   .app-header {
