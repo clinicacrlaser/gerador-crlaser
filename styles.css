@@ -556,6 +556,112 @@ body {
   box-shadow: 0 0 14px rgba(74, 222, 128, 0.18);
 }
 
+.whatsapp-send-btn {
+  letter-spacing: 1.4px;
+}
+
+.whatsapp-send-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.whatsapp-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 5, 12, 0.74);
+  backdrop-filter: blur(2px);
+  z-index: 9998;
+}
+
+.whatsapp-overlay.is-open {
+  display: flex;
+}
+
+.whatsapp-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(140deg, rgba(10, 16, 32, 0.98), rgba(13, 19, 33, 0.98));
+  border: 1px solid rgba(24, 199, 209, 0.34);
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.48), 0 0 26px rgba(24, 199, 209, 0.14);
+  padding: 24px 20px 20px;
+  position: relative;
+}
+
+.whatsapp-card h3 {
+  margin: 0;
+  font-size: 1.03rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+
+.whatsapp-card p {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.whatsapp-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(24, 199, 209, 0.26);
+  background: rgba(24, 199, 209, 0.08);
+  color: var(--text-muted);
+  border-radius: 10px;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t), background var(--t);
+}
+
+.whatsapp-close:hover {
+  color: var(--teal);
+  border-color: rgba(24, 199, 209, 0.55);
+  background: rgba(24, 199, 209, 0.16);
+}
+
+.whatsapp-units-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.whatsapp-unit-btn {
+  width: 100%;
+  border: 1px solid rgba(24, 199, 209, 0.42);
+  border-radius: 11px;
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.22) 0%, rgba(24, 199, 209, 0.14) 100%);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 12px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--t), border-color var(--t), box-shadow var(--t), background var(--t);
+}
+
+.whatsapp-unit-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(24, 199, 209, 0.68);
+  box-shadow: 0 0 20px rgba(24, 199, 209, 0.16);
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.30) 0%, rgba(24, 199, 209, 0.20) 100%);
+}
+
+.whatsapp-unit-btn:active {
+  transform: translateY(0);
+}
+
 /* ══════════════════════════════════════════   TIRE DÚVIDAS
 ════════════════════════════════════════════ */
 .qa-page {
@@ -663,6 +769,16 @@ body {
   .secondary-btn {
     font-size: 0.8rem;
     padding: 13px 18px;
+  }
+
+  .whatsapp-card {
+    max-width: 100%;
+    padding: 22px 16px 16px;
+  }
+
+  .whatsapp-unit-btn {
+    font-size: 0.92rem;
+    padding: 13px 14px;
   }
 }
 

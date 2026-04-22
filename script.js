@@ -251,6 +251,67 @@ function copyOffer() {
   }
 }
 
+/* ── ENVIAR NO WHATSAPP ── */
+
+function openWhatsAppUnitPicker() {
+  const text = document.getElementById('offerText').textContent.trim();
+
+  if (!text) {
+    showError('Gere a oferta antes de enviar no WhatsApp.');
+    return;
+  }
+
+  const overlay = document.getElementById('whatsAppOverlay');
+  if (!overlay) {
+    return;
+  }
+
+  overlay.classList.add('is-open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeWhatsAppUnitPicker() {
+  const overlay = document.getElementById('whatsAppOverlay');
+  if (!overlay) {
+    return;
+  }
+
+  overlay.classList.remove('is-open');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function sendOfferToWhatsApp(number) {
+  const message = document.getElementById('offerText').textContent;
+  const encodedMessage = encodeURIComponent(message);
+  const url = `https://wa.me/${number}?text=${encodedMessage}`;
+
+  window.open(url, '_blank', 'noopener,noreferrer');
+  closeWhatsAppUnitPicker();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const closeBtn = document.getElementById('whatsAppClose');
+  const overlay = document.getElementById('whatsAppOverlay');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeWhatsAppUnitPicker);
+  }
+
+  if (overlay) {
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) {
+        closeWhatsAppUnitPicker();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeWhatsAppUnitPicker();
+    }
+  });
+});
+
 /** Fallback para navegadores sem Clipboard API */
 function fallbackCopy(text, onSuccess) {
   const ta = document.createElement('textarea');
