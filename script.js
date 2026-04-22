@@ -103,6 +103,18 @@ const DISCOUNT_RATES = {
 const HIGHLIGHT_BOTOX_PROC_IDX = '0';
 let isBotoxHighlightActive = false;
 
+const SUGGESTION_MAP = {
+  '0': { idx: 2, name: 'Preenchedor Facial' },
+  '2': { idx: 0, name: 'Botox Facial Terço Superior Com Retorno' },
+  '3': { idx: 4, name: 'Ultraformer MPT Full Face' },
+  '4': { idx: 3, name: 'Bioestimulador Diamond' },
+};
+
+let currentMainProcIdx = null;
+let secondProcedureAdded = false;
+let originalOfferText = '';
+let originalDiscountPct = 0;
+
 /* ── FORMATAÇÃO ── */
 
 /**
@@ -302,6 +314,11 @@ function generateOffer() {
     offerText += `\n\n🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED`;
   }
 
+  currentMainProcIdx = procIdx;
+  secondProcedureAdded = false;
+  originalOfferText = offerText;
+  originalDiscountPct = discountPct;
+
   /* Exibição */
   document.getElementById('offerText').textContent   = offerText;
   document.getElementById('discountBadge').textContent = `Desconto aplicado: ${discountPct}%`;
@@ -309,10 +326,90 @@ function generateOffer() {
   const resultSection = document.getElementById('resultSection');
   resultSection.style.display = 'flex';
 
+  renderSuggestion();
+
   /* Scroll suave até o resultado */
   setTimeout(() => {
     resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 50);
+}
+
+function renderSuggestion() {
+  const suggestionContainer = document.getElementById('suggestionContainer');
+  if (!suggestionContainer || !currentMainProcIdx) {
+    if (suggestionContainer) suggestionContainer.style.display = 'none';
+    secondProcedureAdded = false;
+    return;
+  }
+
+  const suggestion = SUGGESTION_MAP[currentMainProcIdx];
+  if (!suggestion || secondProcedureAdded) {
+    suggestionContainer.style.display = 'none';
+    return;
+  }
+
+  document.getElementById('suggestionName').textContent = suggestion.name;
+  suggestionContainer.style.display = 'block';
+}
+
+function addSecondProcedure() {
+  if (!currentMainProcIdx || secondProcedureAdded) {
+    return;
+  }
+
+  const suggestion = SUGGESTION_MAP[currentMainProcIdx];
+  if (!suggestion) {
+    return;
+  }
+
+  const mainProc = PROCEDURES[parseInt(currentMainProcIdx, 10)];
+  const secondProc = PROCEDURES[suggestion.idx];
+  const offerIdx = document.getElementById('faixaOferta').value;
+
+  const mainDiscountRate = DISCOUNT_RATES[mainProc.group][parseInt(offerIdx, 10)];
+  const secondDiscountRate = DISCOUNT_RATES[secondProc.group][parseInt(offerIdx, 10)];
+
+  const mainOriginalCard = mainProc.pix / 10;
+  const secondOriginalCard = secondProc.pix / 10;
+
+  const mainDiscountedPix = mainProc.pix * (1 - mainDiscountRate);
+  const mainDiscountedCard = mainDiscountedPix / 10;
+
+  const secondDiscountedPix = secondProc.pix * (1 - secondDiscountRate);
+  const secondDiscountedCard = secondDiscountedPix / 10;
+
+  const totalPix = mainDiscountedPix + secondDiscountedPix;
+  const totalCard = totalPix / 10;
+
+  let combinedText = `Aproveite a Oferta CR Laser®\n`;
+  combinedText += `\n➖➖\n\n`;
+
+  combinedText += `🟢 ${mainProc.name}. De R$ ${fmt(mainProc.pix)} no Pix ou 12x de R$ ${fmt(mainOriginalCard)} no cartão por:\n\n`;
+  combinedText += `\u{1F4B0} Pix: R$ ${fmt(mainDiscountedPix)}\n`;
+  combinedText += `\u{1F4B3} Cartão: 12x de R$ ${fmt(mainDiscountedCard)}\n`;
+  combinedText += `\n➖➖\n\n`;
+
+  combinedText += `🟢 ${secondProc.name}. De R$ ${fmt(secondProc.pix)} no Pix ou 12x de R$ ${fmt(secondOriginalCard)} no cartão por:\n\n`;
+  combinedText += `\u{1F4B0} Pix: R$ ${fmt(secondDiscountedPix)}\n`;
+  combinedText += `\u{1F4B3} Cartão: 12x de R$ ${fmt(secondDiscountedCard)}\n`;
+  combinedText += `\n➖➖\n`;
+
+  if (isBotoxHighlightActive && currentMainProcIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
+    combinedText += `\n🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED\n`;
+    combinedText += `\n➖➖\n`;
+  }
+
+  combinedText += `\n\u{1F4B0} Total no Pix: R$ ${fmt(totalPix)}\n`;
+  combinedText += `\u{1F4B3} Total no Cartão: 12x de R$ ${fmt(totalCard)}\n`;
+  combinedText += `\n\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
+
+  document.getElementById('offerText').textContent = combinedText;
+  secondProcedureAdded = true;
+
+  const suggestionContainer = document.getElementById('suggestionContainer');
+  if (suggestionContainer) {
+    suggestionContainer.style.display = 'none';
+  }
 }
 
 /* ── COPIAR OFERTA ── */
