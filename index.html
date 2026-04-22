@@ -382,7 +382,6 @@
     var iosInstallHint = document.getElementById('iosInstallHint');
     var iosInstallHintClose = document.getElementById('iosInstallHintClose');
     var iosInstallHintOk = document.getElementById('iosInstallHintOk');
-    var iosInstallHintTimer;
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -415,11 +414,6 @@
     }
 
     function hideIosInstallHint() {
-      if (iosInstallHintTimer) {
-        clearTimeout(iosInstallHintTimer);
-        iosInstallHintTimer = null;
-      }
-
       if (iosInstallHint) {
         iosInstallHint.hidden = true;
       }
@@ -431,14 +425,6 @@
       }
 
       iosInstallHint.hidden = false;
-
-      if (iosInstallHintTimer) {
-        clearTimeout(iosInstallHintTimer);
-      }
-
-      iosInstallHintTimer = setTimeout(function() {
-        hideIosInstallHint();
-      }, 8000);
     }
 
     function promptPwaInstall() {
