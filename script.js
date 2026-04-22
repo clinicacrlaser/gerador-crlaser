@@ -209,11 +209,11 @@ function generateOffer() {
     `\n` +
     `POR:\n` +
     `\n` +
-    `💰 Pix: R$ ${fmt(discountedPix)}\n` +
-    `💳 Cartão: 12x de R$ ${fmt(discountedCard)}\n` +
+    `\u{1F4B0} Pix: R$ ${fmt(discountedPix)}\n` +
+    `\u{1F4B3} Cartão: 12x de R$ ${fmt(discountedCard)}\n` +
     `\n` +
     `➖➖\n` +
-    `🚨 Consulte as regras fixadas no feed da @crlaser.oficial.`;
+    `\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
 
   /* Exibição */
   document.getElementById('offerText').textContent   = offerText;
