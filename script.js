@@ -1,106 +1,19 @@
 'use strict';
 
-/* ── TABELA REAL DE PROCEDIMENTOS ── */
-/*
-  pix          = valor original no Pix
-  cardOriginal = pix / 10  (total cartão é pix × 1,2, parcelado em 12)
-  Calculados em runtime — não armazenados aqui.
-*/
+const offersData = window.CRLaserOffers;
+if (!offersData) {
+  throw new Error('Base de ofertas não carregada.');
+}
 
-const PROCEDURES = [
-  // ── Botox
-  { name: 'Botox Facial Terço Superior Com Retorno', pix: 975.24,  group: 'botox'            }, // 0
-  { name: 'Botox Suor Axilar',                        pix: 1644.30, group: 'botox'            }, // 1
-  // ── Preenchedor
-  { name: 'Preenchedor Facial',                       pix: 975.24,  group: 'preenchedor'      }, // 2
-  // ── Bioestimulador
-  { name: 'Bioestimulador Diamond',                   pix: 1927.80, group: 'diamond'          }, // 3
-  // ── Ultraformer MPT
-  { name: 'Ultraformer MPT Full Face',                               pix: 2516.85, group: 'ultraformer'     }, // 4
-  { name: 'Ultraformer MPT Pálpebras',                               pix: 1288.35, group: 'ultraformer'     }, // 5
-  { name: 'Ultraformer MPT Pescoço (Pega Papada com Foco em Flacidez)', pix: 2012.85, group: 'ultraformer'  }, // 6
-  { name: 'Ultraformer MPT Papada',                                   pix: 1288.35, group: 'ultraformer'    }, // 7
-  { name: 'Ultraformer MPT Bichectomia',                              pix: 2012.85, group: 'ultraformer'    }, // 8
-  { name: 'Ultraformer MPT Terço Inferior',                           pix: 2012.85, group: 'ultraformer'    }, // 9
-  { name: 'Ultraformer MPT Abdome',                                   pix: 2516.85, group: 'ultraformer'    }, // 10
-  { name: 'Ultraformer MPT Flancos',                                  pix: 1288.35, group: 'ultraformer'    }, // 11
-  { name: 'Ultraformer MPT Colo',                                     pix: 1288.35, group: 'ultraformer'    }, // 12
-  { name: 'Ultraformer MPT Gordura do Sutiã',                         pix: 1288.35, group: 'ultraformer'    }, // 13
-  { name: 'Ultraformer MPT Gordura Pré-Axilar',                       pix: 1288.35, group: 'ultraformer'    }, // 14
-  { name: 'Ultraformer MPT Monte de Vênus',                           pix: 1288.35, group: 'ultraformer'    }, // 15
-  { name: 'Ultraformer MPT Bananinha',                                pix: 1288.35, group: 'ultraformer'    }, // 16
-  { name: 'Ultraformer MPT Braços Região do Tchau',                   pix: 2012.85, group: 'ultraformer'    }, // 17
-  { name: 'Ultraformer MPT Joelho',                                   pix: 2012.85, group: 'ultraformer'    }, // 18
-  { name: 'Ultraformer MPT Interno de Coxa',                          pix: 2516.85, group: 'ultraformer'    }, // 19
-  { name: 'Ultraformer MPT Mãos',                                     pix: 1288.35, group: 'ultraformer'    }, // 20
-  { name: 'Ultraformer MPT Rejuvenescimento Íntimo',                  pix: 1288.35, group: 'ultraformer'    }, // 21
-  { name: 'Ultraformer MPT Bumbum Up',                                pix: 2516.85, group: 'ultraformer'    }, // 22
-  // ── Scizer
-  { name: 'Scizer Corporal Por Região',               pix: 975.24,  group: 'scizer'           }, // 23
-  // ── Laser Lavieen
-  { name: 'Lavieen BB Laser Facial - 3 sessões',      pix: 1927.80, group: 'lavieen'          }, // 24
-  { name: 'Lavieen Facial Completo - 3 sessões',      pix: 1927.80, group: 'lavieen'          }, // 25
-  { name: 'Lavieen Melasma Facial - 3 sessões',       pix: 1927.80, group: 'lavieen'          }, // 26
-  { name: 'Lavieen Face + Pescoço + Colo - 3 sessões',pix: 2557.80, group: 'lavieen'          }, // 27
-  { name: 'Lavieen Facial + Pescoço - 3 sessões',     pix: 2242.80, group: 'lavieen'          }, // 28
-  { name: 'Lavieen Olheiras - 3 sessões',             pix: 975.24,  group: 'lavieen'          }, // 29
-  { name: 'Lavieen Pescoço + Colo - 3 sessões',       pix: 1530.90, group: 'lavieen'          }, // 30
-  { name: 'Lavieen Capilar - 3 sessões',              pix: 1927.80, group: 'lavieen'          }, // 31
-  { name: 'Lavieen Mãos - 3 sessões',                 pix: 975.24,  group: 'lavieen'          }, // 32
-  // ── Microagulhamento
-  { name: 'Microagulhamento Robótico - 3 sessões',    pix: 1927.80, group: 'microagulhamento' }, // 33
-  // ── Endymed
-  { name: 'Endymed Radiofrequência 3DEEP - 6 sessões',pix: 1644.30, group: 'endymed'          }, // 34
-  // ── Luz Pulsada & Laser
-  { name: 'Hollywood Peel - 2 sessões',               pix: 975.24,  group: 'luzpulsada'       }, // 35
-  { name: 'Despigmentação a Laser - 2 sessões',       pix: 975.24,  group: 'luzpulsada'       }, // 36
-  { name: 'Laser Fracionado Pixel - 1 Sessão',        pix: 975.24,  group: 'luzpulsada'       }, // 37
-  { name: 'Laser Fracionado Código de Barras - 2 sessões', pix: 975.24, group: 'luzpulsada'   }, // 38
-  { name: 'Laser Fracionado Pálpebras - 2 sessões',   pix: 975.24,  group: 'luzpulsada'       }, // 39
-  { name: 'Laser Fracionado Glabela - 2 sessões',     pix: 975.24,  group: 'luzpulsada'       }, // 40
-  { name: 'Luz Pulsada Facial - 2 sessões',           pix: 975.24,  group: 'luzpulsada'       }, // 41
-  { name: 'Luz Pulsada Colo - 2 sessões',             pix: 975.24,  group: 'luzpulsada'       }, // 42
-  { name: 'Luz Pulsada Mãos - 2 sessões',             pix: 975.24,  group: 'luzpulsada'       }, // 43
-  // ── Depilação a Laser
-  { name: 'Depilação a Laser (10 Sessões) — Axilas',                                  pix: 693.00,  group: 'depilacao' }, // 44
-  { name: 'Depilação a Laser (10 Sessões) — Virilha Completa (Incl. região perianal)',pix: 1386.00, group: 'depilacao' }, // 45
-  { name: 'Depilação a Laser (10 Sessões) — Buço e Mento',                            pix: 693.00,  group: 'depilacao' }, // 46
-  { name: 'Depilação a Laser (10 Sessões) — Barba Completa',                          pix: 1386.00, group: 'depilacao' }, // 47
-  { name: 'Depilação a Laser (10 Sessões) — Barba Delimitada',                        pix: 871.50,  group: 'depilacao' }, // 48
-  { name: 'Depilação a Laser (10 Sessões) — Rosto',                                   pix: 1386.00, group: 'depilacao' }, // 49
-  { name: 'Depilação a Laser (10 Sessões) — Perna Completa',                          pix: 2772.00, group: 'depilacao' }, // 50
-  { name: 'Depilação a Laser (10 Sessões) — Antebraço',                               pix: 1386.00, group: 'depilacao' }, // 51
-  { name: 'Depilação a Laser (10 Sessões) — Meia Perna',                              pix: 1386.00, group: 'depilacao' }, // 52
-  { name: 'Depilação a Laser (10 Sessões) — Coxa',                                    pix: 1732.50, group: 'depilacao' }, // 53
-  { name: 'Depilação a Laser (10 Sessões) — Costas',                                  pix: 2079.00, group: 'depilacao' }, // 54
-  { name: 'Depilação a Laser (10 Sessões) — Tórax e Abdome',                          pix: 2079.00, group: 'depilacao' }, // 55
-  { name: 'Depilação a Laser (10 Sessões) — Braço Completo',                          pix: 2079.00, group: 'depilacao' }, // 56
-  { name: 'Depilação a Laser (10 Sessões) — Bumbum',                                  pix: 1386.00, group: 'depilacao' }, // 57
-  { name: 'Depilação a Laser (10 Sessões) — Virilha Delimitada',                      pix: 1039.50, group: 'depilacao' }, // 58
-  { name: 'Depilação a Laser (10 Sessões) — Pescoço Feminino',                        pix: 871.50,  group: 'depilacao' }, // 59
-];
+const {
+  PROCEDURES,
+  DISCOUNT_RATES,
+  HIGHLIGHT_BOTOX_PROC_IDX,
+  HIGHLIGHT_BONUS_TEXT,
+  calculateProcedureOffer,
+  formatBRL,
+} = offersData;
 
-/*
-  Desconto por faixa de oferta:
-  Índice 0 → Oferta da Semana
-  Índice 1 → Oferta Especial
-  Índice 2 → Sextouu com Desconto
-  Índice 3 → Close Friends
-*/
-const DISCOUNT_RATES = {
-  ultraformer:      [0.30, 0.35, 0.40, 0.45],
-  lavieen:          [0.45, 0.50, 0.55, 0.60],
-  botox:            [0.25, 0.30, 0.35, 0.40],
-  preenchedor:      [0.25, 0.30, 0.35, 0.40],
-  diamond:          [0.30, 0.35, 0.40, 0.45],
-  scizer:           [0.45, 0.50, 0.55, 0.60],
-  endymed:          [0.45, 0.50, 0.55, 0.60],
-  microagulhamento: [0.05, 0.10, 0.15, 0.25],
-  luzpulsada:       [0.35, 0.40, 0.45, 0.50],
-  depilacao:        [0.40, 0.50, 0.50, 0.50],
-};
-
-const HIGHLIGHT_BOTOX_PROC_IDX = '0';
 let isBotoxHighlightActive = false;
 
 const SUGGESTION_MAP = {
@@ -123,10 +36,7 @@ let originalDiscountPct = 0;
  * Ex: 1500.5 → "1.500,50"
  */
 function fmt(value) {
-  return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+  return formatBRL(value);
 }
 
 /* ── CONTAGEM REGRESSIVA DA OFERTA ── */
@@ -280,24 +190,13 @@ function generateOffer() {
     return;
   }
 
-  /* Dados selecionados */
-  const procedure    = PROCEDURES[parseInt(procIdx, 10)];
-  const discountRate = DISCOUNT_RATES[procedure.group][parseInt(offerIdx, 10)];
-  const discountPct  = Math.round(discountRate * 100);
+    const offerData = calculateProcedureOffer(procIdx, offerIdx);
+    if (!offerData) {
+     showError('Não foi possível calcular a oferta para esse procedimento.');
+     return;
+    }
 
-  /* Valores originais
-     - Pix:    conforme tabela
-     - Cartão: o total no cartão é pix × 1,2 (parcela = pix / 10)
-  */
-  const originalPix      = procedure.pix;
-  const originalCard     = originalPix / 10;   // parcela original no cartão
-
-  /* Valores com desconto
-     - Pix com desconto:    pix × (1 - taxa)
-     - Parcela final cartão: valor Pix com desconto ÷ 12
-  */
-  const discountedPix  = originalPix * (1 - discountRate);
-  const discountedCard = discountedPix / 10;
+    const { procedure, discountPct, originalPix, originalCard, discountedPix, discountedCard } = offerData;
 
   /* Montagem do texto da oferta */
   let offerText =
@@ -312,7 +211,7 @@ function generateOffer() {
     `\u{1F4CC} Consulte as regras fixadas no feed da @crlaser.oficial.`;
 
   if (isBotoxHighlightActive && procIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
-    offerText += `\n\n🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED`;
+    offerText += `\n\n🎁 Bônus exclusivo do destaque: ${HIGHLIGHT_BONUS_TEXT}`;
   }
 
   currentMainProcIdx = procIdx;
@@ -367,17 +266,18 @@ function addSecondProcedure() {
   const secondProc = PROCEDURES[suggestion.idx];
   const offerIdx = document.getElementById('faixaOferta').value;
 
-  const mainDiscountRate = DISCOUNT_RATES[mainProc.group][parseInt(offerIdx, 10)];
-  const secondDiscountRate = DISCOUNT_RATES[secondProc.group][parseInt(offerIdx, 10)];
+  const mainOffer = calculateProcedureOffer(currentMainProcIdx, offerIdx);
+  const secondOffer = calculateProcedureOffer(String(suggestion.idx), offerIdx);
+  if (!mainOffer || !secondOffer) {
+    return;
+  }
 
-  const mainOriginalCard = mainProc.pix / 10;
-  const secondOriginalCard = secondProc.pix / 10;
-
-  const mainDiscountedPix = mainProc.pix * (1 - mainDiscountRate);
-  const mainDiscountedCard = mainDiscountedPix / 10;
-
-  const secondDiscountedPix = secondProc.pix * (1 - secondDiscountRate);
-  const secondDiscountedCard = secondDiscountedPix / 10;
+  const mainOriginalCard = mainOffer.originalCard;
+  const secondOriginalCard = secondOffer.originalCard;
+  const mainDiscountedPix = mainOffer.discountedPix;
+  const mainDiscountedCard = mainOffer.discountedCard;
+  const secondDiscountedPix = secondOffer.discountedPix;
+  const secondDiscountedCard = secondOffer.discountedCard;
 
   const totalPix = mainDiscountedPix + secondDiscountedPix;
   const totalCard = totalPix / 10;
@@ -396,7 +296,7 @@ function addSecondProcedure() {
   combinedText += `\n➖➖\n`;
 
   if (isBotoxHighlightActive && currentMainProcIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
-    combinedText += `🎁 Bônus exclusivo do destaque: Um Peeling Facial + Uma Máscara de LED\n\n`;
+    combinedText += `🎁 Bônus exclusivo do destaque: ${HIGHLIGHT_BONUS_TEXT}\n\n`;
     combinedText += `➖➖\n`;
   }
 
