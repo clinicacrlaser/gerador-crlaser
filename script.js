@@ -113,6 +113,59 @@ function fmt(value) {
   }).format(value);
 }
 
+/* ── CONTAGEM REGRESSIVA DA OFERTA ── */
+
+const OFFER_END_DATE = new Date(2026, 3, 24, 18, 0, 0);
+
+function padCountdown(value) {
+  return String(value).padStart(2, '0');
+}
+
+function formatCountdown(diffMs) {
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${padCountdown(days)} : ${padCountdown(hours)} : ${padCountdown(minutes)} : ${padCountdown(seconds)}`;
+}
+
+function initOfferCountdown() {
+  const valueEl = document.getElementById('offerCountdown');
+  const barEl = document.querySelector('.offer-countdown-bar');
+
+  if (!valueEl || !barEl) {
+    return;
+  }
+
+  const update = () => {
+    const diff = OFFER_END_DATE.getTime() - Date.now();
+
+    if (diff <= 0) {
+      valueEl.textContent = 'Oferta encerrada';
+      barEl.classList.add('is-ended');
+      return true;
+    }
+
+    valueEl.textContent = formatCountdown(diff);
+    barEl.classList.remove('is-ended');
+    return false;
+  };
+
+  if (update()) {
+    return;
+  }
+
+  const timer = setInterval(() => {
+    if (update()) {
+      clearInterval(timer);
+    }
+  }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', initOfferCountdown);
+
 
 
 /* ── GERAÇÃO DA OFERTA ── */
