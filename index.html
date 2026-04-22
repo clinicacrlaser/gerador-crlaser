@@ -365,11 +365,66 @@
     </div>
   </div>
 
+  <button id="installAppButton" class="install-app-btn" type="button" hidden>
+    Instalar app
+  </button>
+
   <script src="script.js?v=2"></script>
   <script>
+    var deferredPrompt;
+    var installAppButton = document.getElementById('installAppButton');
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js');
+      });
+    }
+
+    function hideInstallButton() {
+      if (installAppButton) {
+        installAppButton.hidden = true;
+      }
+    }
+
+    function showInstallButton() {
+      if (installAppButton) {
+        installAppButton.hidden = false;
+      }
+    }
+
+    function promptPwaInstall() {
+      if (!deferredPrompt) {
+        return;
+      }
+
+      deferredPrompt.prompt();
+
+      deferredPrompt.userChoice.then(function() {
+        deferredPrompt = null;
+        hideInstallButton();
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      showInstallButton();
+
+      setTimeout(function() {
+        if (deferredPrompt) {
+          promptPwaInstall();
+        }
+      }, 3000);
+    });
+
+    window.addEventListener('appinstalled', function() {
+      deferredPrompt = null;
+      hideInstallButton();
+    });
+
+    if (installAppButton) {
+      installAppButton.addEventListener('click', function() {
+        promptPwaInstall();
       });
     }
 

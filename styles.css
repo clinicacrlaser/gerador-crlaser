@@ -98,6 +98,40 @@ body {
   letter-spacing: 1.2px;
 }
 
+.install-app-btn {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9998;
+  padding: 10px 14px;
+  border: 1px solid rgba(24, 199, 209, 0.36);
+  border-radius: 999px;
+  background: rgba(10, 16, 32, 0.88);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(30, 95, 175, 0.12);
+  transition: opacity var(--t), transform var(--t), border-color var(--t), box-shadow var(--t);
+}
+
+.install-app-btn:hover {
+  border-color: rgba(24, 199, 209, 0.56);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), 0 0 16px rgba(24, 199, 209, 0.12);
+  transform: translateY(-1px);
+}
+
+.install-app-btn:active {
+  transform: translateY(0);
+}
+
+.install-app-btn[hidden] {
+  display: none;
+}
+
 /* ── CARD PRINCIPAL ── */
 .app-card {
   width: 100%;
@@ -510,6 +544,13 @@ body {
   .offer-countdown-value {
     font-size: 0.88rem;
     letter-spacing: 1.5px;
+  }
+
+  .install-app-btn {
+    right: 12px;
+    bottom: 12px;
+    padding: 9px 12px;
+    font-size: 0.76rem;
   }
 
   .app-header {
