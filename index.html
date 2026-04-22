@@ -528,13 +528,104 @@
   </script>
 
   <!-- ════ TESTE LIA (temporário) ════ -->
-  <div style="position:fixed;bottom:16px;right:16px;z-index:9990;">
-    <button id="btnTestarLia" style="background:#0D1321;border:1px solid rgba(24,199,209,0.4);color:#18C7D1;font-family:inherit;font-size:0.74rem;font-weight:600;letter-spacing:1px;padding:8px 14px;border-radius:10px;cursor:pointer;">Testar Lia</button>
+  <div id="liaChat" style="position:fixed;bottom:16px;right:16px;z-index:9990;width:min(360px,calc(100vw - 32px));background:#0D1321;border:1px solid rgba(24,199,209,0.24);border-radius:16px;box-shadow:0 0 0 1px rgba(30,95,175,0.12),0 12px 34px rgba(0,0,0,0.34),0 0 30px rgba(24,199,209,0.08);overflow:hidden;">
+    <button id="btnTestarLia" type="button" style="width:100%;background:#0D1321;border:0;border-bottom:1px solid rgba(24,199,209,0.18);color:#18C7D1;font-family:inherit;font-size:0.74rem;font-weight:600;letter-spacing:1px;padding:12px 14px;cursor:pointer;text-align:left;">Testar Lia</button>
+    <div id="liaChatBody" style="display:none;padding:12px;">
+      <div id="liaMessages" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;margin-bottom:12px;padding-right:4px;"></div>
+      <div style="display:flex;gap:8px;align-items:stretch;">
+        <input id="liaInput" type="text" placeholder="Digite sua pergunta" style="flex:1;min-width:0;background:#0A1020;border:1px solid rgba(24,199,209,0.24);color:#F5F7FA;font-family:inherit;font-size:0.88rem;padding:11px 12px;border-radius:10px;outline:none;" />
+        <button id="btnEnviarLia" type="button" style="background:linear-gradient(100deg,#1E5FAF,#0F6CBD,#18C7D1);border:none;color:#fff;font-family:inherit;font-size:0.78rem;font-weight:700;letter-spacing:0.7px;padding:0 16px;border-radius:10px;cursor:pointer;white-space:nowrap;">Enviar</button>
+      </div>
+    </div>
   </div>
   <script>
-    document.getElementById('btnTestarLia').addEventListener('click', function() {
-      alert('Lia ativa. Pergunta recebida: Oi Lia');
-    });
+    (function() {
+      var btnTestarLia = document.getElementById('btnTestarLia');
+      var liaChatBody = document.getElementById('liaChatBody');
+      var liaMessages = document.getElementById('liaMessages');
+      var liaInput = document.getElementById('liaInput');
+      var btnEnviarLia = document.getElementById('btnEnviarLia');
+
+      function appendMessage(author, text, tone) {
+        var message = document.createElement('div');
+        var label = document.createElement('strong');
+        var content = document.createElement('span');
+        var background = tone === 'lia' ? 'rgba(30,95,175,0.18)' : 'rgba(24,199,209,0.10)';
+        var border = tone === 'lia' ? 'rgba(30,95,175,0.34)' : 'rgba(24,199,209,0.24)';
+        var authorColor = tone === 'lia' ? '#8BC6FF' : '#18C7D1';
+
+        message.style.background = background;
+        message.style.border = '1px solid ' + border;
+        message.style.borderRadius = '12px';
+        message.style.padding = '10px 12px';
+        message.style.color = '#F5F7FA';
+        message.style.fontSize = '0.86rem';
+        message.style.lineHeight = '1.5';
+        label.style.color = authorColor;
+        label.textContent = author + ': ';
+        content.textContent = text;
+        message.appendChild(label);
+        message.appendChild(content);
+        liaMessages.appendChild(message);
+        liaMessages.scrollTop = liaMessages.scrollHeight;
+      }
+
+      async function enviarPergunta() {
+        var pergunta = liaInput.value.trim();
+
+        if (!pergunta) {
+          liaInput.focus();
+          return;
+        }
+
+        appendMessage('Você', pergunta, 'user');
+        liaInput.value = '';
+        liaInput.disabled = true;
+        btnEnviarLia.disabled = true;
+        btnEnviarLia.style.opacity = '0.7';
+
+        try {
+          var response = await fetch('/api/lia', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ pergunta: pergunta })
+          });
+
+          if (!response.ok) {
+            throw new Error('Falha ao consultar a Lia.');
+          }
+
+          var data = await response.json();
+          appendMessage('Lia', data.resposta || 'Sem resposta no momento.', 'lia');
+        } catch (error) {
+          appendMessage('Lia', 'Não foi possível obter resposta agora.', 'lia');
+        } finally {
+          liaInput.disabled = false;
+          btnEnviarLia.disabled = false;
+          btnEnviarLia.style.opacity = '1';
+          liaInput.focus();
+        }
+      }
+
+      btnTestarLia.addEventListener('click', function() {
+        var isOpen = liaChatBody.style.display === 'block';
+        liaChatBody.style.display = isOpen ? 'none' : 'block';
+
+        if (!isOpen) {
+          liaInput.focus();
+        }
+      });
+
+      btnEnviarLia.addEventListener('click', enviarPergunta);
+      liaInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          enviarPergunta();
+        }
+      });
+    })();
   </script>
 </body>
 </html>
