@@ -465,7 +465,7 @@ function respostaWhatsappPorCidade(cidade = '') {
 
   if (!linkWhatsapp) return null;
 
-  return `Perfeito 😊\n\nVou te direcionar direto para a unidade de ${nomeCidade} 👇\n\n👉 É só clicar aqui e falar com a equipe:\n${linkWhatsapp}`;
+  return `Perfeito 😊\n\nVou te direcionar direto para a unidade de ${nomeCidade} 👇\n\n<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
 }
 
 function encontrarBlocoEndymed(texto = '', contexto = {}) {

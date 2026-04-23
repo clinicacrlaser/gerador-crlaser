@@ -1574,7 +1574,16 @@ function initLiaV2() {
       bolha.style.color = '#ffffff';
     }
 
-    bolha.textContent = texto;
+    if (tipo === 'lia' && /<a\s+href=/i.test(texto)) {
+      bolha.innerHTML = texto;
+      bolha.querySelectorAll('a[target="_blank"]').forEach((a) => {
+        if (!a.hasAttribute('rel')) {
+          a.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+    } else {
+      bolha.textContent = texto;
+    }
 
     linha.appendChild(label);
     linha.appendChild(bolha);
