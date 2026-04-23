@@ -609,6 +609,13 @@
     const liaInput = document.getElementById('liaInput');
     const liaMessages = document.getElementById('liaMessages');
 
+    liaInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('btnEnviarLia').click();
+      }
+    });
+
     btnAbrirLia.addEventListener('click', () => {
       liaChat.style.display = 'block';
     });
