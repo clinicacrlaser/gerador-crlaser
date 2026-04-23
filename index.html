@@ -386,13 +386,79 @@
     </div>
   </div>
 
-  <div class="page" style="margin-top: 16px;">
-    <button id="btnAbrirLia">Fale com a Lia</button>
-    <div id="liaChat" style="display:none; margin-top: 12px; width: 100%; max-width: 760px;">
-      <div id="liaMessages" style="background: #0D1321; border: 1px solid rgba(24,199,209,0.22); border-radius: 12px; padding: 12px; min-height: 120px; margin-bottom: 10px;"></div>
-      <input id="liaInput" placeholder="Digite sua dúvida..." style="width: 100%; margin-bottom: 10px;" />
-      <button id="btnEnviarLia">Enviar</button>
+  <!-- ════ BOTÃO FLUTUANTE LIA ════ -->
+  <button id="btnAbrirLia" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+  ">
+    Fale com a Lia
+  </button>
+
+  <!-- ════ CHAT FLUTUANTE LIA ════ -->
+  <div id="liaChat" style="
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 320px;
+    max-height: 420px;
+    background: #0b1a2a;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    z-index: 9999;
+    overflow: hidden;
+    font-family: Arial;
+  ">
+
+    <!-- HEADER -->
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 12px;
+      background:#0f2a44;
+      color:#00c6ff;
+      font-weight:bold;
+    ">
+      Fale com a Lia
+      <span id="btnFecharLia" style="cursor:pointer;">✕</span>
     </div>
+
+    <!-- MENSAGENS -->
+    <div id="liaMessages" style="
+      padding:10px;
+      overflow-y:auto;
+      max-height:280px;
+      font-size:14px;
+      color:#fff;
+    "></div>
+
+    <!-- INPUT -->
+    <div style="display:flex; padding:10px; gap:6px;">
+      <input id="liaInput" placeholder="Digite sua dúvida..." style="
+        flex:1;
+        padding:8px;
+        border-radius:8px;
+        border:none;
+        outline:none;
+      "/>
+      <button id="btnEnviarLia" style="
+        background:#00c6ff;
+        border:none;
+        padding:8px 12px;
+        border-radius:8px;
+        cursor:pointer;
+      ">Enviar</button>
+    </div>
+
   </div>
 
   <!-- ════ POPUP OFERTA ════ -->
@@ -537,6 +603,7 @@
     });
 
     const btnAbrirLia = document.getElementById('btnAbrirLia');
+    const btnFecharLia = document.getElementById('btnFecharLia');
     const liaChat = document.getElementById('liaChat');
     const btnEnviarLia = document.getElementById('btnEnviarLia');
     const liaInput = document.getElementById('liaInput');
@@ -544,6 +611,10 @@
 
     btnAbrirLia.addEventListener('click', () => {
       liaChat.style.display = 'block';
+    });
+
+    btnFecharLia.addEventListener('click', () => {
+      liaChat.style.display = 'none';
     });
 
     function appendMessage(remetente, texto) {
