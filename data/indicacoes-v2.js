@@ -10,13 +10,17 @@ export const indicacoes = [
       'flacidez na perna',
       'flacidez na barriga',
       'flacidez no braco',
-      'pele flacida no corpo'
+      'pele flacida no corpo',
+      'flacida no corpo',
+      'flacido no corpo',
+      'pele mole no corpo'
     ],
     resposta: 'Para flacidez corporal usamos bastante Endymed 😊\n\nEle estimula colágeno e ajuda a melhorar firmeza e textura da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
   },
   {
     problema: 'flacidez_rosto',
     gatilhos: [
+      // frase completa
       'tenho flacidez no rosto',
       'flacidez no rosto',
       'rosto com flacidez',
@@ -24,10 +28,33 @@ export const indicacoes = [
       'rosto flacido',
       'flacidez facial',
       'tenho flacidez',
+      'estou com flacidez',
+      // palavras-chave isoladas (capturam "tá flácida", "estou flácido" etc.)
       'flacidez',
-      'pele flacida'
+      'flacida',
+      'flacido',
+      // pele caída / solta
+      'pele caiu',
+      'pele caida',
+      'pele mole',
+      'pele frouxa',
+      'frouxa',
+      'rosto caido',
+      'pele esta caindo',
+      // firmeza
+      'perdi firmeza',
+      'sem firmeza',
+      'perdi elasticidade',
+      // emagrecimento
+      'depois de emagrecer',
+      'depois de dieta',
+      'depois de usar mounjaro',
+      'apos emagrecimento',
+      'emagreci e fiquei',
+      'emagreci',
+      'mounjaro'
     ],
-    resposta: 'Depende um pouco do seu tipo de rosto 😊\n\n👉 Se for uma flacidez com mais volume, o Ultraformer MPT costuma ser uma ótima opção\n👉 Se for uma flacidez com perda de estrutura, o Bioestimulador funciona muito bem\n\nEm muitos casos, combinar os dois é o ideal.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+    resposta: 'Depende um pouco do seu tipo de rosto 😊\n\n👉 Se for uma flacidez com mais volume, o Ultraformer MPT costuma ser uma ótima opção\n👉 Se for uma flacidez com perda de estrutura, o Bioestimulador funciona muito bem\n\nEm muitos casos, combinar os dois é o ideal.\n\nSe quiser, posso te orientar melhor para o seu caso 😉'
   },
   {
     problema: 'rugas',
