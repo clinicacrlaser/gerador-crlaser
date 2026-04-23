@@ -315,6 +315,7 @@ export default async function handler(req, res) {
   try {
     const pergunta = (req.body?.pergunta || '').toString();
     const msg = normalizeText(pergunta);
+    const contexto = req.body?.contexto || {};
     let cidadeDetectada = null;
 
     if (msg.includes('goiania') || msg.includes('goiânia')) {
@@ -349,6 +350,45 @@ export default async function handler(req, res) {
 
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    // Continuação de contexto — deve vir antes de todas as outras regras
+    if (contexto.intencao === 'aguardando_endereco_ou_telefone' && contexto.cidade) {
+      const unidadeCtx = unidades.find((u) => u.cidade === contexto.cidade);
+      if (unidadeCtx) {
+        const ambos = msg.includes('os dois') || msg.includes('ambos') || msg.includes('os 2');
+        const pedirEndereco = msg.includes('endereco') || msg === 'endereco';
+        const pedirTelefone = msg.includes('telefone') || msg.includes('numero') || msg.includes('contato');
+        const pedirAmbiguidade = ['quero', 'sim', 'ok', 'claro', 'pode ser'].includes(msg);
+
+        if (ambos) {
+          return res.status(200).json({
+            resposta: `📍 ${unidadeCtx.nomeCompleto}\n\n${unidadeCtx.endereco}\n\n📞 ${unidadeCtx.telefone}`,
+            contexto: {}
+          });
+        }
+
+        if (pedirEndereco) {
+          return res.status(200).json({
+            resposta: `📍 ${unidadeCtx.nomeCompleto}\n\n${unidadeCtx.endereco}\n\n📞 ${unidadeCtx.telefone}`,
+            contexto: {}
+          });
+        }
+
+        if (pedirTelefone) {
+          return res.status(200).json({
+            resposta: `📞 ${unidadeCtx.telefone}`,
+            contexto: {}
+          });
+        }
+
+        if (pedirAmbiguidade) {
+          return res.status(200).json({
+            resposta: 'Você quer o endereço ou o telefone? 😊',
+            contexto: contexto
+          });
+        }
+      }
     }
 
     console.log('VERIFICANDO SAUDACAO');
@@ -400,7 +440,8 @@ export default async function handler(req, res) {
       };
 
       return res.status(200).json({
-        resposta: `Perfeito 😊\nTemos uma unidade em ${nomesCidade[cidadeDetectada]}.\n\nQuer que eu te envie o endereço ou o telefone?`
+        resposta: `Perfeito 😊\nTemos uma unidade em ${nomesCidade[cidadeDetectada]}.\n\nQuer que eu te envie o endereço ou o telefone?`,
+        contexto: { cidade: cidadeDetectada, intencao: 'aguardando_endereco_ou_telefone' }
       });
     }
 
