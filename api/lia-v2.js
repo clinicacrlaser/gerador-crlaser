@@ -2,6 +2,7 @@ import { unidades } from '../data/unidades-v2.js';
 import { correcoes } from '../data/correcoes-v2.js';
 import { faq } from '../data/faq-v2.js';
 import { sugestoes } from '../data/sugestoes-v2.js';
+import { bioestimuladorFaq } from '../data/bioestimulador-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
@@ -372,6 +373,32 @@ function encontrarSugestao(texto = '') {
   return sugestoes.find((item) => Array.isArray(item.gatilhos) && item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))) || null;
 }
 
+function mencionaOutroProcedimento(texto = '') {
+  const t = normalizeText(texto);
+  return ['botox', 'lavieen', 'preenchedor', 'toxina', 'melasma'].some((termo) => t.includes(termo));
+}
+
+function encontrarBlocoBioestimulador(texto = '', contexto = {}) {
+  const textoNormalizado = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const contextoBio = procedimentoAtual === 'bioestimulador' || procedimentoAtual === 'diamond';
+
+  const matchDireto = bioestimuladorFaq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+  );
+  if (matchDireto) return matchDireto;
+
+  if (contextoBio || !mencionaOutroProcedimento(textoNormalizado)) {
+    return bioestimuladorFaq.find((item) =>
+      Array.isArray(item.gatilhosContextuais) &&
+      item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+    ) || null;
+  }
+
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -547,6 +574,14 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: correcao,
         contexto: { intencao: 'aguardando_interesse' }
+      });
+    }
+
+    const itemBio = encontrarBlocoBioestimulador(pergunta, contexto);
+    if (itemBio) {
+      return res.status(200).json({
+        resposta: itemBio.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemBio.procedimento || 'bioestimulador' }
       });
     }
 
