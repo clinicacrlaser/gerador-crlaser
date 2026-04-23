@@ -20,9 +20,23 @@ function normalizeText(texto = '') {
 function identificarCidade(texto = '') {
   const textoNormalizado = normalizeText(texto);
 
+  // Exact substring match (existing behaviour)
   for (const unidade of unidades) {
     if (unidade.nomes.some((nome) => textoNormalizado.includes(normalizeText(nome)))) {
       return unidade;
+    }
+  }
+
+  // Fuzzy: compare each word of the message against each city-name word
+  const palavrasTexto = textoNormalizado.split(' ').filter((p) => p.length >= 4);
+  for (const unidade of unidades) {
+    for (const nome of unidade.nomes) {
+      const palavrasNome = normalizeText(nome).split(' ').filter((p) => p.length >= 4);
+      for (const pn of palavrasNome) {
+        if (palavrasTexto.some((pt) => palavrasParecidas(pt, pn))) {
+          return unidade;
+        }
+      }
     }
   }
 
@@ -66,6 +80,11 @@ function identificarIntencaoOperacional(texto) {
     t.includes('abre') ||
     t.includes('fecha')
   ) return 'horario';
+
+  // Fuzzy fallback for common typos in intent keywords
+  const palavrasFuzzy = t.split(' ').filter((p) => p.length >= 4);
+  if (palavrasFuzzy.some((p) => palavrasParecidas(p, 'endereco'))) return 'endereco';
+  if (palavrasFuzzy.some((p) => palavrasParecidas(p, 'telefone'))) return 'telefone';
 
   return null;
 }
@@ -316,27 +335,8 @@ export default async function handler(req, res) {
     const pergunta = (req.body?.pergunta || '').toString();
     const msg = normalizeText(pergunta);
     const contexto = req.body?.contexto || {};
-    let cidadeDetectada = null;
-
-    if (msg.includes('goiania') || msg.includes('goiânia')) {
-      cidadeDetectada = 'goiania';
-    }
-
-    if (msg.includes('brasilia') || msg.includes('brasília')) {
-      cidadeDetectada = 'brasilia';
-    }
-
-    if (msg.includes('campinas')) {
-      cidadeDetectada = 'campinas';
-    }
-
-    if (msg.includes('palmas')) {
-      cidadeDetectada = 'palmas';
-    }
-
-    if (msg.includes('sao paulo') || msg.includes('são paulo')) {
-      cidadeDetectada = 'saopaulo';
-    }
+    const unidadeDetectada = identificarCidade(pergunta);
+    const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
 
     console.log('PERGUNTA RECEBIDA:', pergunta);
     console.log('TEXTO NORMALIZADO:', msg);
@@ -402,7 +402,7 @@ export default async function handler(req, res) {
     }
 
     const intencao = identificarIntencaoOperacional(pergunta);
-    const unidade = identificarCidade(pergunta);
+    const unidade = unidadeDetectada;
 
     if (intencao === 'horario') {
       return res.status(200).json({ resposta: RESPOSTA_HORARIO });
@@ -430,17 +430,11 @@ export default async function handler(req, res) {
       });
     }
 
-    if (cidadeDetectada) {
-      const nomesCidade = {
-        goiania: 'Goiânia',
-        brasilia: 'Brasília',
-        campinas: 'Campinas',
-        palmas: 'Palmas',
-        saopaulo: 'São Paulo'
-      };
+    if (cidadeDetectada && unidadeDetectada) {
+      const nomeCidade = unidadeDetectada.nomeCompleto.replace('CR Laser® ', '');
 
       return res.status(200).json({
-        resposta: `Perfeito 😊\nTemos uma unidade em ${nomesCidade[cidadeDetectada]}.\n\nQuer que eu te envie o endereço ou o telefone?`,
+        resposta: `Perfeito 😊\nTemos uma unidade em ${nomeCidade}.\n\nQuer que eu te envie o endereço ou o telefone?`,
         contexto: { cidade: cidadeDetectada, intencao: 'aguardando_endereco_ou_telefone' }
       });
     }
