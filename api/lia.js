@@ -44,6 +44,27 @@ Pode acessar por aqui mesmo e testar, você vai gostar 😉"
 - Lavieen
 - Tratamentos de flacidez e gordura localizada`;
 
+function bloquearPreco(resposta) {
+  if (!resposta) return resposta;
+
+  const texto = resposta.toLowerCase();
+
+  const temPreco =
+    texto.includes('r$') ||
+    texto.includes('pix') ||
+    texto.includes('cartão') ||
+    texto.includes('cartao') ||
+    texto.includes('12x') ||
+    texto.includes('10x') ||
+    texto.includes('parcel');
+
+  if (temPreco) {
+    return 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
+  }
+
+  return resposta;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -106,8 +127,11 @@ export default async function handler(req, res) {
       });
     }
 
+    const resposta = data.choices[0].message.content;
+    const respostaFinal = bloquearPreco(resposta);
+
     return res.status(200).json({
-      resposta: data.choices[0].message.content,
+      resposta: respostaFinal,
     });
   } catch (error) {
     return res.status(500).json({
