@@ -6,6 +6,7 @@ import { sugestoes } from '../data/sugestoes-v2.js';
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
+const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Claro 😊\n\nO agendamento é feito direto pelo WhatsApp da unidade.\n\nMe fala qual cidade você está que já te envio o contato certinho 😉';
 
 function normalizeText(texto = '') {
   return texto
@@ -173,6 +174,22 @@ function detectarPreco(texto = '') {
     t.includes('quanto e') ||
     t.includes('quanto sai')
   );
+}
+
+function detectarIntencaoAgendamento(texto = '') {
+  const t = normalizeText(texto);
+
+  if (
+    t.includes('como agendar') ||
+    t.includes('quero agendar') ||
+    t.includes('marcar consulta') ||
+    t.includes('agendar') ||
+    t.includes('marcar') ||
+    t.includes('agenda')
+  ) return true;
+
+  const palavrasFuzzy = t.split(' ').filter((p) => p.length >= 4);
+  return palavrasFuzzy.some((p) => palavrasParecidas(p, 'agendar') || palavrasParecidas(p, 'marcar') || palavrasParecidas(p, 'agenda'));
 }
 
 function tokenize(texto = '') {
@@ -446,6 +463,24 @@ export default async function handler(req, res) {
 
     if (detectarPreco(pergunta)) {
       return res.status(200).json({ resposta: RESPOSTA_PRECO });
+    }
+
+    if (detectarIntencaoAgendamento(pergunta)) {
+      const cidadeContexto = contexto.cidade || null;
+      const unidadeContexto = cidadeContexto ? unidades.find((u) => u.cidade === cidadeContexto) : null;
+      const unidadeAgendamento = unidadeDetectada || unidadeContexto;
+
+      if (!unidadeAgendamento) {
+        return res.status(200).json({
+          resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
+          contexto: { intencao: 'aguardando_apenas_cidade' }
+        });
+      }
+
+      return res.status(200).json({
+        resposta: `Perfeito 😊\n\nVocê pode agendar direto pelo WhatsApp da unidade:\n\n📞 ${unidadeAgendamento.telefone}\n\nSe preferir, posso te orientar sobre o melhor tratamento antes de agendar 😉`,
+        contexto: { cidade: unidadeAgendamento.cidade }
+      });
     }
 
     const intencao = identificarIntencaoOperacional(pergunta);
