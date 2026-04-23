@@ -3,6 +3,8 @@ export const sugestoes = [
     gatilhos: [
       'e confiavel',
       'posso confiar',
+      'confianca',
+      'confio',
       'cliente novo',
       'nunca fui',
       'primeira vez',
@@ -10,7 +12,9 @@ export const sugestoes = [
       'e seguro',
       'como funciona a clinica',
       'quero conhecer',
-      'informacoes importantes'
+      'informacoes importantes',
+      'autoridade',
+      'referencia'
     ],
     resposta: 'Como você ainda não é cliente, deixa eu te passar algumas informações importantes 😊\n\nTrabalhamos com tecnologias e produtos originais e mostramos tudo na clínica:\nproduto, lote, nota fiscal e comprovação de autenticidade.\n\nOs aparelhos ficam fixos na unidade, não são alugados, o que facilita muito o agendamento.\n\nE trabalhamos com um sistema de vendas virtuais, sem dificuldade depois para marcar o procedimento.\n\nSe quiser, pode ver a opinião de alguns pacientes aqui:\nhttps://www.instagram.com/p/Chh_74FuocW/?igshid=YmMyMTA2M2Y='
   },
@@ -35,7 +39,10 @@ export const sugestoes = [
       'tem horario disponivel',
       'quando tem vaga',
       'aparelho fica na clinica',
-      'disponibilidade de horario'
+      'disponibilidade de horario',
+      'horario disponivel',
+      'tem vaga',
+      'disponibilidade'
     ],
     resposta: 'Como os aparelhos ficam sempre na clínica, não temos complicação com agenda 😊\n\nPode não ter exatamente o horário que você quer, mas normalmente conseguimos ajustar no mesmo dia ou próximo.'
   },
@@ -47,7 +54,10 @@ export const sugestoes = [
       'compra adiantada',
       'validade da compra',
       'posso guardar a oferta',
-      'comprar e usar depois'
+      'comprar e usar depois',
+      'comprar antes',
+      'comprar adiantado',
+      'prazo para usar'
     ],
     resposta: 'Você pode aproveitar o sistema de vendas virtuais 😊\n\nTem até 1 ano para realizar o procedimento, caso não queira fazer agora.\n\nVeja o que dizem alguns pacientes:\nhttps://www.instagram.com/p/Chh_74FuocW/?igshid=YmMyMTA2M2Y='
   },
@@ -58,7 +68,10 @@ export const sugestoes = [
       'quem trabalha na clinica',
       'equipe treinada',
       'qualificacao da equipe',
-      'formacao dos profissionais'
+      'formacao dos profissionais',
+      'equipe',
+      'profissional',
+      'treinamento'
     ],
     resposta: 'Temos um processo bem rigoroso de seleção e treinamento 😊\n\nOs profissionais passam por etapas teóricas e práticas, inclusive em outras unidades.\n\nE o primeiro atendimento é feito no próprio CEO ou familiares próximos, para garantir o padrão.'
   },
@@ -83,9 +96,25 @@ export const sugestoes = [
       'como funciona o pagamento',
       'e golpe',
       'desconfio',
-      'como confirmo que e real'
+      'como confirmo que e real',
+      'seguranca',
+      'golpe',
+      'pagamento',
+      'pagar'
     ],
     resposta: 'Pode ficar tranquilo 😊\n\nSó orientamos que você fale sempre com os canais oficiais da unidade e confira os dados antes de realizar o pagamento.'
+  },
+  {
+    gatilhos: [
+      'produto original',
+      'equipamento original',
+      'original',
+      'qualidade dos produtos',
+      'aparelho original',
+      'usa produto original',
+      'produto de qualidade'
+    ],
+    resposta: 'Trabalhamos com equipamentos e produtos originais 😊\n\nOs aparelhos são da própria clínica, não são alugados, e ficam disponíveis todos os dias.\n\nSe quiser, posso te explicar como identificar isso também.'
   },
   {
     gatilhos: [
