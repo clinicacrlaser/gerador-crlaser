@@ -41,6 +41,10 @@ function expandirAbreviacoes(texto = '') {
     .replace(/\bgoinia\b/gi, 'goiania')
     .replace(/\bestu\b/gi, 'estou')
     .replace(/\bbotoxx\b/gi, 'botox')
+    // Bioestimulador typos
+    .replace(/\bscultra\b/gi, 'sculptra')
+    .replace(/\bbioestulador\b/gi, 'bioestimulador')
+    .replace(/\bbioestimuldor\b/gi, 'bioestimulador')
     .toLowerCase()
     .trim();
 }

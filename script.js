@@ -1603,12 +1603,8 @@ function initLiaV2() {
       console.log('resposta da lia', data);
       liaContexto = data.contexto || {};
       const resposta = data.resposta || 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊\nMas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.';
-      if (resposta === ultimaRespostaLia) {
-        appendMessage('Lia', 'Hm, parece que já te falei sobre isso 😊 Quer perguntar algo diferente ou posso te mostrar as opções da semana?', 'lia');
-      } else {
-        ultimaRespostaLia = resposta;
-        appendMessage('Lia', resposta, 'lia');
-      }
+      ultimaRespostaLia = resposta;
+      appendMessage('Lia', resposta, 'lia');
     } catch (error) {
       console.error('Erro ao chamar /api/lia-v2:', error);
       appendMessage('Lia', 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊\nMas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.', 'lia');

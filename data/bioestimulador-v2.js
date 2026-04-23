@@ -2,6 +2,29 @@ export const bioestimuladorFaq = [
   {
     procedimento: 'bioestimulador',
     gatilhos: [
+      'tem sculptra',
+      'tem scultra',
+      'voces tem sculptra',
+      'voces fazem sculptra',
+      'fazem sculptra',
+      'sculptra'
+    ],
+    resposta: 'Na CR Laser® trabalhamos com o Diamond 😊\n\nÉ um bioestimulador à base de hidroxiapatita de cálcio, com efeito de estímulo de colágeno e sustentação da pele.\n\nSe quiser, posso te explicar melhor como funciona ou te indicar o melhor pra você 😉'
+  },
+  {
+    procedimento: 'bioestimulador',
+    gatilhos: [
+      'tem bioestimulador',
+      'voces tem bioestimulador',
+      'fazem bioestimulador',
+      'voces fazem bioestimulador',
+      'trabalham com bioestimulador'
+    ],
+    resposta: 'Fazemos sim 😊\n\nTrabalhamos com o Diamond, que estimula colágeno e melhora a firmeza da pele.\n\nSe quiser, posso te explicar melhor ou te indicar para o seu caso 😉'
+  },
+  {
+    procedimento: 'bioestimulador',
+    gatilhos: [
       'qual bioestimulador voces usam',
       'qual bioestimulador vocês usam',
       'qual bioestimulador',
@@ -18,9 +41,12 @@ export const bioestimuladorFaq = [
       'bioestimulador para que serve',
       'pra que serve o bioestimulador',
       'indicacao do bioestimulador',
-      'bioestimulador flacidez'
+      'bioestimulador flacidez',
+      'bioestimulador funciona',
+      'funciona o bioestimulador',
+      'bioestimulador realmente funciona'
     ],
-    gatilhosContextuais: ['pra que serve', 'para que serve', 'flacidez', 'indicacao'],
+    gatilhosContextuais: ['pra que serve', 'para que serve', 'flacidez', 'indicacao', 'funciona'],
     resposta: 'Indicamos principalmente para flacidez e perda de estrutura da pele 😊\n\nEle estimula colágeno, melhora a firmeza, elasticidade e ajuda a recuperar a sustentação do rosto.'
   },
   {
