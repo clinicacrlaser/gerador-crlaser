@@ -314,17 +314,40 @@ export default async function handler(req, res) {
 
   try {
     const pergunta = (req.body?.pergunta || '').toString();
-    console.log('PERGUNTA RECEBIDA:', pergunta);
-    console.log('TEXTO NORMALIZADO:', normalizeText(pergunta));
+    const msg = normalizeText(pergunta);
+    let cidadeDetectada = null;
 
-    if (!normalizeText(pergunta)) {
+    if (msg.includes('goiania') || msg.includes('goiânia')) {
+      cidadeDetectada = 'goiania';
+    }
+
+    if (msg.includes('brasilia') || msg.includes('brasília')) {
+      cidadeDetectada = 'brasilia';
+    }
+
+    if (msg.includes('campinas')) {
+      cidadeDetectada = 'campinas';
+    }
+
+    if (msg.includes('palmas')) {
+      cidadeDetectada = 'palmas';
+    }
+
+    if (msg.includes('sao paulo') || msg.includes('são paulo')) {
+      cidadeDetectada = 'saopaulo';
+    }
+
+    console.log('PERGUNTA RECEBIDA:', pergunta);
+    console.log('TEXTO NORMALIZADO:', msg);
+
+    if (!msg) {
       console.log('CAIU NO FALLBACK');
       return res.status(200).json({
         resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
       });
     }
 
-    if (normalizeText(pergunta).startsWith('midia0505')) {
+    if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
@@ -350,8 +373,34 @@ export default async function handler(req, res) {
         return res.status(200).json({ resposta: RESPOSTA_CIDADE });
       }
 
+      if (intencao === 'endereco') {
+        return res.status(200).json({
+          resposta: `📍 ${unidade.nomeCompleto}\n\n${unidade.endereco}\n\n📞 ${unidade.telefone}`
+        });
+      }
+
+      if (intencao === 'telefone') {
+        return res.status(200).json({
+          resposta: `📞 ${unidade.telefone}`
+        });
+      }
+
       return res.status(200).json({
-        resposta: '📍 ' + unidade.nomeCompleto + '\n\n' + unidade.endereco + '\n\n📍 Mapa:\n' + unidade.mapa + '\n\n📞 ' + unidade.telefone
+        resposta: `📍 Mapa:\n${unidade.mapa}`
+      });
+    }
+
+    if (cidadeDetectada) {
+      const nomesCidade = {
+        goiania: 'Goiânia',
+        brasilia: 'Brasília',
+        campinas: 'Campinas',
+        palmas: 'Palmas',
+        saopaulo: 'São Paulo'
+      };
+
+      return res.status(200).json({
+        resposta: `Perfeito 😊\nTemos uma unidade em ${nomesCidade[cidadeDetectada]}.\n\nQuer que eu te envie o endereço ou o telefone?`
       });
     }
 
