@@ -4,6 +4,7 @@ import { endymedFaq } from '../data/endymed-v2.js';
 import { faq } from '../data/faq-v2.js';
 import { sugestoes } from '../data/sugestoes-v2.js';
 import { bioestimuladorFaq } from '../data/bioestimulador-v2.js';
+import { indicacoes } from '../data/indicacoes-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
@@ -383,6 +384,21 @@ function mencionaOutroProcedimento(texto = '') {
   return ['botox', 'lavieen', 'preenchedor', 'toxina', 'melasma', 'bioestimulador', 'diamond', 'sculptra', 'elleva', 'endymed', 'ifine', 'intensif', 'small', 'shapper'].some((termo) => t.includes(termo));
 }
 
+// Nomes de tratamentos que, se presentes, impedem a lógica de indicação de disparar
+// (o usuário está perguntando sobre o tratamento, não descrevendo um problema)
+const TRATAMENTOS_CONHECIDOS = ['botox', 'bioestimulador', 'endymed', 'ultraformer', 'lavieen', 'sculptra', 'diamond', 'shapper', 'small'];
+
+function identificarProblema(texto = '') {
+  const t = normalizeText(texto);
+  if (TRATAMENTOS_CONHECIDOS.some((tr) => t.includes(tr))) return null;
+  for (const item of indicacoes) {
+    if (item.gatilhos.some((g) => t.includes(normalizeText(g)))) {
+      return item;
+    }
+  }
+  return null;
+}
+
 function encontrarBlocoEndymed(texto = '', contexto = {}) {
   const textoNormalizado = normalizeText(texto);
   const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
@@ -608,6 +624,14 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: correcao,
         contexto: { intencao: 'aguardando_interesse' }
+      });
+    }
+
+    const itemIndicacao = identificarProblema(pergunta);
+    if (itemIndicacao) {
+      return res.status(200).json({
+        resposta: itemIndicacao.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemIndicacao.problema }
       });
     }
 
