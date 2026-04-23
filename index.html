@@ -386,6 +386,15 @@
     </div>
   </div>
 
+  <div class="page" style="margin-top: 16px;">
+    <button id="btnAbrirLia">Fale com a Lia</button>
+    <div id="liaChat" style="display:none; margin-top: 12px; width: 100%; max-width: 760px;">
+      <div id="liaMessages" style="background: #0D1321; border: 1px solid rgba(24,199,209,0.22); border-radius: 12px; padding: 12px; min-height: 120px; margin-bottom: 10px;"></div>
+      <input id="liaInput" placeholder="Digite sua dúvida..." style="width: 100%; margin-bottom: 10px;" />
+      <button id="btnEnviarLia">Enviar</button>
+    </div>
+  </div>
+
   <!-- ════ POPUP OFERTA ════ -->
   <div id="popupOverlay">
     <div id="popupBox">
@@ -525,6 +534,40 @@
     });
     document.getElementById('popupOk').addEventListener('click', function() {
       document.getElementById('popupOverlay').style.display = 'none';
+    });
+
+    const btnAbrirLia = document.getElementById('btnAbrirLia');
+    const liaChat = document.getElementById('liaChat');
+    const btnEnviarLia = document.getElementById('btnEnviarLia');
+    const liaInput = document.getElementById('liaInput');
+    const liaMessages = document.getElementById('liaMessages');
+
+    btnAbrirLia.addEventListener('click', () => {
+      liaChat.style.display = 'block';
+    });
+
+    function appendMessage(remetente, texto) {
+      const msg = document.createElement('div');
+      msg.innerText = remetente + ': ' + texto;
+      liaMessages.appendChild(msg);
+    }
+
+    btnEnviarLia.addEventListener('click', async () => {
+      const pergunta = liaInput.value;
+      appendMessage('Você', pergunta);
+
+      const res = await fetch('/api/lia', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ pergunta })
+      });
+
+      const data = await res.json();
+      appendMessage('Lia', data.resposta);
+
+      liaInput.value = '';
     });
   </script>
 </body>
