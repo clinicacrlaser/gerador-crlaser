@@ -107,6 +107,18 @@ function detectarConfirmacao(texto = '') {
   return ['sim', 'ok', 'confirme', 'confirmado', 'certo', 'ta', 'entendi', 'beleza', 'perfeito', 'claro', 'pode ser'].includes(t);
 }
 
+function detectarIntencaoPositiva(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'sim',
+    'quero',
+    'pode mandar',
+    'manda',
+    'claro',
+    'ok'
+  ].includes(t);
+}
+
 function detectarPreco(texto = '') {
   const t = normalizeText(texto);
   return (
@@ -364,6 +376,12 @@ export default async function handler(req, res) {
     const itemSugestao = encontrarSugestao(pergunta);
     if (itemSugestao) {
       return res.status(200).json({ resposta: itemSugestao.resposta });
+    }
+
+    if (detectarIntencaoPositiva(pergunta)) {
+      return res.status(200).json({
+        resposta: 'Perfeito 😊\n\nMe fala qual procedimento você tem interesse que eu te envio os valores da oferta da semana 😉'
+      });
     }
 
     if (detectarConfirmacao(pergunta)) {
