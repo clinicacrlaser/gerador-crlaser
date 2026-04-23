@@ -489,7 +489,7 @@ export default async function handler(req, res) {
 
       if (linkWhatsapp) {
         return res.status(200).json({
-          resposta: `Perfeito 😊\n\nVocê pode falar direto com a unidade pelo WhatsApp:\n\n👉 ${linkWhatsapp}\n\nSe quiser, posso te ajudar a entender qual tratamento é melhor antes 😉`,
+          resposta: `Perfeito 😊\n\n👉 Para abrir o WhatsApp da unidade, toque no link abaixo:\n\n${linkWhatsapp}\n\nSe quiser, posso te ajudar a entender qual tratamento é melhor antes 😉`,
           contexto: { cidade: unidadeAgendamento.cidade }
         });
       }

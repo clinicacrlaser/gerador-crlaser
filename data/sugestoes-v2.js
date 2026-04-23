@@ -16,7 +16,7 @@ export const sugestoes = [
       'autoridade',
       'referencia'
     ],
-    resposta: 'Como você ainda não é cliente, deixa eu te passar algumas informações importantes 😊\n\nTrabalhamos com tecnologias e produtos originais e mostramos tudo na clínica:\nproduto, lote, nota fiscal e comprovação de autenticidade.\n\nOs aparelhos ficam fixos na unidade, não são alugados, o que facilita muito o agendamento.\n\nE trabalhamos com um sistema de vendas virtuais, sem dificuldade depois para marcar o procedimento.\n\nSe quiser, pode ver a opinião de alguns pacientes aqui:\nhttps://www.instagram.com/p/Chh_74FuocW/?igshid=YmMyMTA2M2Y='
+    resposta: 'Como você ainda não é cliente, deixa eu te passar algumas informações importantes 😊\n\nTrabalhamos com tecnologias e produtos originais e mostramos tudo na clínica:\nproduto, lote, nota fiscal e comprovação de autenticidade.\n\nOs aparelhos ficam fixos na unidade, não são alugados, o que facilita muito o agendamento.\n\nE trabalhamos com um sistema de vendas virtuais, sem dificuldade depois para marcar o procedimento.\n\n👉 Para ver as avaliações, toque no link abaixo:\n\nhttps://www.instagram.com/p/Chh_74FuocW/?igshid=YmMyMTA2M2Y='
   },
   {
     gatilhos: [
@@ -30,7 +30,7 @@ export const sugestoes = [
       'alguem ja foi',
       'experiencia de clientes'
     ],
-    resposta: 'Caso ainda não conheça a CR Laser® 😊\n\nVocê pode ver a opinião de alguns clientes aqui:\n\nhttps://www.instagram.com/explore/tags/oquedizemdacrlaser/'
+    resposta: 'Caso ainda não conheça a CR Laser® 😊\n\n👉 Para ver as avaliações, toque no link abaixo:\n\nhttps://www.instagram.com/explore/tags/oquedizemdacrlaser/'
   },
   {
     gatilhos: [
@@ -59,7 +59,7 @@ export const sugestoes = [
       'comprar adiantado',
       'prazo para usar'
     ],
-    resposta: 'Você pode aproveitar o sistema de vendas virtuais 😊\n\nTem até 1 ano para realizar o procedimento, caso não queira fazer agora.\n\nVeja o que dizem alguns pacientes:\nhttps://www.instagram.com/p/Chh_74FuocW/?igshid=YmMyMTA2M2Y='
+    resposta: 'Você pode aproveitar o sistema de vendas virtuais 😊\n\nTem até 1 ano para realizar o procedimento, caso não queira fazer agora.\n\n👉 Para ver as avaliações sobre o sistema de compra, toque no link abaixo:\n\nhttps://www.instagram.com/p/Chh_74FuocW/?igshid=YmMyMTA2M2Y='
   },
   {
     gatilhos: [
@@ -115,6 +115,16 @@ export const sugestoes = [
       'produto de qualidade'
     ],
     resposta: 'Trabalhamos com equipamentos e produtos originais 😊\n\nOs aparelhos são da própria clínica, não são alugados, e ficam disponíveis todos os dias.\n\nSe quiser, posso te explicar como identificar isso também.'
+  },
+  {
+    gatilhos: [
+      'video explicativo',
+      'videos explicativos',
+      'quero ver video',
+      'me manda o video',
+      'tem video explicando'
+    ],
+    resposta: 'Tenho um vídeo explicativo que pode te ajudar 😊\n\n👉 Para ver o vídeo explicativo, toque no link abaixo:\n\nhttps://www.instagram.com/reel/DJQKsFxJm5o/'
   },
   {
     gatilhos: [
