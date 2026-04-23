@@ -1,15 +1,3 @@
-import offersData from '../data/ofertas.js';
-
-const {
-  calculateProcedureOffer,
-  detectOfferIndexFromQuestion,
-  findProcedureFromQuestion,
-  formatBRL,
-  HIGHLIGHT_BONUS_TEXT,
-  HIGHLIGHT_BOTOX_PROC_IDX,
-  isPriceQuestion,
-} = offersData;
-
 const SYSTEM_PROMPT = `Você é a Lia, assistente comercial da Clínica CR Laser®.
 
 Seu objetivo é:
@@ -31,9 +19,12 @@ Regras de comportamento:
 - explique o benefício
 - destaque resultado (flacidez, gordura, rejuvenescimento)
 
-3. Quando perguntarem preço:
-- dê suporte comercial sem inventar valores
-- convide para atendimento
+3. Quando perguntarem preço, valor, quanto custa, quanto sai ou similares:
+- nunca informar valor diretamente
+- responder exatamente com esta mensagem:
+"Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊
+É bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.
+Pode acessar por aqui mesmo e testar, você vai gostar 😉"
 
 4. Sempre conduza para ação:
 - "posso te explicar melhor"
@@ -53,88 +44,37 @@ Regras de comportamento:
 - Lavieen
 - Tratamentos de flacidez e gordura localizada`;
 
-function isBotoxQuestion(pergunta) {
-  return String(pergunta || '').toLowerCase().includes('botox');
-}
-
-function buildBotoxExplanation() {
-  return 'O Botox é indicado para suavizar rugas e prevenir marcas de expressão.\n\nSe quiser, te explico como funciona ou te passo o valor 😉';
-}
-
-function buildBotoxPriceAnswer(body) {
-  const selectedOffer = body && body.faixaOferta ? String(body.faixaOferta) : '';
-  const highlightAtivo = Boolean(body && body.highlightAtivo);
-  const offerIdx = selectedOffer || '1';
-  const calculated = calculateProcedureOffer('0', offerIdx);
-
-  if (!calculated) {
-    return 'Posso te ajudar melhor se você me disser qual procedimento deseja.';
-  }
-
-  let resposta = `O Botox Facial hoje está por R$ ${formatBRL(calculated.discountedPix)} no Pix ou 12x de R$ ${formatBRL(calculated.discountedCard)} no cartão.`;
-
-  if (highlightAtivo) {
-    resposta += ` Bônus ativo de hoje: ${HIGHLIGHT_BONUS_TEXT}.`;
-  }
-
-  resposta += '\n\nSe quiser, já te explico como funciona 😉';
-  return resposta;
-}
-
-function buildPriceAnswer(pergunta, body) {
-  const selectedProcedure = body && body.procedimento ? String(body.procedimento) : '';
-  const selectedOffer = body && body.faixaOferta ? String(body.faixaOferta) : '';
-  const highlightAtivo = Boolean(body && body.highlightAtivo);
-
-  const procIdx = selectedProcedure || findProcedureFromQuestion(pergunta);
-  if (!procIdx && procIdx !== '0') {
-    return 'Posso te ajudar melhor se você me disser qual procedimento deseja.';
-  }
-
-  const offerIdx = selectedOffer || detectOfferIndexFromQuestion(pergunta);
-  const calculated = calculateProcedureOffer(procIdx, offerIdx);
-  if (!calculated) {
-    return 'Posso te ajudar melhor se você me disser qual procedimento deseja.';
-  }
-
-  let resposta = `${calculated.procedure.name} está por R$ ${formatBRL(calculated.discountedPix)} no Pix ou 12x de R$ ${formatBRL(calculated.discountedCard)} no cartão, na oferta atual.`;
-
-  if (highlightAtivo && calculated.procIdx === HIGHLIGHT_BOTOX_PROC_IDX) {
-    resposta += ` Bônus ativo de hoje: ${HIGHLIGHT_BONUS_TEXT}.`;
-  }
-
-  resposta += ' Se quiser, posso te direcionar para avaliação.';
-  return resposta;
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { pergunta } = req.body || {};
+    const { pergunta } = req.body;
+
+    const texto = (pergunta || '').toLowerCase();
+
+    const pediuPreco =
+      texto.includes('preço') ||
+      texto.includes('preco') ||
+      texto.includes('valor') ||
+      texto.includes('quanto custa') ||
+      texto.includes('quanto é') ||
+      texto.includes('quanto e') ||
+      texto.includes('quanto sai') ||
+      texto.includes('tem valor') ||
+      texto.includes('qual o preço') ||
+      texto.includes('qual o preco');
+
+    if (pediuPreco) {
+      return res.status(200).json({
+        resposta: 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉'
+      });
+    }
+
     if (!pergunta) {
       return res.status(200).json({
         resposta: 'Posso te ajudar melhor se você me disser qual procedimento deseja.',
-      });
-    }
-
-    if (isBotoxQuestion(pergunta)) {
-      if (isPriceQuestion(pergunta)) {
-        return res.status(200).json({
-          resposta: buildBotoxPriceAnswer(req.body),
-        });
-      }
-
-      return res.status(200).json({
-        resposta: buildBotoxExplanation(),
-      });
-    }
-
-    if (isPriceQuestion(pergunta)) {
-      return res.status(200).json({
-        resposta: buildPriceAnswer(pergunta, req.body),
       });
     }
 

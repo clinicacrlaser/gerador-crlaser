@@ -196,14 +196,6 @@
     return null;
   }
 
-  function isPriceQuestion(question) {
-    const normalized = normalizeText(question);
-    return normalized.includes('preco')
-      || normalized.includes('valor')
-      || normalized.includes('quanto custa')
-      || normalized.includes('quanto e');
-  }
-
   const shared = {
     PROCEDURES,
     DISCOUNT_RATES,
@@ -215,8 +207,7 @@
     getOfferIndexForGroup,
     calculateProcedureOffer,
     detectOfferIndexFromQuestion,
-    findProcedureFromQuestion,
-    isPriceQuestion
+    findProcedureFromQuestion
   };
 
   if (typeof module !== 'undefined' && module.exports) {
