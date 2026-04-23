@@ -9,7 +9,8 @@ import { indicacoes } from '../data/indicacoes-v2.js';
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
-const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Claro 😊\n\nO agendamento é feito direto pelo WhatsApp da unidade.\n\nMe fala qual cidade você está que já te envio o contato certinho 😉';
+const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
+const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -191,13 +192,24 @@ function detectarPreco(texto = '') {
   );
 }
 
+function detectarInteresseFechamento(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    ['quero', 'sim', 'tenho interesse', 'interesse', 'quero sim', 'pode mandar', 'manda'].includes(t) ||
+    t.includes('quanto custa') ||
+    t.includes('tenho interesse')
+  );
+}
+
 function detectarIntencaoAgendamento(texto = '') {
   const t = normalizeText(texto);
 
   if (
     t.includes('como agendar') ||
     t.includes('quero agendar') ||
+    t.includes('como faco') ||
     t.includes('marcar consulta') ||
+    t.includes('marcar horario') ||
     t.includes('agendar') ||
     t.includes('marcar') ||
     t.includes('agenda')
@@ -399,6 +411,61 @@ function identificarProblema(texto = '') {
   return null;
 }
 
+function perguntaConducaoPorProblema(problema = '') {
+  const p = normalizeText(problema);
+
+  if (p === 'flacidez_rosto' || p === 'perda_volume') {
+    return '👉 Você sente mais flacidez ou perda de volume?';
+  }
+
+  if (p === 'papada' || p === 'gordura') {
+    return '👉 É mais gordura ou flacidez?';
+  }
+
+  if (p === 'vago') {
+    return 'O que mais te incomoda hoje?';
+  }
+
+  return '👉 Essa região te incomoda há muito tempo?';
+}
+
+function perguntaContinuidadePorProblema(problema = '') {
+  const p = normalizeText(problema);
+
+  if (p === 'papada' || p === 'gordura') {
+    return '👉 Essa região te incomoda há muito tempo?';
+  }
+
+  if (p === 'flacidez_rosto' || p === 'perda_volume' || p === 'flacidez_corpo') {
+    return '👉 Essa região te incomoda há muito tempo?';
+  }
+
+  if (p === 'vago') {
+    return 'O que mais te incomoda hoje?';
+  }
+
+  return '👉 O que mais te incomoda hoje?';
+}
+
+function montarRespostaIndicacaoComConducao(itemIndicacao) {
+  const respostaBase = itemIndicacao?.resposta || '';
+  const pergunta = perguntaConducaoPorProblema(itemIndicacao?.problema || '');
+
+  if (!pergunta) return respostaBase;
+  if (respostaBase.includes(pergunta)) return respostaBase;
+
+  return `${respostaBase}\n\n${pergunta}`;
+}
+
+function respostaWhatsappPorCidade(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[cidadeNorm];
+
+  if (!linkWhatsapp) return null;
+
+  return `Perfeito 😊\n\nVocê pode falar direto com a unidade pelo WhatsApp:\n\n👉 ${linkWhatsapp}`;
+}
+
 function encontrarBlocoEndymed(texto = '', contexto = {}) {
   const textoNormalizado = normalizeText(texto);
   const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
@@ -481,6 +548,24 @@ export default async function handler(req, res) {
       }
     }
 
+    if (contexto.intencao === 'aguardando_cidade_whatsapp') {
+      const cidadeNoMsg = unidadeDetectada ? unidadeDetectada.cidade : null;
+      if (cidadeNoMsg) {
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeNoMsg);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: respostaWhatsapp,
+            contexto: { cidade: cidadeNoMsg }
+          });
+        }
+      }
+
+      return res.status(200).json({
+        resposta: 'Me fala sua cidade que te envio o contato direto da unidade mais próxima 😊',
+        contexto
+      });
+    }
+
     if (contexto.intencao === 'aguardando_endereco_ou_telefone' && contexto.cidade) {
       const unidadeCtx = unidades.find((u) => u.cidade === contexto.cidade);
       if (unidadeCtx) {
@@ -532,10 +617,83 @@ export default async function handler(req, res) {
       }
     }
 
+    if (contexto.intencao === 'conduzindo_indicacao') {
+      const cidadeContexto = contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+      if (detectarIntencaoAgendamento(pergunta)) {
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
+            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp' }
+          });
+        }
+
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: respostaWhatsapp,
+            contexto: { cidade: cidadeAtual }
+          });
+        }
+      }
+
+      if (detectarInteresseFechamento(pergunta)) {
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
+            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp' }
+          });
+        }
+
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: respostaWhatsapp,
+            contexto: { cidade: cidadeAtual }
+          });
+        }
+      }
+
+      const passos = Number(contexto.passosConducao || 0) + 1;
+      if (passos >= 2) {
+        return res.status(200).json({
+          resposta: RESPOSTA_FECHAMENTO_LEVE,
+          contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined }
+        });
+      }
+
+      const perguntaConducao = perguntaContinuidadePorProblema(contexto.procedimentoAtual || '');
+      return res.status(200).json({
+        resposta: perguntaConducao || 'O que mais te incomoda hoje?',
+        contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined }
+      });
+    }
+
     console.log('VERIFICANDO SAUDACAO');
     if (ehSaudacao(pergunta)) {
       console.log('CAIU NA SAUDACAO');
       return res.status(200).json({ resposta: respostaSaudacao(pergunta) });
+    }
+
+    if (detectarInteresseFechamento(pergunta)) {
+      const cidadeContexto = contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
+          contexto: { intencao: 'aguardando_cidade_whatsapp' }
+        });
+      }
+
+      const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
+      if (respostaWhatsapp) {
+        return res.status(200).json({
+          resposta: respostaWhatsapp,
+          contexto: { cidade: cidadeAtual }
+        });
+      }
     }
 
     if (detectarPreco(pergunta)) {
@@ -630,8 +788,13 @@ export default async function handler(req, res) {
     const itemIndicacao = identificarProblema(pergunta);
     if (itemIndicacao) {
       return res.status(200).json({
-        resposta: itemIndicacao.resposta,
-        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemIndicacao.problema }
+        resposta: montarRespostaIndicacaoComConducao(itemIndicacao),
+        contexto: {
+          intencao: 'conduzindo_indicacao',
+          procedimentoAtual: itemIndicacao.problema,
+          passosConducao: 0,
+          cidade: cidadeDetectada || contexto.cidade
+        }
       });
     }
 
