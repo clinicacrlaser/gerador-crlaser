@@ -1,5 +1,7 @@
 'use strict';
 
+console.log('SCRIPT.JS CARREGOU');
+
 const offersData = window.CRLaserOffers;
 if (!offersData) {
   throw new Error('Base de ofertas não carregada.');
@@ -58,6 +60,7 @@ function formatCountdown(diffMs) {
 }
 
 function initOfferCountdown() {
+  console.log('INIT RELÓGIO');
   const valueEl = document.getElementById('offerCountdown');
   const barEl = document.querySelector('.offer-countdown-bar');
 
@@ -1518,12 +1521,21 @@ function qaCopiarResposta() {
 }
 
 function initLiaV2() {
+  console.log('INIT LIA');
   const btnAbrirLia = document.getElementById('btnAbrirLia');
   const btnFecharLia = document.getElementById('btnFecharLia');
   const liaChat = document.getElementById('liaChat');
   const liaMessages = document.getElementById('liaMessages');
   const liaInput = document.getElementById('liaInput');
   const btnEnviarLia = document.getElementById('btnEnviarLia');
+
+  if (btnAbrirLia) {
+    console.log('BOTÃO LIA ENCONTRADO');
+  }
+
+  if (liaInput) {
+    console.log('INPUT LIA ENCONTRADO');
+  }
 
   if (!btnAbrirLia || !btnFecharLia || !liaChat || !liaMessages || !liaInput || !btnEnviarLia) {
     return;
@@ -1587,8 +1599,7 @@ function initLiaV2() {
 
       const data = await res.json();
       console.log('resposta da lia', data);
-      const resposta = data.resposta || 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊
-Mas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.';
+      const resposta = data.resposta || 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊\nMas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.';
       if (resposta === ultimaRespostaLia) {
         appendMessage('Lia', 'Hm, parece que já te falei sobre isso 😊 Quer perguntar algo diferente ou posso te mostrar as opções da semana?', 'lia');
       } else {
@@ -1597,8 +1608,7 @@ Mas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores 
       }
     } catch (error) {
       console.error('Erro ao chamar /api/lia-v2:', error);
-      appendMessage('Lia', 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊
-Mas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.', 'lia');
+      appendMessage('Lia', 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊\nMas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.', 'lia');
     }
   }
 
