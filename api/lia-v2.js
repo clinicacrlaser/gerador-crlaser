@@ -1,5 +1,6 @@
 import { unidades } from '../data/unidades-v2.js';
 import { correcoes } from '../data/correcoes-v2.js';
+import { endymedFaq } from '../data/endymed-v2.js';
 import { faq } from '../data/faq-v2.js';
 import { sugestoes } from '../data/sugestoes-v2.js';
 import { bioestimuladorFaq } from '../data/bioestimulador-v2.js';
@@ -375,7 +376,28 @@ function encontrarSugestao(texto = '') {
 
 function mencionaOutroProcedimento(texto = '') {
   const t = normalizeText(texto);
-  return ['botox', 'lavieen', 'preenchedor', 'toxina', 'melasma'].some((termo) => t.includes(termo));
+  return ['botox', 'lavieen', 'preenchedor', 'toxina', 'melasma', 'bioestimulador', 'diamond', 'sculptra', 'elleva', 'endymed', 'ifine', 'intensif', 'small', 'shapper'].some((termo) => t.includes(termo));
+}
+
+function encontrarBlocoEndymed(texto = '', contexto = {}) {
+  const textoNormalizado = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const contextoEndymed = procedimentoAtual === 'endymed';
+
+  const matchDireto = endymedFaq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+  );
+  if (matchDireto) return matchDireto;
+
+  if (contextoEndymed) {
+    return endymedFaq.find((item) =>
+      Array.isArray(item.gatilhosContextuais) &&
+      item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+    ) || null;
+  }
+
+  return null;
 }
 
 function encontrarBlocoBioestimulador(texto = '', contexto = {}) {
@@ -389,7 +411,7 @@ function encontrarBlocoBioestimulador(texto = '', contexto = {}) {
   );
   if (matchDireto) return matchDireto;
 
-  if (contextoBio || !mencionaOutroProcedimento(textoNormalizado)) {
+  if (contextoBio) {
     return bioestimuladorFaq.find((item) =>
       Array.isArray(item.gatilhosContextuais) &&
       item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
@@ -524,6 +546,14 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: `Perfeito 😊\n\nVocê pode agendar direto pelo WhatsApp da unidade:\n\n📞 ${unidadeAgendamento.telefone}\n\nSe preferir, posso te orientar sobre o melhor tratamento antes de agendar 😉`,
         contexto: { cidade: unidadeAgendamento.cidade }
+      });
+    }
+
+    const itemEndymed = encontrarBlocoEndymed(pergunta, contexto);
+    if (itemEndymed) {
+      return res.status(200).json({
+        resposta: itemEndymed.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemEndymed.procedimento || 'endymed' }
       });
     }
 
