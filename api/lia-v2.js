@@ -4,7 +4,7 @@ import { faq } from '../data/faq-v2.js';
 import { sugestoes } from '../data/sugestoes-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
-const RESPOSTA_CIDADE = 'Claro 😊\nMe fala qual cidade você está que te envio o endereço da unidade mais próxima.';
+const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 
 function normalizeText(texto = '') {
@@ -64,6 +64,9 @@ function identificarIntencaoOperacional(texto) {
     t.includes('endereco de') ||
     t.includes('onde fica') ||
     t.includes('onde e') ||
+    t.includes('onde vocês') ||
+    t.includes('onde voces') ||
+    t.includes('ficam onde') ||
     t.includes('localizacao') ||
     t.includes('localizacao da clinica') ||
     t.includes('unidade') ||
