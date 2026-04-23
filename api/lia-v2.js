@@ -17,6 +17,18 @@ function normalizeText(texto = '') {
     .trim();
 }
 
+function expandirAbreviacoes(texto = '') {
+  // Expand common abbreviations before normalization
+  return texto
+    .replace(/\bvcs\b/gi, 'vocês')
+    .replace(/\bvc\b/gi, 'você')
+    .replace(/\bql\b/gi, 'qual')
+    .replace(/\bpq\b/gi, 'porque')
+    .replace(/\bp\.q\./gi, 'porque')
+    .toLowerCase()
+    .trim();
+}
+
 function identificarCidade(texto = '') {
   const textoNormalizado = normalizeText(texto);
 
@@ -28,10 +40,10 @@ function identificarCidade(texto = '') {
   }
 
   // Fuzzy: compare each word of the message against each city-name word
-  const palavrasTexto = textoNormalizado.split(' ').filter((p) => p.length >= 4);
+  const palavrasTexto = textoNormalizado.split(' ').filter((p) => p.length >= 3);
   for (const unidade of unidades) {
     for (const nome of unidade.nomes) {
-      const palavrasNome = normalizeText(nome).split(' ').filter((p) => p.length >= 4);
+      const palavrasNome = normalizeText(nome).split(' ').filter((p) => p.length >= 3);
       for (const pn of palavrasNome) {
         if (palavrasTexto.some((pt) => palavrasParecidas(pt, pn))) {
           return unidade;
@@ -332,7 +344,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const pergunta = (req.body?.pergunta || '').toString();
+    let pergunta = (req.body?.pergunta || '').toString();
+    pergunta = expandirAbreviacoes(pergunta);
     const msg = normalizeText(pergunta);
     const contexto = req.body?.contexto || {};
     const unidadeDetectada = identificarCidade(pergunta);
