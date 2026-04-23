@@ -460,10 +460,12 @@ function montarRespostaIndicacaoComConducao(itemIndicacao) {
 function respostaWhatsappPorCidade(cidade = '') {
   const cidadeNorm = normalizeText(cidade);
   const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
 
   if (!linkWhatsapp) return null;
 
-  return `Perfeito 😊\n\nVocê pode falar direto com a unidade pelo WhatsApp:\n\n👉 ${linkWhatsapp}`;
+  return `Perfeito 😊\n\nVou te direcionar direto para a unidade de ${nomeCidade} 👇\n\n👉 É só clicar aqui e falar com a equipe:\n${linkWhatsapp}`;
 }
 
 function encontrarBlocoEndymed(texto = '', contexto = {}) {
@@ -589,6 +591,14 @@ export default async function handler(req, res) {
         }
 
         if (pedirTelefone) {
+          const respostaWhatsapp = respostaWhatsappPorCidade(unidadeCtx.cidade);
+          if (respostaWhatsapp) {
+            return res.status(200).json({
+              resposta: respostaWhatsapp,
+              contexto: { cidade: unidadeCtx.cidade }
+            });
+          }
+
           return res.status(200).json({
             resposta: `📞 ${unidadeCtx.telefone}`,
             contexto: {}
@@ -715,8 +725,9 @@ export default async function handler(req, res) {
       const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[unidadeAgendamento.cidade];
 
       if (linkWhatsapp) {
+        const respostaWhatsapp = respostaWhatsappPorCidade(unidadeAgendamento.cidade);
         return res.status(200).json({
-          resposta: `Perfeito 😊\n\n👉 Para abrir o WhatsApp da unidade, toque no link abaixo:\n\n${linkWhatsapp}\n\nSe quiser, posso te ajudar a entender qual tratamento é melhor antes 😉`,
+          resposta: respostaWhatsapp,
           contexto: { cidade: unidadeAgendamento.cidade }
         });
       }
@@ -757,6 +768,14 @@ export default async function handler(req, res) {
       }
 
       if (intencao === 'telefone') {
+        const respostaWhatsapp = respostaWhatsappPorCidade(unidade.cidade);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: respostaWhatsapp,
+            contexto: { cidade: unidade.cidade }
+          });
+        }
+
         return res.status(200).json({
           resposta: `📞 ${unidade.telefone}`
         });
