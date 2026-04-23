@@ -1529,7 +1529,7 @@ function initLiaV2() {
     return;
   }
 
-  function appendMessageLiaV2(remetente, texto, tipo) {
+  function appendMessage(remetente, texto, tipo) {
     const linha = document.createElement('div');
     linha.style.display = 'flex';
     linha.style.flexDirection = 'column';
@@ -1570,29 +1570,48 @@ function initLiaV2() {
     liaMessages.scrollTop = liaMessages.scrollHeight;
   }
 
+  let ultimaRespostaLia = null;
+
+  async function enviarParaAPI(texto) {
+    try {
+      console.log('enviando para /api/lia-v2', texto);
+      const res = await fetch('/api/lia-v2', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pergunta: texto
+        })
+      });
+
+      const data = await res.json();
+      console.log('resposta da lia', data);
+      const resposta = data.resposta || 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊
+Mas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.';
+      if (resposta === ultimaRespostaLia) {
+        appendMessage('Lia', 'Hm, parece que já te falei sobre isso 😊 Quer perguntar algo diferente ou posso te mostrar as opções da semana?', 'lia');
+      } else {
+        ultimaRespostaLia = resposta;
+        appendMessage('Lia', resposta, 'lia');
+      }
+    } catch (error) {
+      console.error('Erro ao chamar /api/lia-v2:', error);
+      appendMessage('Lia', 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊
+Mas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.', 'lia');
+    }
+  }
+
   async function enviarMensagemLiaV2(e) {
     if (e) e.preventDefault();
 
     const texto = liaInput.value.trim();
     if (!texto) return;
 
-    appendMessageLiaV2('Você', texto, 'user');
+    appendMessage('Você', texto, 'user');
     liaInput.value = '';
 
-    try {
-      const res = await fetch('/api/lia-v2', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pergunta: texto })
-      });
-
-      const data = await res.json();
-      if (data && typeof data.resposta === 'string') {
-        appendMessageLiaV2('Lia', data.resposta, 'lia');
-      }
-    } catch {
-      return;
-    }
+    await enviarParaAPI(texto);
   }
 
   btnAbrirLia.addEventListener('click', function () {

@@ -176,5 +176,17 @@ export const faq = [
       'como faco'
     ],
     resposta: 'Se quiser, posso te explicar direitinho como funciona a oferta da semana 😊 Geralmente é a melhor forma de fazer com valores mais vantajosos.'
+  },
+  {
+    gatilhos: [
+      'fazem botox',
+      'tem botox',
+      'voces fazem botox',
+      'trabalham com botox',
+      'voces tem botox',
+      'voces trabalham com botox',
+      'botox'
+    ],
+    resposta: 'Fazemos sim 😊\nTrabalhamos com aplicação facial com direito a retorno no terço superior completo.\n\nSe quiser, posso te passar os valores da oferta da semana 😉'
   }
 ];

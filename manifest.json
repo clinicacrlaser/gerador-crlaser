@@ -1,8 +1,8 @@
 {
   "name": "CR Laser® - Gerador de Ofertas",
   "short_name": "CR Laser®",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "https://gerador-crlaser-tvvp-jfa0irxz0-clinicacrlasers-projects.vercel.app/",
+  "scope": "https://gerador-crlaser-tvvp-jfa0irxz0-clinicacrlasers-projects.vercel.app/",
   "display": "standalone",
   "background_color": "#070B14",
   "theme_color": "#18C7D1",

@@ -65,6 +65,48 @@ function identificarIntencaoOperacional(texto) {
   return null;
 }
 
+function ehSaudacao(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'oi',
+    'ola',
+    'olá',
+    'bom dia',
+    'boa tarde',
+    'boa noite',
+    'tudo bem',
+    'oii',
+    'opa'
+  ].some((s) => t === normalizeText(s));
+}
+
+function respostaSaudacao(texto = '') {
+  const t = normalizeText(texto);
+
+  if (t === normalizeText('bom dia')) {
+    return 'Bom dia 😊\nComo posso te ajudar hoje?';
+  }
+
+  if (t === normalizeText('boa tarde')) {
+    return 'Boa tarde 😊\nComo posso te ajudar hoje?';
+  }
+
+  if (t === normalizeText('boa noite')) {
+    return 'Boa noite 😊\nComo posso te ajudar hoje?';
+  }
+
+  if (t === normalizeText('tudo bem')) {
+    return 'Tudo bem 😊\nComo posso te ajudar hoje?';
+  }
+
+  return 'Oi 😊\nMe conta o que está te incomodando que eu te ajudo.';
+}
+
+function detectarConfirmacao(texto = '') {
+  const t = normalizeText(texto);
+  return ['sim', 'ok', 'confirme', 'confirmado', 'certo', 'ta', 'entendi', 'beleza', 'perfeito', 'claro', 'pode ser'].includes(t);
+}
+
 function detectarPreco(texto = '') {
   const t = normalizeText(texto);
   return (
@@ -74,6 +116,84 @@ function detectarPreco(texto = '') {
     t.includes('quanto e') ||
     t.includes('quanto sai')
   );
+}
+
+function tokenize(texto = '') {
+  const stopwords = new Set(['a', 'o', 'as', 'os', 'de', 'do', 'da', 'dos', 'das', 'e', 'em', 'no', 'na', 'nos', 'nas', 'com', 'por', 'para', 'que', 'qual', 'quais']);
+  return normalizeText(texto)
+    .split(' ')
+    .filter((p) => p.length >= 3 && !stopwords.has(p));
+}
+
+function levenshteinDistance(a = '', b = '') {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+
+  const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+
+  for (let i = 0; i <= a.length; i += 1) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j += 1) matrix[0][j] = j;
+
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const custo = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + custo
+      );
+    }
+  }
+
+  return matrix[a.length][b.length];
+}
+
+function palavrasParecidas(a = '', b = '') {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.length >= 4 && b.length >= 4 && a.slice(0, 3) === b.slice(0, 3)) return true;
+
+  const maxLen = Math.max(a.length, b.length);
+  const dist = levenshteinDistance(a, b);
+  const tolerancia = maxLen <= 5 ? 2 : 2;
+
+  return dist <= tolerancia;
+}
+
+function scorePerguntaVsGatilho(pergunta, gatilho) {
+  const perguntaPalavras = tokenize(pergunta);
+  const gatilhoPalavras = tokenize(gatilho);
+  if (!perguntaPalavras.length || !gatilhoPalavras.length) return 0;
+
+  const keywordsCentrais = new Set(['botox', 'marca', 'toxina', 'durabilidade', 'pontos', 'preenchimento', 'melasma', 'lavieen', 'ultraformer', 'axilar']);
+
+  let exatas = 0;
+  let aproximadas = 0;
+  let centrais = 0;
+
+  for (const gp of gatilhoPalavras) {
+    if (perguntaPalavras.includes(gp)) {
+      exatas += 1;
+      if (keywordsCentrais.has(gp)) centrais += 1;
+      continue;
+    }
+
+    const temParecida = perguntaPalavras.some((pp) => palavrasParecidas(pp, gp));
+    if (temParecida) {
+      aproximadas += 1;
+      if (keywordsCentrais.has(gp)) centrais += 1;
+    }
+  }
+
+  const total = gatilhoPalavras.length;
+  const scoreExato = exatas / total;
+  const scoreAprox = aproximadas / total;
+  const scoreCoberturaPergunta = (exatas + aproximadas) / Math.max(perguntaPalavras.length, 1);
+  const temCentral = centrais >= 1 ? 1 : 0;
+  const temCentralForte = centrais >= 2 ? 1 : 0;
+
+  return (scoreExato * 0.45) + (scoreAprox * 0.2) + (scoreCoberturaPergunta * 0.2) + (temCentral * 0.1) + (temCentralForte * 0.05);
 }
 
 function encontrarCorrecao(texto = '') {
@@ -98,7 +218,71 @@ function encontrarCorrecao(texto = '') {
 
 function encontrarFaq(texto = '') {
   const textoNormalizado = normalizeText(texto);
-  return faq.find((item) => Array.isArray(item.gatilhos) && item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))) || null;
+  const palavrasPergunta = tokenize(textoNormalizado);
+  const perguntaCurta = palavrasPergunta.length <= 1;
+
+  // Etapa 1: correspondencia exata por includes (prioriza gatilhos especificos).
+  const matchExato = faq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((g) => {
+      const gNorm = normalizeText(g);
+      const palavrasGatilho = tokenize(gNorm);
+      const gatilhoCurto = palavrasGatilho.length <= 1;
+      if (!perguntaCurta && gatilhoCurto) return false;
+      return textoNormalizado.includes(gNorm);
+    })
+  );
+  if (matchExato) return matchExato;
+
+  // Para perguntas muito curtas, aceita gatilho curto exato (ex.: "botox").
+  if (perguntaCurta) {
+    const matchCurto = faq.find((item) =>
+      Array.isArray(item.gatilhos) &&
+      item.gatilhos.some((g) => {
+        const gNorm = normalizeText(g);
+        return gNorm && textoNormalizado.includes(gNorm);
+      })
+    );
+    if (matchCurto) return matchCurto;
+  }
+
+  // Etapa 2: correspondencia por palavras-chave.
+  let matchPalavraChave = null;
+  let melhorScorePalavra = 0;
+  for (const item of faq) {
+    if (!Array.isArray(item.gatilhos)) continue;
+    for (const g of item.gatilhos) {
+      const palavrasGatilho = tokenize(g);
+      if (!palavrasGatilho.length) continue;
+      if (!perguntaCurta && palavrasGatilho.length <= 1) continue;
+      const intersecao = palavrasGatilho.filter((pg) => palavrasPergunta.includes(pg)).length;
+      const score = intersecao / palavrasGatilho.length;
+      const passouMinimo = intersecao >= Math.min(2, palavrasGatilho.length);
+      if (passouMinimo && score > melhorScorePalavra) {
+        melhorScorePalavra = score;
+        matchPalavraChave = item;
+      }
+    }
+  }
+  if (matchPalavraChave) return matchPalavraChave;
+
+  // Etapa 3: correspondencia aproximada com score minimo.
+  let melhorItem = null;
+  let melhorScore = 0;
+
+  for (const item of faq) {
+    if (!Array.isArray(item.gatilhos)) continue;
+    for (const gatilho of item.gatilhos) {
+      if (!perguntaCurta && tokenize(gatilho).length <= 1) continue;
+      const score = scorePerguntaVsGatilho(textoNormalizado, gatilho);
+      if (score > melhorScore) {
+        melhorScore = score;
+        melhorItem = item;
+      }
+    }
+  }
+
+  return melhorScore >= 0.62 ? melhorItem : null;
 }
 
 function encontrarSugestao(texto = '') {
@@ -113,9 +297,24 @@ export default async function handler(req, res) {
 
   try {
     const pergunta = (req.body?.pergunta || '').toString();
+    console.log('PERGUNTA RECEBIDA:', pergunta);
+    console.log('TEXTO NORMALIZADO:', normalizeText(pergunta));
+
+    if (!normalizeText(pergunta)) {
+      console.log('CAIU NO FALLBACK');
+      return res.status(200).json({
+        resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
+      });
+    }
 
     if (normalizeText(pergunta).startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    console.log('VERIFICANDO SAUDACAO');
+    if (ehSaudacao(pergunta)) {
+      console.log('CAIU NA SAUDACAO');
+      return res.status(200).json({ resposta: respostaSaudacao(pergunta) });
     }
 
     if (detectarPreco(pergunta)) {
@@ -135,7 +334,9 @@ export default async function handler(req, res) {
       }
 
       if (intencao === 'telefone') {
-        return res.status(200).json({ resposta: unidade.telefone });
+        return res.status(200).json({
+          resposta: `O telefone da ${unidade.nomeCompleto} é:\n${unidade.telefone}`
+        });
       }
 
       if (intencao === 'endereco') {
@@ -144,9 +345,12 @@ export default async function handler(req, res) {
         });
       }
 
-      return res.status(200).json({ resposta: unidade.mapa });
+      return res.status(200).json({
+        resposta: `Segue o mapa da ${unidade.nomeCompleto}:\n${unidade.mapa}`
+      });
     }
 
+    console.log('CAIU NA BASE');
     const correcao = encontrarCorrecao(pergunta);
     if (correcao) {
       return res.status(200).json({ resposta: correcao });
@@ -162,12 +366,20 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: itemSugestao.resposta });
     }
 
+    if (detectarConfirmacao(pergunta)) {
+      return res.status(200).json({
+        resposta: 'Perfeito 😊\nVocê quer saber sobre algum tratamento específico ou está buscando melhorar algo no rosto ou corpo?'
+      });
+    }
+
+    console.log('CAIU NO FALLBACK');
     return res.status(200).json({
-      resposta: 'Posso confirmar essa informação com a equipe pra você 😊'
+      resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
     });
   } catch {
+    console.log('CAIU NO FALLBACK');
     return res.status(200).json({
-      resposta: 'Posso confirmar essa informação com a equipe pra você 😊'
+      resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
     });
   }
 }
