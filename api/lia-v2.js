@@ -369,6 +369,18 @@ export default async function handler(req, res) {
     }
 
     // Continuação de contexto — deve vir antes de todas as outras regras
+    
+    // Se está esperando apenas a resposta de cidade, enviar dados direto
+    if (contexto.intencao === 'aguardando_apenas_cidade') {
+      const cidadeNoMsg = unidadeDetectada ? unidadeDetectada.cidade : null;
+      if (cidadeNoMsg && unidadeDetectada) {
+        return res.status(200).json({
+          resposta: `📍 ${unidadeDetectada.nomeCompleto}\n\n${unidadeDetectada.endereco}\n\n📞 ${unidadeDetectada.telefone}`,
+          contexto: {}
+        });
+      }
+    }
+
     if (contexto.intencao === 'aguardando_endereco_ou_telefone' && contexto.cidade) {
       const unidadeCtx = unidades.find((u) => u.cidade === contexto.cidade);
       if (unidadeCtx) {
@@ -426,7 +438,10 @@ export default async function handler(req, res) {
 
     if (intencao === 'endereco' || intencao === 'telefone' || intencao === 'mapa') {
       if (!unidade) {
-        return res.status(200).json({ resposta: RESPOSTA_CIDADE });
+        return res.status(200).json({ 
+          resposta: RESPOSTA_CIDADE,
+          contexto: { intencao: 'aguardando_apenas_cidade' }
+        });
       }
 
       if (intencao === 'endereco') {
