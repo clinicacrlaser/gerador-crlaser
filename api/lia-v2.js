@@ -54,10 +54,11 @@ function identificarCidade(texto = '') {
   }
 
   // Fuzzy: compare each word of the message against each city-name word
-  const palavrasTexto = textoNormalizado.split(' ').filter((p) => p.length >= 3);
+  // Min length 4 to avoid false positives with 3-char words (e.g. "faz" ~ "sao")
+  const palavrasTexto = textoNormalizado.split(' ').filter((p) => p.length >= 4);
   for (const unidade of unidades) {
     for (const nome of unidade.nomes) {
-      const palavrasNome = normalizeText(nome).split(' ').filter((p) => p.length >= 3);
+      const palavrasNome = normalizeText(nome).split(' ').filter((p) => p.length >= 4);
       for (const pn of palavrasNome) {
         if (palavrasTexto.some((pt) => palavrasParecidas(pt, pn))) {
           return unidade;
@@ -195,8 +196,8 @@ function detectarIntencaoAgendamento(texto = '') {
     t.includes('agenda')
   ) return true;
 
-  const palavrasFuzzy = t.split(' ').filter((p) => p.length >= 4);
-  return palavrasFuzzy.some((p) => palavrasParecidas(p, 'agendar') || palavrasParecidas(p, 'marcar') || palavrasParecidas(p, 'agenda'));
+  const palavrasFuzzy = t.split(' ').filter((p) => p.length >= 5);
+  return palavrasFuzzy.some((p) => palavrasParecidas(p, 'agendar') || palavrasParecidas(p, 'agenda'));
 }
 
 function tokenize(texto = '') {
