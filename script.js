@@ -1517,10 +1517,104 @@ function qaCopiarResposta() {
   }
 }
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .then(() => console.log("SW registrado"))
-      .catch(err => console.log("Erro SW:", err));
+function initLiaV2() {
+  const btnAbrirLia = document.getElementById('btnAbrirLia');
+  const btnFecharLia = document.getElementById('btnFecharLia');
+  const liaChat = document.getElementById('liaChat');
+  const liaMessages = document.getElementById('liaMessages');
+  const liaInput = document.getElementById('liaInput');
+  const btnEnviarLia = document.getElementById('btnEnviarLia');
+
+  if (!btnAbrirLia || !btnFecharLia || !liaChat || !liaMessages || !liaInput || !btnEnviarLia) {
+    return;
+  }
+
+  function appendMessageLiaV2(remetente, texto, tipo) {
+    const linha = document.createElement('div');
+    linha.style.display = 'flex';
+    linha.style.flexDirection = 'column';
+    linha.style.marginBottom = '12px';
+    linha.style.alignItems = tipo === 'user' ? 'flex-end' : 'flex-start';
+
+    const label = document.createElement('div');
+    label.textContent = remetente;
+    label.style.fontSize = '12px';
+    label.style.fontWeight = 'bold';
+    label.style.marginBottom = '4px';
+    label.style.color = tipo === 'user' ? '#18C7D1' : '#7dd3fc';
+
+    const bolha = document.createElement('div');
+    bolha.style.maxWidth = '85%';
+    bolha.style.padding = '10px 12px';
+    bolha.style.borderRadius = '14px';
+    bolha.style.lineHeight = '1.5';
+    bolha.style.fontSize = '14px';
+    bolha.style.whiteSpace = 'pre-wrap';
+    bolha.style.wordBreak = 'break-word';
+
+    if (tipo === 'user') {
+      bolha.style.background = 'rgba(24,199,209,0.12)';
+      bolha.style.border = '1px solid rgba(24,199,209,0.30)';
+      bolha.style.color = '#ffffff';
+    } else {
+      bolha.style.background = 'rgba(255,255,255,0.05)';
+      bolha.style.border = '1px solid rgba(255,255,255,0.10)';
+      bolha.style.color = '#ffffff';
+    }
+
+    bolha.textContent = texto;
+
+    linha.appendChild(label);
+    linha.appendChild(bolha);
+    liaMessages.appendChild(linha);
+    liaMessages.scrollTop = liaMessages.scrollHeight;
+  }
+
+  async function enviarMensagemLiaV2(e) {
+    if (e) e.preventDefault();
+
+    const texto = liaInput.value.trim();
+    if (!texto) return;
+
+    appendMessageLiaV2('Você', texto, 'user');
+    liaInput.value = '';
+
+    try {
+      const res = await fetch('/api/lia-v2', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pergunta: texto })
+      });
+
+      const data = await res.json();
+      if (data && typeof data.resposta === 'string') {
+        appendMessageLiaV2('Lia', data.resposta, 'lia');
+      }
+    } catch {
+      return;
+    }
+  }
+
+  btnAbrirLia.addEventListener('click', function () {
+    liaChat.style.display = 'block';
   });
+
+  btnFecharLia.addEventListener('click', function () {
+    liaChat.style.display = 'none';
+  });
+
+  btnEnviarLia.onclick = enviarMensagemLiaV2;
+
+  liaInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      enviarMensagemLiaV2();
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLiaV2);
+} else {
+  initLiaV2();
 }
