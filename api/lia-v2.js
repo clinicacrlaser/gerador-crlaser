@@ -4,7 +4,7 @@ import { faq } from '../data/faq-v2.js';
 import { sugestoes } from '../data/sugestoes-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
-const RESPOSTA_CIDADE = 'Me fala qual cidade você deseja 😊 Temos Brasília, Campinas, Goiânia, Palmas e São Paulo.';
+const RESPOSTA_CIDADE = 'Claro 😊\nMe fala qual cidade você está que te envio o endereço da unidade mais próxima.';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 
 function normalizeText(texto = '') {
@@ -39,7 +39,12 @@ function identificarIntencaoOperacional(texto) {
     t.includes('onde fica') ||
     t.includes('onde e') ||
     t.includes('localizacao') ||
-    t.includes('localizacao da clinica')
+    t.includes('localizacao da clinica') ||
+    t.includes('unidade') ||
+    t.includes('tem em') ||
+    t.includes('tem na') ||
+    t.includes('funciona em') ||
+    t.includes('fica em')
   ) return 'endereco';
 
   if (
@@ -345,20 +350,8 @@ export default async function handler(req, res) {
         return res.status(200).json({ resposta: RESPOSTA_CIDADE });
       }
 
-      if (intencao === 'telefone') {
-        return res.status(200).json({
-          resposta: `O telefone da ${unidade.nomeCompleto} é:\n${unidade.telefone}`
-        });
-      }
-
-      if (intencao === 'endereco') {
-        return res.status(200).json({
-          resposta: `${unidade.nomeCompleto} fica em:\n${unidade.endereco}`
-        });
-      }
-
       return res.status(200).json({
-        resposta: `Segue o mapa da ${unidade.nomeCompleto}:\n${unidade.mapa}`
+        resposta: '📍 ' + unidade.nomeCompleto + '\n\n' + unidade.endereco + '\n\n📍 Mapa:\n' + unidade.mapa + '\n\n📞 ' + unidade.telefone
       });
     }
 
