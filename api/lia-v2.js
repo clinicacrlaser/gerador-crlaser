@@ -419,6 +419,19 @@ export default async function handler(req, res) {
       }
     }
 
+    // Continuação de contexto — cliente fez follow-up após resposta sobre procedimento/oferta
+    if (contexto.intencao === 'aguardando_interesse') {
+      const ambos = msg.includes('os dois') || msg.includes('ambos') || msg.includes('os 2');
+      const quer = ['quero', 'sim', 'ok', 'claro', 'pode ser', 'manda', 'pode mandar'].includes(msg) || ambos;
+      if (quer) {
+        const sufixo = contexto.procedimentoAtual ? ` sobre ${contexto.procedimentoAtual}` : '';
+        return res.status(200).json({
+          resposta: `Perfeito 😊\n\nMe fala qual é a sua principal preocupação${sufixo} que já te preparo as melhores opções da semana 😉`,
+          contexto: contexto
+        });
+      }
+    }
+
     console.log('VERIFICANDO SAUDACAO');
     if (ehSaudacao(pergunta)) {
       console.log('CAIU NA SAUDACAO');
@@ -473,17 +486,30 @@ export default async function handler(req, res) {
     console.log('CAIU NA BASE');
     const correcao = encontrarCorrecao(pergunta);
     if (correcao) {
-      return res.status(200).json({ resposta: correcao });
+      return res.status(200).json({
+        resposta: correcao,
+        contexto: { intencao: 'aguardando_interesse' }
+      });
     }
 
     const itemFaq = encontrarFaq(pergunta);
     if (itemFaq) {
-      return res.status(200).json({ resposta: itemFaq.resposta });
+      const rawGatilho = Array.isArray(itemFaq.gatilhos) ? itemFaq.gatilhos[0] : null;
+      const procAtual = rawGatilho && rawGatilho.split(' ').length <= 2 ? rawGatilho : null;
+      return res.status(200).json({
+        resposta: itemFaq.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: procAtual }
+      });
     }
 
     const itemSugestao = encontrarSugestao(pergunta);
     if (itemSugestao) {
-      return res.status(200).json({ resposta: itemSugestao.resposta });
+      const rawSug = Array.isArray(itemSugestao.gatilhos) ? itemSugestao.gatilhos[0] : null;
+      const procSug = rawSug && rawSug.split(' ').length <= 2 ? rawSug : null;
+      return res.status(200).json({
+        resposta: itemSugestao.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: procSug }
+      });
     }
 
     if (detectarIntencaoPositiva(pergunta)) {
