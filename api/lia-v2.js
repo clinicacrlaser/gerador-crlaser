@@ -7,6 +7,13 @@ const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar dire
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Claro 😊\n\nO agendamento é feito direto pelo WhatsApp da unidade.\n\nMe fala qual cidade você está que já te envio o contato certinho 😉';
+const LINKS_WHATSAPP_UNIDADE = {
+  campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
+  brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
+  goiania: 'https://wa.me/5562985499102?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
+  palmas: 'https://wa.me/5563981226319?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
+  saopaulo: 'https://wa.me/5511967292039?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es'
+};
 
 function normalizeText(texto = '') {
   return texto
@@ -474,6 +481,15 @@ export default async function handler(req, res) {
         return res.status(200).json({
           resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
           contexto: { intencao: 'aguardando_apenas_cidade' }
+        });
+      }
+
+      const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[unidadeAgendamento.cidade];
+
+      if (linkWhatsapp) {
+        return res.status(200).json({
+          resposta: `Perfeito 😊\n\nVocê pode falar direto com a unidade pelo WhatsApp:\n\n👉 ${linkWhatsapp}\n\nSe quiser, posso te ajudar a entender qual tratamento é melhor antes 😉`,
+          contexto: { cidade: unidadeAgendamento.cidade }
         });
       }
 
