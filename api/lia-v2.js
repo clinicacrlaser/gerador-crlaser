@@ -25,6 +25,12 @@ function expandirAbreviacoes(texto = '') {
     .replace(/\bql\b/gi, 'qual')
     .replace(/\bpq\b/gi, 'porque')
     .replace(/\bp\.q\./gi, 'porque')
+    // Common light typos that appear in real chats
+    .replace(/\bmarda\b/gi, 'marca')
+    .replace(/\bender[cç]o\b/gi, 'endereco')
+    .replace(/\bgoinia\b/gi, 'goiania')
+    .replace(/\bestu\b/gi, 'estou')
+    .replace(/\bbotoxx\b/gi, 'botox')
     .toLowerCase()
     .trim();
 }
@@ -398,7 +404,7 @@ export default async function handler(req, res) {
 
         if (pedirEndereco) {
           return res.status(200).json({
-            resposta: `📍 ${unidadeCtx.nomeCompleto}\n\n${unidadeCtx.endereco}\n\n📞 ${unidadeCtx.telefone}`,
+            resposta: `📍 ${unidadeCtx.nomeCompleto}\n\n${unidadeCtx.endereco}`,
             contexto: {}
           });
         }
