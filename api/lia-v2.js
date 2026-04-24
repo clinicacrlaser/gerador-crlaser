@@ -888,6 +888,54 @@ function detectarFormaPagamento(texto = '') {
   return null;
 }
 
+// ════ DETECÇÃO DE CONFIRMAÇÃO DE PAGAMENTO ════
+function detectarConfirmacaoPagamento(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    t.includes('ja paguei') ||
+    t.includes('já paguei') ||
+    t.includes('fiz o pix') ||
+    t.includes('fiz pix') ||
+    t.includes('pagamento feito') ||
+    t.includes('comprovante enviado') ||
+    t.includes('paguei') ||
+    t === 'ja paguei' ||
+    t === 'já paguei' ||
+    t === 'fiz o pix' ||
+    t === 'fiz pix' ||
+    t === 'pagamento feito' ||
+    t === 'comprovante enviado' ||
+    t === 'paguei'
+  );
+}
+
+// ════ DETECÇÃO DE MUDANÇA DE FORMA DE PAGAMENTO ════
+function detectarMudancaFormaPagamento(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    t.includes('quero cartao') ||
+    t.includes('quero cartão') ||
+    t.includes('prefiro cartao') ||
+    t.includes('prefiro cartão') ||
+    t.includes('mudar forma') ||
+    t.includes('trocar forma') ||
+    t.includes('trocar pagamento') ||
+    t.includes('mudar pagamento') ||
+    t.includes('prefiro pix') ||
+    t.includes('quero pix') ||
+    t === 'quero cartao' ||
+    t === 'quero cartão' ||
+    t === 'prefiro cartao' ||
+    t === 'prefiro cartão' ||
+    t === 'mudar forma' ||
+    t === 'trocar forma' ||
+    t === 'trocar pagamento' ||
+    t === 'mudar pagamento' ||
+    t === 'prefiro pix' ||
+    t === 'quero pix'
+  );
+}
+
 function gerarRespostaPix(cidade = '') {
   const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
   const pix = PIX_POR_CIDADE[cidadeNorm];
@@ -1683,20 +1731,100 @@ export default async function handler(req, res) {
       if (formaPagamento === 'pix') {
         return res.status(200).json({
           resposta: gerarRespostaPix(cidadeCompra),
-          contexto: { cidade: cidadeCompra, intencao: 'compra_finalizada_sistema', intencaoCompra: 'sistema', formaPagamento: 'pix', cidadeCompra }
+          contexto: { 
+            cidade: cidadeCompra, 
+            intencao: 'fluxo_pagamento_aguardando_confirmacao',
+            intencaoCompra: 'sistema', 
+            formaPagamento: 'pix', 
+            cidadeCompra 
+          }
         });
       }
 
       if (formaPagamento === 'cartao') {
         return res.status(200).json({
           resposta: gerarRespostaCartao(cidadeCompra),
-          contexto: { cidade: cidadeCompra, intencao: 'compra_finalizada_sistema', intencaoCompra: 'sistema', formaPagamento: 'cartao', cidadeCompra }
+          contexto: { 
+            cidade: cidadeCompra, 
+            intencao: 'fluxo_pagamento_aguardando_confirmacao',
+            intencaoCompra: 'sistema', 
+            formaPagamento: 'cartao', 
+            cidadeCompra 
+          }
         });
       }
 
       // Se não entendeu a forma de pagamento, repetir
       return res.status(200).json({
         resposta: 'Desculpa, não entendi 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão',
+        contexto: contexto
+      });
+    }
+
+    // ════ FLUXO DE PAGAMENTO - AGUARDANDO CONFIRMAÇÃO OU MUDANÇA ════
+    if (contexto.intencao === 'fluxo_pagamento_aguardando_confirmacao') {
+      // Verificar se cliente confirmou o pagamento
+      if (detectarConfirmacaoPagamento(pergunta)) {
+        return res.status(200).json({
+          resposta: 'Perfeito 😊\n\nRecebemos a confirmação! Você irá receber um email com os detalhes da sua compra.\n\nMuitíssimo obrigado! Qualquer dúvida, estamos aqui 🎉',
+          contexto: { 
+            ...contexto, 
+            intencao: 'compra_finalizada_sistema',
+            statusPagamento: 'confirmado'
+          }
+        });
+      }
+
+      // Verificar se cliente quer mudar de forma de pagamento
+      if (detectarMudancaFormaPagamento(pergunta)) {
+        const formaPagamentoAtual = contexto.formaPagamento || 'desconhecida';
+        const novaForma = normalizeText(pergunta).includes('cartao') || normalizeText(pergunta).includes('cartão') ? 'cartão' : 'pix';
+        
+        // Se solicitou cartão mas está em pix, oferecer cartão
+        if (novaForma === 'cartão' && formaPagamentoAtual === 'pix') {
+          return res.status(200).json({
+            resposta: 'Sem problema 😊\n\nVou te passar o link do cartão da ' + contexto.cidadeCompra + '.',
+            contexto: { 
+              ...contexto, 
+              intencao: 'fluxo_compra_aguardando_pagamento'
+            }
+          });
+        }
+        
+        // Se solicitou pix mas está em cartão, oferecer pix
+        if (novaForma === 'pix' && formaPagamentoAtual === 'cartao') {
+          return res.status(200).json({
+            resposta: 'Sem problema 😊\n\nVou te passar a chave pix da ' + contexto.cidadeCompra + '.',
+            contexto: { 
+              ...contexto, 
+              intencao: 'fluxo_compra_aguardando_pagamento'
+            }
+          });
+        }
+      }
+
+      // Se houver procedimento mencionado, oferecer link
+      const procedimentoDetectado = detectarProcedimento(pergunta);
+      if (procedimentoDetectado && contexto.cidadeCompra) {
+        const cidadesComLinks = ['brasilia', 'campinas', 'goiania', 'palmas', 'saopaulo'];
+        if (cidadesComLinks.includes(normalizeText(contexto.cidadeCompra).replace(/\s+/g, ''))) {
+          const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, contexto.cidadeCompra);
+          if (respostaOferta) {
+            return res.status(200).json({
+              resposta: respostaOferta,
+              contexto: { 
+                ...contexto, 
+                intencao: 'compra_finalizada_sistema',
+                procedimento: procedimentoDetectado
+              }
+            });
+          }
+        }
+      }
+
+      // Se nenhuma das opções acima, oferecer os próximos passos
+      return res.status(200).json({
+        resposta: 'Após o pagamento, é só me avisar que registramos e você pode agendar com a equipe 😊',
         contexto: contexto
       });
     }
