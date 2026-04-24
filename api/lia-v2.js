@@ -535,6 +535,23 @@ function detectarConfirmacao(texto = '') {
   return ['sim', 'ok', 'confirme', 'confirmado', 'certo', 'ta', 'entendi', 'beleza', 'perfeito', 'claro', 'pode ser'].includes(t);
 }
 
+function ehRespostaCurta(texto = '') {
+  const t = normalizeText(texto);
+  return ['ok', 'sim', 'certo', 'pode', 'entendi', 'beleza', 'ta', 'tá', 'perfeito', 'claro'].includes(t);
+}
+
+function interpretarFormaPagamentoPorRespostaCurta(texto = '') {
+  const t = normalizeText(texto);
+  if (['1', 'pix'].includes(t)) return 'pix';
+  if (['2', 'cartao', 'cartão'].includes(t)) return 'cartao';
+  return null;
+}
+
+function respostaCurtaAposLink(texto = '') {
+  const t = normalizeText(texto);
+  return ['ok', 'certo', 'entendi', 'beleza', 'sim', 'pode'].includes(t);
+}
+
 function detectarIntencaoPositiva(texto = '') {
   const t = normalizeText(texto);
   return [
@@ -2065,7 +2082,9 @@ export default async function handler(req, res) {
       const cidadeCompra = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
       if (!cidadeCompra) {
         return res.status(200).json({
-          resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          resposta: ehRespostaCurta(pergunta)
+            ? RESPOSTA_QUAL_UNIDADE
+            : 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
           contexto: { ...contexto, aguardandoComprovante: true, intencao: 'aguardando_cidade_comprovante' }
         });
       }
@@ -2254,7 +2273,7 @@ export default async function handler(req, res) {
 
     // ════ FLUXO DE COMPRA - SISTEMA AGUARDANDO FORMA DE PAGAMENTO ════
     if (contexto.intencao === 'fluxo_compra_aguardando_pagamento') {
-      const formaPagamento = detectarFormaPagamento(pergunta);
+      const formaPagamento = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
       const cidadeCompra = contexto.cidadeCompra || cidadeDetectada;
 
       if (!cidadeCompra) {
@@ -2509,6 +2528,13 @@ export default async function handler(req, res) {
 
     // ════ FLUXO DE PAGAMENTO - AGUARDANDO CONFIRMAÇÃO OU MUDANÇA ════
     if (contexto.intencao === 'fluxo_pagamento_aguardando_confirmacao') {
+      if (respostaCurtaAposLink(pergunta)) {
+        return res.status(200).json({
+          resposta: 'Perfeito 😊\n\nDepois do pagamento, envie o comprovante para o WhatsApp da unidade para solicitar o agendamento.',
+          contexto: { ...contexto, aguardandoComprovante: true, status_compra: 'em andamento' }
+        });
+      }
+
       // Verificar se cliente confirmou o pagamento
       if (detectarConfirmacaoPagamento(pergunta)) {
         return res.status(200).json({
@@ -2691,6 +2717,13 @@ export default async function handler(req, res) {
           contexto: {}
         });
       }
+
+      if (ehRespostaCurta(pergunta)) {
+        return res.status(200).json({
+          resposta: RESPOSTA_QUAL_UNIDADE,
+          contexto
+        });
+      }
     }
 
     if (contexto.intencao === 'aguardando_cidade_whatsapp') {
@@ -2709,6 +2742,13 @@ export default async function handler(req, res) {
             contexto: { cidade: cidadeNoMsg, cidadeAtual: cidadeNoMsg }
           });
         }
+      }
+
+      if (ehRespostaCurta(pergunta)) {
+        return res.status(200).json({
+          resposta: RESPOSTA_QUAL_UNIDADE,
+          contexto
+        });
       }
 
       return res.status(200).json({
