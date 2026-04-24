@@ -685,7 +685,28 @@ function gerarRespostaPix(cidade = '') {
     return 'Desculpe, não encontrei a chave Pix desta unidade. Você pode falar direto com a equipe!';
   }
 
-  return `${pix}\n\nApós o pagamento, é só enviar o comprovante para a unidade e solicitar o agendamento 😊`;
+  // Extrair CNPJ da string PIX (está entre os 🔽🔽 e o final)
+  const cnpjMatch = pix.match(/(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/);
+  const cnpj = cnpjMatch ? cnpjMatch[1] : '';
+
+  // Extrair nome da cidade (primeira palavra após "Laser®")
+  const cityNameMatch = pix.match(/Laser®\s+([^:]+)/);
+  const cityName = cityNameMatch ? cityNameMatch[1].trim() : cidade;
+
+  // Botão para copiar Pix
+  const botaoCopiar = cnpj ? `<button onclick="navigator.clipboard.writeText('${cnpj}').then(() => alert('Pix copiado!')).catch(e => console.error('Erro ao copiar:', e))" style="display:inline-block;margin-top:12px;padding:10px 20px;background:#00c2ff;color:#ffffff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;">📋 Copiar Pix</button>` : '';
+
+  return `Perfeito 😊
+
+Segue o Pix da unidade de ${cityName}:
+
+${cnpj}
+
+${botaoCopiar}
+
+Após o pagamento, envie o comprovante para a unidade e solicite o agendamento.
+
+📍 Importante: confira se os dados pertencem à CR Laser® antes de concluir o pagamento.`;
 }
 
 function gerarRespostaCartao(cidade = '') {
@@ -1272,6 +1293,14 @@ export default async function handler(req, res) {
 
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    // ════ SE COMPRA JÁ FOI FINALIZADA, NÃO CONTINUAR O FLUXO ════
+    if (contexto.intencao === 'compra_finalizada_sistema' || contexto.intencao === 'compra_finalizada_equipe') {
+      return res.status(200).json({
+        resposta: 'Sua compra já foi processada! 🎉\n\nQualquer dúvida, fale direto com a equipe de atendimento. Estamos sempre prontos para ajudar! 😊',
+        contexto: contexto
+      });
     }
 
     // ════ FLUXO DE COMPRA - DETECÇÃO DE INTENÇÃO ════
