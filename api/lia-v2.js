@@ -569,10 +569,21 @@ function detectarPreco(texto = '') {
   return (
     t.includes('preco') ||
     t.includes('valor') ||
+    t.includes('valores') ||
     t.includes('quanto custa') ||
+    t.includes('custa quanto') ||
+    t.includes('orcamento') ||
+    t.includes('promocao') ||
+    t.includes('oferta') ||
     t.includes('quanto e') ||
     t.includes('quanto sai')
   );
+}
+
+function detectarPrecoProcedimento(texto = '') {
+  const temPreco = detectarPreco(texto);
+  const temProcedimento = !!detectarProcedimento(texto) || !!detectarBaseProcedimentoAmbiguo(texto);
+  return temPreco && temProcedimento;
 }
 
 function detectarInteresseFechamento(texto = '') {
@@ -808,6 +819,7 @@ function labelCategoriaProvavel(categoria = 'fallback') {
     humano: 'atendimento humano',
     pos_pagamento: 'pagamento / comprovante',
     localizacao: 'localização',
+    preco_procedimento: 'preço de procedimento',
     compra: 'compra / pagamento',
     procedimento: 'procedimento',
     botox_rugas: 'botox / rugas',
@@ -845,6 +857,15 @@ function classificarIntencaoMensagem(texto = '', contexto = {}) {
 
   if (detectarConfirmacaoPagamento(texto)) {
     return { categoria: 'pos_pagamento' };
+  }
+
+  // Pedido de preco + procedimento deve vir antes de duvida tecnica.
+  if (detectarPrecoProcedimento(texto)) {
+    return { categoria: 'preco_procedimento' };
+  }
+
+  if (detectarPreco(texto)) {
+    return { categoria: 'oferta_preco' };
   }
 
   if (detectarIntencaoCompra(texto) || detectarFormaPagamento(texto) || detectarPreco(texto) || detectarInteresseFechamento(texto)) {
@@ -2048,6 +2069,46 @@ export default async function handler(req, res) {
           contexto: { ...contexto, ...respostaLocalizacao.contexto, tentativas_pergunta: 0 }
         });
       }
+    }
+
+    if (intencaoInterpretada.categoria === 'preco_procedimento') {
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+      const procedimentoPorBase = procedimentoBaseMensagem ? resolverProcedimentoPorBase(procedimentoBaseMensagem, pergunta) : null;
+      const procedimentoAtual = procedimentoDetectadoMensagem || procedimentoPorBase || contexto.procedimento || contexto.procedimento_selecionado || undefined;
+      const respostaPreco = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara ver a condição atual, é melhor gerar direto no sistema.';
+
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: `${respostaPreco}\n\n${RESPOSTA_QUAL_UNIDADE}`,
+          contexto: {
+            ...contexto,
+            intencao: 'fluxo_compra_aguardando_cidade_sistema',
+            procedimento: procedimentoAtual,
+            procedimentoAtual: procedimentoAtual,
+            procedimento_selecionado: procedimentoAtual || contexto.procedimento_selecionado || undefined,
+            procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
+            status_compra: 'em andamento'
+          }
+        });
+      }
+
+      return res.status(200).json({
+        resposta: `${respostaPreco}\n\n${RESPOSTA_FORMA_PAGAMENTO}`,
+        contexto: {
+          ...contexto,
+          cidade: cidadeAtual,
+          cidadeAtual,
+          cidadeCompra: cidadeAtual,
+          intencao: 'fluxo_compra_aguardando_pagamento',
+          intencaoCompra: 'sistema',
+          procedimento: procedimentoAtual,
+          procedimentoAtual: procedimentoAtual,
+          procedimento_selecionado: procedimentoAtual || contexto.procedimento_selecionado || undefined,
+          procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
+          status_compra: 'em andamento'
+        }
+      });
     }
 
     if (contexto.aguardandoComprovante && detectarConfirmacaoPagamento(pergunta)) {
