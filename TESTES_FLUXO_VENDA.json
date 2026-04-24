@@ -1,0 +1,210 @@
+{
+  "testes_fluxo_venda": [
+    {
+      "titulo": "Teste 1: Comprar pelo Sistema (Palmas, Pix)",
+      "passos": [
+        {
+          "passo": 1,
+          "usuario_diz": "quero comprar",
+          "contexto_entrada": {},
+          "resposta_esperada_contem": [
+            "Você pode comprar aqui comigo",
+            "1️⃣ Comprar aqui pelo sistema",
+            "2️⃣ Falar com a equipe"
+          ],
+          "contexto_saida": {
+            "intencao": "fluxo_compra_opcoes"
+          }
+        },
+        {
+          "passo": 2,
+          "usuario_diz": "sistema",
+          "contexto_entrada": {
+            "intencao": "fluxo_compra_opcoes"
+          },
+          "resposta_esperada_contem": [
+            "Qual unidade fica melhor pra você?",
+            "Brasília, Campinas, Goiânia, Palmas ou São Paulo"
+          ],
+          "contexto_saida": {
+            "intencao": "fluxo_compra_aguardando_cidade_sistema",
+            "intencaoCompra": "sistema"
+          }
+        },
+        {
+          "passo": 3,
+          "usuario_diz": "Palmas",
+          "contexto_entrada": {
+            "intencao": "fluxo_compra_aguardando_cidade_sistema",
+            "intencaoCompra": "sistema"
+          },
+          "resposta_esperada_contem": [
+            "Qual será a forma de pagamento?",
+            "1️⃣ Pix",
+            "2️⃣ Cartão"
+          ],
+          "contexto_saida": {
+            "intencao": "fluxo_compra_aguardando_pagamento",
+            "cidadeCompra": "palmas",
+            "intencaoCompra": "sistema"
+          }
+        },
+        {
+          "passo": 4,
+          "usuario_diz": "Pix",
+          "contexto_entrada": {
+            "intencao": "fluxo_compra_aguardando_pagamento",
+            "cidadeCompra": "palmas",
+            "intencaoCompra": "sistema"
+          },
+          "resposta_esperada_contem": [
+            "Chave PIX de Palmas",
+            "INSERIR_PIX_PALMAS",
+            "Após o pagamento, envie o comprovante"
+          ],
+          "contexto_saida": {
+            "intencao": "compra_finalizada_sistema",
+            "formaPagamento": "pix",
+            "cidadeCompra": "palmas"
+          }
+        }
+      ]
+    },
+    {
+      "titulo": "Teste 2: Falar com Equipe (Campinas)",
+      "passos": [
+        {
+          "passo": 1,
+          "usuario_diz": "quero comprar",
+          "contexto_entrada": {},
+          "resposta_esperada_contem": [
+            "Você pode comprar aqui comigo",
+            "1️⃣ Comprar aqui pelo sistema",
+            "2️⃣ Falar com a equipe"
+          ],
+          "contexto_saida": {
+            "intencao": "fluxo_compra_opcoes"
+          }
+        },
+        {
+          "passo": 2,
+          "usuario_diz": "equipe",
+          "contexto_entrada": {
+            "intencao": "fluxo_compra_opcoes"
+          },
+          "resposta_esperada_contem": [
+            "Qual unidade fica melhor pra você?",
+            "Brasília, Campinas, Goiânia, Palmas ou São Paulo"
+          ],
+          "contexto_saida": {
+            "intencao": "fluxo_compra_aguardando_cidade_equipe"
+          }
+        },
+        {
+          "passo": 3,
+          "usuario_diz": "Campinas",
+          "contexto_entrada": {
+            "intencao": "fluxo_compra_aguardando_cidade_equipe"
+          },
+          "resposta_esperada_contem": [
+            "Perfeito 😊",
+            "Vou te direcionar direto para a equipe",
+            "Falar com a equipe no WhatsApp",
+            "equipe de Campinas"
+          ],
+          "contexto_saida": {
+            "intencao": "compra_finalizada_equipe",
+            "intencaoCompra": "equipe",
+            "cidadeCompra": "campinas"
+          }
+        }
+      ]
+    },
+    {
+      "titulo": "Teste 3: Variações de Detecção de Compra",
+      "exemplos_deteccao": [
+        "quero comprar",
+        "quero fechar",
+        "quero aproveitar",
+        "quero pagar",
+        "vou querer",
+        "quero essa oferta"
+      ],
+      "esperado": "Todos devem ativar o fluxo de compra (oferecer equipe/sistema)"
+    },
+    {
+      "titulo": "Teste 4: Variações de Detecção de Opção",
+      "equipe": [
+        "equipe",
+        "unidade",
+        "atendente",
+        "whatsapp",
+        "2",
+        "falar com alguém"
+      ],
+      "sistema": [
+        "sistema",
+        "aqui",
+        "comprar aqui",
+        "pelo sistema",
+        "1"
+      ]
+    },
+    {
+      "titulo": "Teste 5: Variações de Forma de Pagamento",
+      "pix": [
+        "pix",
+        "1"
+      ],
+      "cartao": [
+        "cartão",
+        "cartao",
+        "2"
+      ]
+    },
+    {
+      "titulo": "Teste 6: Tentativa com Cidade Já Conhecida",
+      "descricao": "Se o contexto já tiver cidade, não deve perguntar de novo",
+      "passos": [
+        {
+          "usuario_diz": "quero comprar",
+          "contexto_entrada": {
+            "cidade": "saopaulo"
+          },
+          "resposta_esperada_contem": [
+            "Você pode comprar aqui comigo",
+            "1️⃣ Comprar aqui pelo sistema",
+            "2️⃣ Falar com a equipe"
+          ],
+          "nota": "Cria novo contexto, mas cidade já está no background"
+        }
+      ]
+    }
+  ],
+  "exemplo_requisicao_curl": {
+    "teste_1_passo_1": {
+      "url": "POST /api/lia-v2",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "pergunta": "quero comprar",
+        "contexto": {}
+      }
+    },
+    "teste_1_passo_4": {
+      "url": "POST /api/lia-v2",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "pergunta": "Pix",
+        "contexto": {
+          "intencao": "fluxo_compra_aguardando_pagamento",
+          "cidadeCompra": "palmas",
+          "intencaoCompra": "sistema"
+        }
+      }
+    }
+  }
+}
