@@ -552,6 +552,24 @@ function respostaCurtaAposLink(texto = '') {
   return ['ok', 'certo', 'entendi', 'beleza', 'sim', 'pode'].includes(t);
 }
 
+function detectarPedidoContatoComprovante(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'qual',
+    'onde',
+    'qual whatsapp',
+    'qual contato',
+    'quero sim',
+    'manda',
+    'pode mandar',
+    'me envia'
+  ].includes(t);
+}
+
+function contextoComprovanteAtivo(contexto = {}) {
+  return Boolean(contexto.aguardandoComprovante || contexto.aguardando_comprovante);
+}
+
 function detectarIntencaoPositiva(texto = '') {
   const t = normalizeText(texto);
   return [
@@ -1067,11 +1085,10 @@ function detectarConfirmacaoPagamento(texto = '') {
 
 function gerarRespostaComprovanteUnidade(cidade = '') {
   const cidadeNorm = normalizeText(cidade);
-  const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[cidadeNorm];
   const unidade = unidades.find((u) => u.cidade === cidadeNorm);
   const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
 
-  if (!linkWhatsapp) {
+  if (!unidade) {
     return null;
   }
 
@@ -1081,7 +1098,9 @@ O comprovante deve ser enviado para o WhatsApp da unidade de ${nomeCidade}.
 
 O agendamento também é feito direto por lá.
 
-<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
+📍 ${unidade.nomeCompleto}
+
+📞 ${unidade.telefone}`;
 }
 
 // ════ DETECÇÃO DE MUDANÇA DE FORMA DE PAGAMENTO ════
@@ -2047,6 +2066,39 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
+    if (contextoComprovanteAtivo(contexto) && detectarPedidoContatoComprovante(pergunta)) {
+      const cidadeCompra = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
+
+      if (!cidadeCompra) {
+        return res.status(200).json({
+          resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: {
+            ...contexto,
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante'
+          }
+        });
+      }
+
+      const respostaComprovante = gerarRespostaComprovanteUnidade(cidadeCompra);
+      if (respostaComprovante) {
+        return res.status(200).json({
+          resposta: respostaComprovante,
+          contexto: {
+            ...contexto,
+            cidade: cidadeCompra,
+            cidadeAtual: cidadeCompra,
+            cidadeCompra,
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante',
+            status_compra: 'em andamento'
+          }
+        });
+      }
+    }
+
     // ════ PRIORIDADE ABSOLUTA: Localização/Contato/Telefone SEMPRE acima de pós-pagamento ════
     if (intencaoInterpretada.categoria === 'localizacao') {
       const cidadeParaLocalizar = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
@@ -2111,13 +2163,13 @@ export default async function handler(req, res) {
       });
     }
 
-    if (contexto.aguardandoComprovante && detectarConfirmacaoPagamento(pergunta)) {
+    if (contextoComprovanteAtivo(contexto) && detectarConfirmacaoPagamento(pergunta)) {
       const cidadeCompra = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || cidadeDetectada;
 
       if (!cidadeCompra) {
         return res.status(200).json({
           resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
-          contexto: { ...contexto, aguardandoComprovante: true, intencao: 'aguardando_cidade_comprovante' }
+          contexto: { ...contexto, aguardandoComprovante: true, aguardando_comprovante: true, intencao: 'aguardando_cidade_comprovante' }
         });
       }
 
@@ -2130,10 +2182,11 @@ export default async function handler(req, res) {
             cidade: cidadeCompra,
             cidadeAtual: cidadeCompra,
             cidadeCompra,
-            aguardandoComprovante: false,
-            intencao: 'compra_finalizada_sistema',
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante',
             statusPagamento: 'confirmado',
-            status_compra: 'finalizada'
+            status_compra: 'em andamento'
           }
         });
       }
@@ -2146,7 +2199,7 @@ export default async function handler(req, res) {
           resposta: ehRespostaCurta(pergunta)
             ? RESPOSTA_QUAL_UNIDADE
             : 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
-          contexto: { ...contexto, aguardandoComprovante: true, intencao: 'aguardando_cidade_comprovante' }
+          contexto: { ...contexto, aguardandoComprovante: true, aguardando_comprovante: true, intencao: 'aguardando_cidade_comprovante' }
         });
       }
 
@@ -2159,10 +2212,11 @@ export default async function handler(req, res) {
             cidade: cidadeCompra,
             cidadeAtual: cidadeCompra,
             cidadeCompra,
-            aguardandoComprovante: false,
-            intencao: 'compra_finalizada_sistema',
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante',
             statusPagamento: 'confirmado',
-            status_compra: 'finalizada'
+            status_compra: 'em andamento'
           }
         });
       }
@@ -2297,6 +2351,7 @@ export default async function handler(req, res) {
                 procedimento: procedimentoDetectado,
                 procedimentoAtual: procedimentoDetectado,
                 aguardandoComprovante: true,
+                aguardando_comprovante: true,
                 status_compra: 'em andamento'
               }
             });
@@ -2356,6 +2411,7 @@ export default async function handler(req, res) {
             cidadeCompra,
             procedimentoAtual: contexto.procedimento || contexto.procedimento_selecionado || undefined,
             aguardandoComprovante: true,
+            aguardando_comprovante: true,
             procedimento_selecionado: contexto.procedimento_selecionado || undefined,
             procedimentoBase: contexto.procedimentoBase || undefined,
             status_compra: 'em andamento'
@@ -2439,6 +2495,7 @@ export default async function handler(req, res) {
               procedimento: procedimentoDetectado,
               procedimentoAtual: procedimentoDetectado,
               aguardandoComprovante: true,
+              aguardando_comprovante: true,
               perguntouProcedimentoCartao: false,
               status_compra: 'em andamento'
             }
@@ -2567,6 +2624,7 @@ export default async function handler(req, res) {
             procedimento: procedimentoDetectado,
             procedimentoAtual: procedimentoDetectado,
             aguardandoComprovante: true,
+            aguardando_comprovante: true,
             perguntouProcedimentoCartao: false,
             status_compra: 'em andamento'
           }
@@ -2590,9 +2648,19 @@ export default async function handler(req, res) {
     // ════ FLUXO DE PAGAMENTO - AGUARDANDO CONFIRMAÇÃO OU MUDANÇA ════
     if (contexto.intencao === 'fluxo_pagamento_aguardando_confirmacao') {
       if (respostaCurtaAposLink(pergunta)) {
+        const cidadeCompra = contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || cidadeDetectada;
         return res.status(200).json({
           resposta: 'Perfeito 😊\n\nDepois do pagamento, envie o comprovante para o WhatsApp da unidade para solicitar o agendamento.',
-          contexto: { ...contexto, aguardandoComprovante: true, status_compra: 'em andamento' }
+          contexto: {
+            ...contexto,
+            cidade: cidadeCompra || contexto.cidade,
+            cidadeAtual: cidadeCompra || contexto.cidadeAtual,
+            cidadeCompra: cidadeCompra || contexto.cidadeCompra,
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante',
+            status_compra: 'em andamento'
+          }
         });
       }
 
@@ -2686,6 +2754,7 @@ export default async function handler(req, res) {
                 procedimentoAtual: procedimentoDetectado,
                 cidadeAtual: contexto.cidadeCompra,
                 aguardandoComprovante: true,
+                aguardando_comprovante: true,
                 status_compra: 'em andamento'
               }
             });
@@ -2703,8 +2772,15 @@ export default async function handler(req, res) {
 
       // Se nenhuma das opções acima, oferecer os próximos passos
       return res.status(200).json({
-        resposta: 'Se quiser, posso te orientar sobre o envio do comprovante para a unidade 😊',
-        contexto: { ...contexto, aguardandoComprovante: true, status_compra: 'em andamento' }
+        resposta: 'Perfeito 😊\n\nDepois do pagamento, envie o comprovante para o WhatsApp da unidade para solicitar o agendamento.',
+        contexto: {
+          ...contexto,
+          cidadeAtual: contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || cidadeDetectada,
+          aguardandoComprovante: true,
+          aguardando_comprovante: true,
+          intencao: 'aguardando_cidade_comprovante',
+          status_compra: 'em andamento'
+        }
       });
     }
 
