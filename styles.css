@@ -730,6 +730,53 @@ body {
 .suggestion-container {
   padding: 20px 0 0;
 }
+@media (max-width: 768px) {
+  #liaChat.is-mobile-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    z-index: 12000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #liaChat.is-mobile-fullscreen #liaChatHeader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  #liaChat.is-mobile-fullscreen #liaMessages {
+    flex: 1 1 auto;
+    max-height: none !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px !important;
+  }
+
+  #liaChat.is-mobile-fullscreen #liaInputBar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: #0b1a2a;
+    border-top: 1px solid rgba(24, 199, 209, 0.25);
+    padding: 10px !important;
+  }
+
+  #liaChat.is-mobile-fullscreen #liaInput {
+    font-size: 16px;
+  }
+
+  body.lia-mobile-open {
+    overflow: hidden;
+  }
+}
 
 .suggestion-label {
   margin: 0 0 14px;

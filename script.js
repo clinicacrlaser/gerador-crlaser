@@ -1541,6 +1541,22 @@ function initLiaV2() {
     return;
   }
 
+  function isMobileLiaViewport() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  function aplicarModoLia() {
+    const chatAberto = liaChat.style.display !== 'none';
+    if (chatAberto && isMobileLiaViewport()) {
+      liaChat.classList.add('is-mobile-fullscreen');
+      document.body.classList.add('lia-mobile-open');
+      return;
+    }
+
+    liaChat.classList.remove('is-mobile-fullscreen');
+    document.body.classList.remove('lia-mobile-open');
+  }
+
   function appendMessage(remetente, texto, tipo) {
     const linha = document.createElement('div');
     linha.style.display = 'flex';
@@ -1634,10 +1650,12 @@ function initLiaV2() {
 
   btnAbrirLia.addEventListener('click', function () {
     liaChat.style.display = 'block';
+    aplicarModoLia();
   });
 
   btnFecharLia.addEventListener('click', function () {
     liaChat.style.display = 'none';
+    aplicarModoLia();
   });
 
   btnEnviarLia.onclick = enviarMensagemLiaV2;
@@ -1648,6 +1666,8 @@ function initLiaV2() {
       enviarMensagemLiaV2();
     }
   });
+
+  window.addEventListener('resize', aplicarModoLia);
 }
 
 if (document.readyState === 'loading') {
