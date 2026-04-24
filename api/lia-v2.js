@@ -904,16 +904,11 @@ function gerarRespostaPix(cidade = '') {
   const cityNameMatch = pix.match(/Laser®\s+([^:]+)/);
   const cityName = cityNameMatch ? cityNameMatch[1].trim() : cidade;
 
-  // Botão para copiar Pix
-  const botaoCopiar = cnpj ? `<button onclick="navigator.clipboard.writeText('${cnpj}').then(() => alert('Pix copiado!')).catch(e => console.error('Erro ao copiar:', e))" style="display:inline-block;margin-top:12px;padding:10px 20px;background:#00c2ff;color:#ffffff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;">📋 Copiar Pix</button>` : '';
-
   return `Perfeito 😊
 
 Segue o Pix da unidade de ${cityName}:
 
 ${cnpj}
-
-${botaoCopiar}
 
 Após o pagamento, envie o comprovante para a unidade e solicite o agendamento.
 
