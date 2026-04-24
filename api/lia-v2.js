@@ -961,19 +961,48 @@ function detectarConfirmacaoPagamento(texto = '') {
   return (
     t.includes('ja paguei') ||
     t.includes('já paguei') ||
+    t.includes('feito o pagamento') ||
     t.includes('fiz o pix') ||
     t.includes('fiz pix') ||
     t.includes('pagamento feito') ||
     t.includes('comprovante enviado') ||
+    t.includes('comprovante') ||
+    t.includes('mando o comprovante onde') ||
+    t.includes('enviei') ||
+    t.includes('pageui') ||
     t.includes('paguei') ||
     t === 'ja paguei' ||
     t === 'já paguei' ||
+    t === 'feito o pagamento' ||
     t === 'fiz o pix' ||
     t === 'fiz pix' ||
     t === 'pagamento feito' ||
     t === 'comprovante enviado' ||
+    t === 'comprovante' ||
+    t === 'mando o comprovante onde' ||
+    t === 'enviei' ||
+    t === 'pageui' ||
     t === 'paguei'
   );
+}
+
+function gerarRespostaComprovanteUnidade(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+
+  if (!linkWhatsapp) {
+    return null;
+  }
+
+  return `Perfeito 😊
+
+O comprovante deve ser enviado para o WhatsApp da unidade de ${nomeCidade}.
+
+O agendamento também é feito direto por lá.
+
+<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
 }
 
 // ════ DETECÇÃO DE MUDANÇA DE FORMA DE PAGAMENTO ════
@@ -1877,6 +1906,61 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
+    if (contexto.aguardandoComprovante && detectarConfirmacaoPagamento(pergunta)) {
+      const cidadeCompra = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || cidadeDetectada;
+
+      if (!cidadeCompra) {
+        return res.status(200).json({
+          resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: { ...contexto, aguardandoComprovante: true, intencao: 'aguardando_cidade_comprovante' }
+        });
+      }
+
+      const respostaComprovante = gerarRespostaComprovanteUnidade(cidadeCompra);
+      if (respostaComprovante) {
+        return res.status(200).json({
+          resposta: respostaComprovante,
+          contexto: {
+            ...contexto,
+            cidade: cidadeCompra,
+            cidadeAtual: cidadeCompra,
+            cidadeCompra,
+            aguardandoComprovante: false,
+            intencao: 'compra_finalizada_sistema',
+            statusPagamento: 'confirmado',
+            status_compra: 'finalizada'
+          }
+        });
+      }
+    }
+
+    if (contexto.intencao === 'aguardando_cidade_comprovante') {
+      const cidadeCompra = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
+      if (!cidadeCompra) {
+        return res.status(200).json({
+          resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: { ...contexto, aguardandoComprovante: true, intencao: 'aguardando_cidade_comprovante' }
+        });
+      }
+
+      const respostaComprovante = gerarRespostaComprovanteUnidade(cidadeCompra);
+      if (respostaComprovante) {
+        return res.status(200).json({
+          resposta: respostaComprovante,
+          contexto: {
+            ...contexto,
+            cidade: cidadeCompra,
+            cidadeAtual: cidadeCompra,
+            cidadeCompra,
+            aguardandoComprovante: false,
+            intencao: 'compra_finalizada_sistema',
+            statusPagamento: 'confirmado',
+            status_compra: 'finalizada'
+          }
+        });
+      }
+    }
+
     // ════ SE COMPRA JÁ FOI FINALIZADA, NÃO CONTINUAR O FLUXO ════
     if (contexto.intencao === 'compra_finalizada_sistema' || contexto.intencao === 'compra_finalizada_equipe') {
       return res.status(200).json({
@@ -2001,8 +2085,11 @@ export default async function handler(req, res) {
                 ...contexto,
                 intencao: 'fluxo_pagamento_aguardando_confirmacao',
                 cidadeCompra: cidadeAtual,
+                cidadeAtual: cidadeAtual,
                 intencaoCompra: 'sistema',
                 procedimento: procedimentoDetectado,
+                procedimentoAtual: procedimentoDetectado,
+                aguardandoComprovante: true,
                 status_compra: 'em andamento'
               }
             });
@@ -2055,10 +2142,13 @@ export default async function handler(req, res) {
           resposta: gerarRespostaPix(cidadeCompra),
           contexto: { 
             cidade: cidadeCompra, 
+            cidadeAtual: cidadeCompra,
             intencao: 'fluxo_pagamento_aguardando_confirmacao',
             intencaoCompra: 'sistema', 
             formaPagamento: 'pix', 
             cidadeCompra,
+            procedimentoAtual: contexto.procedimento || contexto.procedimento_selecionado || undefined,
+            aguardandoComprovante: true,
             procedimento_selecionado: contexto.procedimento_selecionado || undefined,
             procedimentoBase: contexto.procedimentoBase || undefined,
             status_compra: 'em andamento'
@@ -2125,9 +2215,12 @@ export default async function handler(req, res) {
               intencao: 'fluxo_pagamento_aguardando_confirmacao',
               formaPagamento: 'cartao',
               cidadeCompra,
+              cidadeAtual: cidadeCompra,
               procedimentoBase: desambiguacao.base || contexto.procedimentoBase || null,
               tentativasProcedimento: 0,
               procedimento: procedimentoDetectado,
+              procedimentoAtual: procedimentoDetectado,
+              aguardandoComprovante: true,
               perguntouProcedimentoCartao: false,
               status_compra: 'em andamento'
             }
@@ -2237,11 +2330,14 @@ export default async function handler(req, res) {
             ...contexto,
             intencao: 'fluxo_pagamento_aguardando_confirmacao',
             cidade: cidadeCompra,
+            cidadeAtual: cidadeCompra,
             cidadeCompra,
             formaPagamento: 'cartao',
             procedimentoBase: desambiguacao.base || contexto.procedimentoBase || null,
             tentativasProcedimento: 0,
             procedimento: procedimentoDetectado,
+            procedimentoAtual: procedimentoDetectado,
+            aguardandoComprovante: true,
             perguntouProcedimentoCartao: false,
             status_compra: 'em andamento'
           }
@@ -2351,6 +2447,9 @@ export default async function handler(req, res) {
                 ...contexto, 
                 intencao: 'fluxo_pagamento_aguardando_confirmacao',
                 procedimento: procedimentoDetectado,
+                procedimentoAtual: procedimentoDetectado,
+                cidadeAtual: contexto.cidadeCompra,
+                aguardandoComprovante: true,
                 status_compra: 'em andamento'
               }
             });
@@ -2368,8 +2467,8 @@ export default async function handler(req, res) {
 
       // Se nenhuma das opções acima, oferecer os próximos passos
       return res.status(200).json({
-        resposta: 'Após o pagamento, é só me avisar que registramos e você pode agendar com a equipe 😊',
-        contexto: { ...contexto, status_compra: 'em andamento' }
+        resposta: 'Se quiser, posso te orientar sobre o envio do comprovante para a unidade 😊',
+        contexto: { ...contexto, aguardandoComprovante: true, status_compra: 'em andamento' }
       });
     }
 
