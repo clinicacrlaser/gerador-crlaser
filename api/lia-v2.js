@@ -153,6 +153,41 @@ const LINKS_CAMPANHA_SEXTOUU_BRASILIA = {
   'Bioestimulador Diamond': 'https://cielolink.com.br/3HUzUx6'
 };
 
+// ════ LINKS DE PAGAMENTO - CAMPANHA SEXTOUU - CAMPINAS ════
+const LINKS_CAMPANHA_SEXTOUU_CAMPINAS = {
+  'Ultraformer MPT Full Face': 'https://cielolink.com.br/4hMMcVZ',
+  'Ultraformer MPT Terço Inferior': 'https://cielolink.com.br/47SmB9U',
+  'Ultraformer MPT Papada': 'https://cielolink.com.br/3WIYKnO',
+  'Ultraformer MPT Bichectomia': 'https://cielolink.com.br/4qLLht5',
+  'Ultraformer MPT Pescoço (Pega Papada com Foco em Flacidez)': 'https://cielolink.com.br/49GEfzH',
+  'Ultraformer MPT Colo': 'https://cielolink.com.br/3LokIdr',
+  'Ultraformer MPT Pálpebras': 'https://cielolink.com.br/4hNiG2x',
+  'Ultraformer MPT Abdome': 'https://cielolink.com.br/4hNP19u',
+  'Ultraformer MPT Flancos': 'https://cielolink.com.br/43ZgOxR',
+  'Ultraformer MPT Braços Região do Tchau': 'https://cielolink.com.br/3WIGD1q',
+  'Ultraformer MPT Gordura do Sutiã': 'https://cielolink.com.br/3JQjKWK',
+  'Ultraformer MPT Gordura Pré-Axilar': 'https://cielolink.com.br/4nLfaqR',
+  'Ultraformer MPT Bananinha': 'https://cielolink.com.br/4nKHqdg',
+  'Ultraformer MPT Interno de Coxa': 'https://cielolink.com.br/4oVCkf1',
+  'Ultraformer MPT Monte de Vênus': 'https://cielolink.com.br/3XfbVwO',
+  'Ultraformer MPT Rejuvenescimento Íntimo': 'https://cielolink.com.br/3JHTD4c',
+  'Ultraformer MPT Joelho': 'https://cielolink.com.br/3XmQtpH',
+  'Ultraformer MPT Mãos': 'https://cielolink.com.br/4ow6VQF',
+  'Lavieen Facial Completo - 3 sessões': 'https://cielolink.com.br/4nRfu7u',
+  'Lavieen Facial + Pescoço - 3 sessões': 'https://cielolink.com.br/3LFxqo4',
+  'Lavieen Pescoço + Colo - 3 sessões': 'https://cielolink.com.br/4nQS9CI',
+  'Lavieen Face + Pescoço + Colo - 3 sessões': 'https://cielolink.com.br/4qTN2V4',
+  'Lavieen BB Laser Facial - 3 sessões': 'https://cielolink.com.br/3JQmHGW',
+  'Lavieen Melasma Facial - 3 sessões': 'https://cielolink.com.br/4qVchGD',
+  'Lavieen Olheiras - 3 sessões': 'https://cielolink.com.br/4oDzdc4',
+  'Lavieen Capilar - 3 sessões': 'https://cielolink.com.br/47S34Gf',
+  'Lavieen Mãos - 3 sessões': 'https://cielolink.com.br/4hWmuyk',
+  'Botox Facial Terço Superior Com Retorno': 'https://cielolink.com.br/4igbg8p',
+  'Botox Suor Axilar': 'https://cielolink.com.br/47P9eHd',
+  'Preenchedor Facial': 'https://cielolink.com.br/3WUFXGd',
+  'Bioestimulador Diamond': 'https://cielolink.com.br/49Vqe14'
+};
+
 function normalizeText(texto = '') {
   return texto
     .toLowerCase()
@@ -797,13 +832,18 @@ function gerarRespostaCartao(cidade = '') {
 function gerarRespostaOfertaCampanha(procedimento = '', cidade = '') {
   const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
   
-  // Por enquanto, apenas Brasília tem links de campanha
-  if (cidadeNorm !== 'brasilia') {
+  // Validar cidade e escolher mapeamento correto
+  let linksMap = null;
+  if (cidadeNorm === 'brasilia') {
+    linksMap = LINKS_CAMPANHA_SEXTOUU_BRASILIA;
+  } else if (cidadeNorm === 'campinas') {
+    linksMap = LINKS_CAMPANHA_SEXTOUU_CAMPINAS;
+  } else {
     return null;
   }
 
   // Buscar o link pelo nome do procedimento
-  const link = LINKS_CAMPANHA_SEXTOUU_BRASILIA[procedimento];
+  const link = linksMap[procedimento];
 
   if (!link) {
     return null;
@@ -1495,7 +1535,9 @@ export default async function handler(req, res) {
         // Verificar se mencionou um procedimento
         const procedimentoDetectado = detectarProcedimento(pergunta);
         
-        if (procedimentoDetectado && cidadeAtual === 'brasilia') {
+        // Verificar se a cidade tem links de campanha (Brasília ou Campinas)
+        const cidadesComLinks = ['brasilia', 'campinas'];
+        if (procedimentoDetectado && cidadesComLinks.includes(cidadeAtual)) {
           // Tentar buscar link da campanha
           const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeAtual);
           if (respostaOferta) {
@@ -1515,7 +1557,7 @@ export default async function handler(req, res) {
           }
         }
         
-        // Se não mencionar procedimento ou não for Brasília, continuar com forma de pagamento
+        // Se não mencionar procedimento ou cidade não tem links, continuar com forma de pagamento
         return res.status(200).json({
           resposta: RESPOSTA_FORMA_PAGAMENTO,
           contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_pagamento', cidadeCompra: cidadeAtual, intencaoCompra: 'sistema' }
