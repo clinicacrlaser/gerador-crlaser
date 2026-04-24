@@ -6,6 +6,7 @@ import { sugestoes } from '../data/sugestoes-v2.js';
 import { bioestimuladorFaq } from '../data/bioestimulador-v2.js';
 import { indicacoes } from '../data/indicacoes-v2.js';
 import { lavieenFaq } from '../data/lavieen-v2.js';
+import { ultraformerFaq } from '../data/ultraformer-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
@@ -534,6 +535,33 @@ function encontrarBlocoBioestimulador(texto = '', contexto = {}) {
   return null;
 }
 
+function encontrarBlocoUltraformer(texto = '', contexto = {}) {
+  const textoNormalizado = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const contextoUltraformer = procedimentoAtual === 'ultraformer' || procedimentoAtual.includes('ultraformer');
+  const contextoOutroProcedimento = ['lavieen', 'endymed', 'intensif', 'bioestimulador', 'diamond', 'botox'].includes(procedimentoAtual);
+  const mencionaUltraformer = ['ultraformer', 'mpt'].some((termo) => textoNormalizado.includes(termo));
+
+  if (contextoOutroProcedimento && !contextoUltraformer && !mencionaUltraformer) {
+    return null;
+  }
+
+  const matchDireto = ultraformerFaq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+  );
+  if (matchDireto) return matchDireto;
+
+  if (contextoUltraformer) {
+    return ultraformerFaq.find((item) =>
+      Array.isArray(item.gatilhosContextuais) &&
+      item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+    ) || null;
+  }
+
+  return null;
+}
+
 function encontrarBlocoLavieen(texto = '', contexto = {}) {
   const textoNormalizado = normalizeText(texto);
   const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
@@ -874,6 +902,14 @@ export default async function handler(req, res) {
           passosConducao: 0,
           cidade: cidadeDetectada || contexto.cidade
         }
+      });
+    }
+
+    const itemUltraformer = encontrarBlocoUltraformer(pergunta, contexto);
+    if (itemUltraformer) {
+      return res.status(200).json({
+        resposta: itemUltraformer.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemUltraformer.procedimento || 'ultraformer' }
       });
     }
 

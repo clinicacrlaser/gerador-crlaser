@@ -76,9 +76,7 @@ export const endymedFaq = [
       'microagulhamento doi',
       'microagulhamento dói',
       'intensif doi',
-      'intensif dói',
-      'doi',
-      'dói'
+      'intensif dói'
     ],
     gatilhosContextuais: ['doi', 'dói', 'dolorido'],
     resposta: 'Pode ter um leve desconforto 😊\n\nMas usamos anestesia para deixar o procedimento mais tranquilo.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
