@@ -21,6 +21,43 @@ const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
 
+// ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
+const RESPOSTA_OPCOES_COMPRA = 'Você pode comprar aqui comigo, de forma mais rápida e prática, ou falar direto com a equipe da unidade 😊\n\nApós a compra, é só enviar o comprovante para a unidade de atendimento e solicitar o agendamento.\n\n➖️➖️➖️➖️\n📍 Como fica mais fácil para você?\n\n1️⃣ Comprar aqui pelo sistema\n2️⃣ Falar com a equipe da unidade';
+
+const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
+
+const RESPOSTA_FORMA_PAGAMENTO = 'Perfeito 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão';
+
+// ════ PLACEHOLDERS PARA PIX ════
+const PIX_BRASILIA = 'INSERIR_PIX_BRASILIA';
+const PIX_CAMPINAS = 'INSERIR_PIX_CAMPINAS';
+const PIX_GOIANIA = 'INSERIR_PIX_GOIANIA';
+const PIX_PALMAS = 'INSERIR_PIX_PALMAS';
+const PIX_SAO_PAULO = 'INSERIR_PIX_SAO_PAULO';
+
+// ════ PLACEHOLDERS PARA LINKS DE CARTÃO ════
+const LINK_CARTAO_BRASILIA = 'INSERIR_LINK_CARTAO_BRASILIA';
+const LINK_CARTAO_CAMPINAS = 'INSERIR_LINK_CARTAO_CAMPINAS';
+const LINK_CARTAO_GOIANIA = 'INSERIR_LINK_CARTAO_GOIANIA';
+const LINK_CARTAO_PALMAS = 'INSERIR_LINK_CARTAO_PALMAS';
+const LINK_CARTAO_SAO_PAULO = 'INSERIR_LINK_CARTAO_SAO_PAULO';
+
+const PIX_POR_CIDADE = {
+  brasilia: PIX_BRASILIA,
+  campinas: PIX_CAMPINAS,
+  goiania: PIX_GOIANIA,
+  palmas: PIX_PALMAS,
+  saopaulo: PIX_SAO_PAULO
+};
+
+const LINK_CARTAO_POR_CIDADE = {
+  brasilia: LINK_CARTAO_BRASILIA,
+  campinas: LINK_CARTAO_CAMPINAS,
+  goiania: LINK_CARTAO_GOIANIA,
+  palmas: LINK_CARTAO_PALMAS,
+  saopaulo: LINK_CARTAO_SAO_PAULO
+};
+
 // ════ RESPOSTAS PADRONIZADAS COM AUTORIDADE (MODELO OFICIAL CR LASER®) ════
 // Estrutura: Responder → Autoridade (Equipamento Original, Segurança, ANVISA) → Direcionar
 const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras é um tratamento não-invasivo que atua na flacidez, estimulando colágeno e melhorando o contorno.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Todas as ponteiras são originais e ANVISA aprovadas\n\n👉 Você pode gerar sua oferta agora direto no sistema';
@@ -580,6 +617,90 @@ function detectarIntencaoHumano(texto = '') {
     'tem alguem',
     'tem alguém'
   ].some((g) => t.includes(normalizeText(g)));
+}
+
+// ════ DETECÇÃO DE INTENÇÃO DE COMPRA ════
+function detectarIntencaoCompra(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    t.includes('quero comprar') ||
+    t.includes('quero fechar') ||
+    t.includes('quero aproveitar') ||
+    t.includes('quero pagar') ||
+    t.includes('vou querer') ||
+    t.includes('quero essa oferta') ||
+    t === 'quero comprar' ||
+    t === 'quero fechar' ||
+    t === 'quero aproveitar' ||
+    t === 'quero pagar' ||
+    t === 'vou querer' ||
+    t === 'quero essa oferta'
+  );
+}
+
+// ════ DETECÇÃO DE ESCOLHA: EQUIPE OU SISTEMA ════
+function detectarEscolhaEquipe(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    t.includes('equipe') ||
+    t.includes('unidade') ||
+    t.includes('atendente') ||
+    t.includes('whatsapp') ||
+    t.includes('falar com alguem') ||
+    t.includes('falar com alguém') ||
+    t === '2' ||
+    t === 'equipe' ||
+    t === 'unidade' ||
+    t === 'atendente'
+  );
+}
+
+function detectarEscolhaSistema(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    t.includes('sistema') ||
+    t.includes('aqui') ||
+    t.includes('comprar aqui') ||
+    t.includes('pelo sistema') ||
+    t === '1' ||
+    t === 'sistema' ||
+    t === 'aqui' ||
+    t === 'comprar aqui'
+  );
+}
+
+// ════ DETECÇÃO DE FORMA DE PAGAMENTO ════
+function detectarFormaPagamento(texto = '') {
+  const t = normalizeText(texto);
+  if (t.includes('pix') || t === '1' || t === 'pix') return 'pix';
+  if (t.includes('cartao') || t.includes('cartão') || t === '2' || t === 'cartao' || t === 'cartão') return 'cartao';
+  return null;
+}
+
+function gerarRespostaPix(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const pix = PIX_POR_CIDADE[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+
+  if (!pix || pix.startsWith('INSERIR_')) {
+    return `Chave PIX de ${nomeCidade}:\n\n${pix}\n\nApós o pagamento, envie o comprovante para a unidade e solicite o agendamento 😊`;
+  }
+
+  return `Chave PIX de ${nomeCidade}:\n\n${pix}\n\nApós o pagamento, envie o comprovante para a unidade e solicite o agendamento 😊`;
+}
+
+function gerarRespostaCartao(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const link = LINK_CARTAO_POR_CIDADE[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+
+  if (!link || link.startsWith('INSERIR_')) {
+    return `Link de pagamento de ${nomeCidade}:\n\n${link}\n\nApós o pagamento, solicite o agendamento 😊`;
+  }
+
+  return `Você pode pagar com cartão clicando aqui:\n\n<a href="${link}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Pagar com Cartão</a>\n\nApós o pagamento, solicite o agendamento 😊`;
 }
 
 function tokenize(texto = '') {
@@ -1153,6 +1274,123 @@ export default async function handler(req, res) {
 
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    // ════ FLUXO DE COMPRA - DETECÇÃO DE INTENÇÃO ════
+    if (detectarIntencaoCompra(pergunta)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_OPCOES_COMPRA,
+        contexto: { ...contexto, intencao: 'fluxo_compra_opcoes', cidade: cidadeDetectada || contexto.cidade || undefined }
+      });
+    }
+
+    // ════ FLUXO DE COMPRA - CONTEXTO AGUARDANDO ESCOLHA (EQUIPE OU SISTEMA) ════
+    if (contexto.intencao === 'fluxo_compra_opcoes') {
+      if (detectarEscolhaEquipe(pergunta)) {
+        // Usuário escolheu falar com equipe
+        const cidadeContexto = contexto.cidade || null;
+        const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: RESPOSTA_QUAL_UNIDADE,
+            contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_cidade_equipe' }
+          });
+        }
+
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: respostaWhatsapp,
+            contexto: { cidade: cidadeAtual, intencao: 'compra_finalizada_equipe', intencaoCompra: 'equipe', cidadeCompra: cidadeAtual }
+          });
+        }
+      }
+
+      if (detectarEscolhaSistema(pergunta)) {
+        // Usuário escolheu comprar pelo sistema
+        const cidadeContexto = contexto.cidade || null;
+        const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: RESPOSTA_QUAL_UNIDADE,
+            contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_cidade_sistema' }
+          });
+        }
+
+        return res.status(200).json({
+          resposta: RESPOSTA_FORMA_PAGAMENTO,
+          contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_pagamento', cidadeCompra: cidadeAtual, intencaoCompra: 'sistema' }
+        });
+      }
+
+      // Se não entendeu a opção, repetir
+      return res.status(200).json({
+        resposta: 'Desculpa, não entendi 😊\n\nVocê prefere:\n\n1️⃣ Comprar aqui pelo sistema\n2️⃣ Falar com a equipe da unidade',
+        contexto: contexto
+      });
+    }
+
+    // ════ FLUXO DE COMPRA - EQUIPE AGUARDANDO CIDADE ════
+    if (contexto.intencao === 'fluxo_compra_aguardando_cidade_equipe') {
+      const cidadeAtual = cidadeDetectada;
+      if (cidadeAtual) {
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: respostaWhatsapp,
+            contexto: { cidade: cidadeAtual, intencao: 'compra_finalizada_equipe', intencaoCompra: 'equipe', cidadeCompra: cidadeAtual }
+          });
+        }
+      }
+
+      return res.status(200).json({
+        resposta: RESPOSTA_QUAL_UNIDADE,
+        contexto: contexto
+      });
+    }
+
+    // ════ FLUXO DE COMPRA - SISTEMA AGUARDANDO CIDADE ════
+    if (contexto.intencao === 'fluxo_compra_aguardando_cidade_sistema') {
+      const cidadeAtual = cidadeDetectada;
+      if (cidadeAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_FORMA_PAGAMENTO,
+          contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_pagamento', cidadeCompra: cidadeAtual, intencaoCompra: 'sistema' }
+        });
+      }
+
+      return res.status(200).json({
+        resposta: RESPOSTA_QUAL_UNIDADE,
+        contexto: contexto
+      });
+    }
+
+    // ════ FLUXO DE COMPRA - SISTEMA AGUARDANDO FORMA DE PAGAMENTO ════
+    if (contexto.intencao === 'fluxo_compra_aguardando_pagamento') {
+      const formaPagamento = detectarFormaPagamento(pergunta);
+      const cidadeCompra = contexto.cidadeCompra || cidadeDetectada;
+
+      if (formaPagamento === 'pix') {
+        return res.status(200).json({
+          resposta: gerarRespostaPix(cidadeCompra),
+          contexto: { cidade: cidadeCompra, intencao: 'compra_finalizada_sistema', intencaoCompra: 'sistema', formaPagamento: 'pix', cidadeCompra }
+        });
+      }
+
+      if (formaPagamento === 'cartao') {
+        return res.status(200).json({
+          resposta: gerarRespostaCartao(cidadeCompra),
+          contexto: { cidade: cidadeCompra, intencao: 'compra_finalizada_sistema', intencaoCompra: 'sistema', formaPagamento: 'cartao', cidadeCompra }
+        });
+      }
+
+      // Se não entendeu a forma de pagamento, repetir
+      return res.status(200).json({
+        resposta: 'Desculpa, não entendi 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão',
+        contexto: contexto
+      });
     }
 
     // Prioridade máxima: pediu humano = direcionamento imediato ao WhatsApp.
