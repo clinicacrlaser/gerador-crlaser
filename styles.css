@@ -771,6 +771,11 @@ body {
   padding: 20px 0 0;
 }
 @media (max-width: 768px) {
+  #btnAbrirLia,
+  #liaChat {
+    display: none !important;
+  }
+
   #liaChat.is-mobile-fullscreen {
     position: fixed !important;
     top: 0 !important;
