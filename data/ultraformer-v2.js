@@ -2,6 +2,56 @@ export const ultraformerFaq = [
   {
     procedimento: 'ultraformer',
     gatilhos: [
+      'quantos disparos voces fazem',
+      'quantos disparos vocês fazem',
+      'quantos disparos',
+      'disparos do ultraformer',
+      'ultraformer disparos'
+    ],
+    gatilhosContextuais: ['disparos'],
+    resposta: 'Entendo sua dúvida 😊\n\nAqui na CR Laser® não trabalhamos com número fixo de disparos.\n\nCada paciente recebe um protocolo personalizado, definido após avaliação.\n\n👉 Não vendemos disparos, vendemos o tratamento completo.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'anticoagulante',
+      'uso anticoagulante posso fazer',
+      'quem usa anticoagulante pode fazer',
+      'trombose',
+      'tenho trombose posso fazer'
+    ],
+    gatilhosContextuais: ['anticoagulante', 'trombose'],
+    resposta: 'Pode fazer sim 😊\n\nO que pode acontecer é surgir algum hematoma.\n\n👉 Nesse caso, orientamos evitar sol e usar produtos para ajudar na recuperação.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'vocês usam anestesia',
+      'voces usam anestesia',
+      'usam anestesia',
+      'usa anestesia',
+      'anestesia',
+      'doi mais',
+      'dói mais'
+    ],
+    gatilhosContextuais: ['anestesia', 'doi mais', 'dói mais', 'dor'],
+    resposta: 'Não usamos anestésico tópico 😊\n\nPercebemos que ele não reduz o incômodo de forma relevante e ainda pode interferir no resultado.\n\nA sensibilidade pode variar de pessoa para pessoa, por isso às vezes o procedimento pode incomodar mais ou menos.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'doi muito',
+      'dói muito',
+      'senti dor',
+      'senti muita dor',
+      'muita dor'
+    ],
+    gatilhosContextuais: ['senti dor', 'muita dor'],
+    resposta: 'A sensibilidade varia bastante 😊\n\n👉 Pode depender do dia\n👉 Da sensibilidade individual\n👉 E até da potência utilizada\n\nMas no geral é bem tolerável.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
       'o que e ultraformer',
       'o que é ultraformer',
       'ultraformer funciona',
