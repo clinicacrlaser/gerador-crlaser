@@ -821,12 +821,13 @@ function classificarIntencaoMensagem(texto = '', contexto = {}) {
     return { categoria: 'humano' };
   }
 
-  if (detectarConfirmacaoPagamento(texto) || contexto.aguardandoComprovante) {
-    return { categoria: 'pos_pagamento' };
-  }
-
+  // Localização/Contato/Telefone SEMPRE tem prioridade sobre pós-pagamento
   if (identificarIntencaoOperacional(texto) || (!!identificarCidade(texto) && ['onde', 'endereco', 'telefone', 'unidade', 'mapa', 'fica', 'contato'].some((termo) => t.includes(termo)))) {
     return { categoria: 'localizacao' };
+  }
+
+  if (detectarConfirmacaoPagamento(texto)) {
+    return { categoria: 'pos_pagamento' };
   }
 
   if (detectarIntencaoCompra(texto) || detectarFormaPagamento(texto) || detectarPreco(texto) || detectarInteresseFechamento(texto)) {
@@ -1094,8 +1095,6 @@ Segue o Pix da unidade de ${cityName}:
 
 ${cnpj}
 
-Após o pagamento, envie o comprovante para a unidade e solicite o agendamento.
-
 📍 Importante: confira se os dados pertencem à CR Laser® antes de concluir o pagamento.`;
 }
 
@@ -1106,11 +1105,11 @@ function gerarRespostaCartao(cidade = '') {
   const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
 
   if (!link || link.startsWith('INSERIR_')) {
-    return `Link de pagamento de ${nomeCidade}:\n\n${link}\n\nApós o pagamento, solicite o agendamento 😊`;
+    return `Link de pagamento de ${nomeCidade}:\n\n${link}`;
   }
 
-  return `Você pode pagar com cartão clicando aqui:\n\n<a href="${link}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Pagar com Cartão</a>\n\nApós o pagamento, solicite o agendamento 😊`;
-}
+  return `Você pode pagar com cartão clicando aqui:\n\n<a href="${link}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Pagar com Cartão</a>`;
+
 
 function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = 'html') {
   const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
@@ -1145,19 +1144,15 @@ function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = '
 
 Você pode finalizar sua compra aqui 👇
 
-${link}
-
-Após o pagamento, é só enviar o comprovante para a unidade e solicitar o agendamento.`;
+${link}`;
   }
 
   return `Perfeito 😊
 
 Você pode finalizar sua compra aqui 👇
 
-<a href="${link}" target="_blank" style="display:inline-block;margin-top:12px;padding:12px 20px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">🛒 Finalizar Compra</a>
+<a href="${link}" target="_blank" style="display:inline-block;margin-top:12px;padding:12px 20px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">🛒 Finalizar Compra</a>`;
 
-Após o pagamento, é só enviar o comprovante para a unidade e solicitar o agendamento.`;
-}
 
 function detectarProcedimentoDetalhado(texto = '') {
   const textoNorm = normalizeText(texto);
@@ -1976,6 +1971,30 @@ export default async function handler(req, res) {
 
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    // ════ PRIORIDADE ABSOLUTA: Localização/Contato/Telefone SEMPRE acima de pós-pagamento ════
+    if (intencaoInterpretada.categoria === 'localizacao') {
+      const cidadeParaLocalizar = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
+      
+      if (!cidadeParaLocalizar) {
+        return res.status(200).json({
+          resposta: RESPOSTA_CIDADE,
+          contexto: contexto
+        });
+      }
+
+      const respostaLocalizacao = responderIntencaoOperacional(
+        identificarIntencaoOperacional(pergunta) || 'endereco',
+        unidades.find((u) => u.cidade === cidadeParaLocalizar)
+      );
+
+      if (respostaLocalizacao) {
+        return res.status(200).json({
+          resposta: respostaLocalizacao.resposta,
+          contexto: { ...contexto, ...respostaLocalizacao.contexto }
+        });
+      }
     }
 
     if (contexto.aguardandoComprovante && detectarConfirmacaoPagamento(pergunta)) {

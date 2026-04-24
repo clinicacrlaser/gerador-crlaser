@@ -1,0 +1,8 @@
+{
+  "name": "cr-laser-gerador",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node _test_*.mjs"
+  }
+}
