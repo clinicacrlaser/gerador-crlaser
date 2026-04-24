@@ -31,6 +31,50 @@ let secondProcedureAdded = false;
 let originalOfferText = '';
 let originalDiscountPct = 0;
 
+const DEFAULT_RANGE_OPTIONS = [
+  { value: '1', label: 'Oferta Especial' },
+  { value: '2', label: '🔥 Sextouu CR Laser®' }
+];
+
+const SCIZER_RANGE_OPTIONS = [
+  { value: '0', label: 'Oferta da Semana (40%)' },
+  { value: '1', label: 'Oferta Especial (45%)' },
+  { value: '2', label: 'Sextouu CR Laser® (50%)' },
+  { value: '3', label: 'Close Friends (55%)' }
+];
+
+function getRangeOptionsByProcedure(procIdx) {
+  return String(procIdx) === '23' ? SCIZER_RANGE_OPTIONS : DEFAULT_RANGE_OPTIONS;
+}
+
+function updateOfferRangeOptions(procIdx) {
+  const rangeSelect = document.getElementById('faixaOferta');
+  if (!rangeSelect) return;
+
+  const prevValue = rangeSelect.value;
+  const options = getRangeOptionsByProcedure(procIdx);
+
+  rangeSelect.innerHTML = '';
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  placeholder.textContent = 'Selecione a faixa';
+  rangeSelect.appendChild(placeholder);
+
+  options.forEach((item) => {
+    const option = document.createElement('option');
+    option.value = item.value;
+    option.textContent = item.label;
+    if (item.value === prevValue) {
+      placeholder.selected = false;
+      option.selected = true;
+    }
+    rangeSelect.appendChild(option);
+  });
+}
+
 const ULTRAFORMER_UPSELL_MESSAGES = {
   FACIAL: 'Você também pode considerar adicionar o Ultraformer MPT Pescoço para um resultado mais completo 😊',
   PESCOCO: 'Para um resultado mais harmônico, muitos pacientes combinam com o Ultraformer MPT Facial 😊',
@@ -191,6 +235,8 @@ function handleProcedureChangeForHighlight() {
     return;
   }
 
+  updateOfferRangeOptions(procedureSelect.value);
+
   if (isBotoxHighlightActive && procedureSelect.value !== HIGHLIGHT_BOTOX_PROC_IDX) {
     isBotoxHighlightActive = false;
   }
@@ -204,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const rangeSelect = document.getElementById('faixaOferta');
 
   if (procedureSelect) {
+    updateOfferRangeOptions(procedureSelect.value);
     procedureSelect.addEventListener('change', handleProcedureChangeForHighlight);
   }
 
