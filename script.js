@@ -149,6 +149,7 @@ function clearOfferResult() {
   const resultSection = document.getElementById('resultSection');
   const offerTextEl = document.getElementById('offerText');
   const discountBadgeEl = document.getElementById('discountBadge');
+  const suggestionContainer = document.getElementById('suggestionContainer');
 
   if (offerTextEl) {
     offerTextEl.textContent = '';
@@ -161,6 +162,15 @@ function clearOfferResult() {
   if (resultSection) {
     resultSection.style.display = 'none';
   }
+
+  if (suggestionContainer) {
+    suggestionContainer.style.display = 'none';
+  }
+
+  currentMainProcIdx = null;
+  secondProcedureAdded = false;
+  originalOfferText = '';
+  originalDiscountPct = 0;
 }
 
 function ensureOfferRangeSelected() {
@@ -228,6 +238,7 @@ function handleProcedureChangeForHighlight() {
   }
 
   updateOfferRangeOptions(procedureSelect.value);
+  clearOfferResult();
 
   if (isBotoxHighlightActive && procedureSelect.value !== HIGHLIGHT_BOTOX_PROC_IDX) {
     isBotoxHighlightActive = false;
