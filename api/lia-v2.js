@@ -1251,7 +1251,13 @@ function resolverProcedimentoPorBase(base = '', texto = '') {
 }
 
 function resolverDesambiguacaoProcedimentoCartao(texto = '', contexto = {}) {
-  const base = contexto.procedimentoBase || detectarBaseProcedimentoAmbiguo(texto);
+  const baseDoContexto = contexto.procedimentoBase || (
+    contexto.procedimento_selecionado === 'Botox' ? 'botox' :
+    contexto.procedimento_selecionado === 'Ultraformer MPT' ? 'ultraformer' :
+    contexto.procedimento_selecionado === 'Lavieen' ? 'lavieen' :
+    null
+  );
+  const base = baseDoContexto || detectarBaseProcedimentoAmbiguo(texto);
   if (!base) {
     return { procedimento: null, base: null, precisaPerguntar: false, respostaPergunta: '', tentativas: 0, redirecionar: false };
   }
@@ -1846,6 +1852,15 @@ export default async function handler(req, res) {
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
     const intencaoInterpretada = classificarIntencaoMensagem(pergunta, contexto);
+    const procedimentoDetectadoMensagem = detectarProcedimento(pergunta);
+    const procedimentoBaseMensagem = detectarBaseProcedimentoAmbiguo(pergunta);
+    const procedimentoResolvidoPorBase = procedimentoBaseMensagem ? resolverProcedimentoPorBase(procedimentoBaseMensagem, pergunta) : null;
+    const procedimentoSelecionadoMensagem = procedimentoResolvidoPorBase || (
+      procedimentoBaseMensagem === 'botox' ? 'Botox' :
+      procedimentoBaseMensagem === 'ultraformer' ? 'Ultraformer MPT' :
+      procedimentoBaseMensagem === 'lavieen' ? 'Lavieen' :
+      procedimentoDetectadoMensagem || null
+    );
 
     console.log('PERGUNTA RECEBIDA:', pergunta);
     console.log('TEXTO NORMALIZADO:', msg);
@@ -1878,6 +1893,8 @@ export default async function handler(req, res) {
           ...contexto,
           intencao: 'fluxo_compra_opcoes',
           cidade: cidadeDetectada || contexto.cidade || undefined,
+          procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+          procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
           status_compra: 'em andamento'
         }
       });
@@ -1914,13 +1931,25 @@ export default async function handler(req, res) {
         if (!cidadeAtual) {
           return res.status(200).json({
             resposta: RESPOSTA_QUAL_UNIDADE,
-            contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_cidade_sistema' }
+            contexto: {
+              ...contexto,
+              intencao: 'fluxo_compra_aguardando_cidade_sistema',
+              procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+              procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined
+            }
           });
         }
 
         return res.status(200).json({
           resposta: RESPOSTA_FORMA_PAGAMENTO,
-          contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_pagamento', cidadeCompra: cidadeAtual, intencaoCompra: 'sistema' }
+          contexto: {
+            ...contexto,
+            intencao: 'fluxo_compra_aguardando_pagamento',
+            cidadeCompra: cidadeAtual,
+            intencaoCompra: 'sistema',
+            procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+            procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined
+          }
         });
       }
 
@@ -1992,7 +2021,14 @@ export default async function handler(req, res) {
         // Se não mencionar procedimento ou cidade não tem links, continuar com forma de pagamento
         return res.status(200).json({
           resposta: RESPOSTA_FORMA_PAGAMENTO,
-          contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_pagamento', cidadeCompra: cidadeAtual, intencaoCompra: 'sistema' }
+          contexto: {
+            ...contexto,
+            intencao: 'fluxo_compra_aguardando_pagamento',
+            cidadeCompra: cidadeAtual,
+            intencaoCompra: 'sistema',
+            procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+            procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined
+          }
         });
       }
 
@@ -2023,6 +2059,8 @@ export default async function handler(req, res) {
             intencaoCompra: 'sistema', 
             formaPagamento: 'pix', 
             cidadeCompra,
+            procedimento_selecionado: contexto.procedimento_selecionado || undefined,
+            procedimentoBase: contexto.procedimentoBase || undefined,
             status_compra: 'em andamento'
           }
         });
@@ -2057,7 +2095,10 @@ export default async function handler(req, res) {
         }
 
         const procedimentoInfo = detectarProcedimentoDetalhado(pergunta);
-        const procedimentoDetectado = desambiguacao.procedimento || procedimentoInfo.procedimento || contexto.procedimento;
+        const procedimentoDoContexto = ['Botox', 'Ultraformer MPT', 'Lavieen'].includes(contexto.procedimento_selecionado)
+          ? null
+          : contexto.procedimento_selecionado;
+        const procedimentoDetectado = desambiguacao.procedimento || procedimentoInfo.procedimento || contexto.procedimento || procedimentoDoContexto;
 
         if (!procedimentoDetectado) {
           return res.status(200).json({
