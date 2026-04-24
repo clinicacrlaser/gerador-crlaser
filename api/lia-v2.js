@@ -57,6 +57,12 @@ const PROCEDURE_ALIASES = {
     'aplicacao facial',
     'toxina botulinica facial'
   ],
+  'Botox Suor Axilar': [
+    'suor',
+    'axila',
+    'axilar',
+    'hiperidrose'
+  ],
   'Ultraformer MPT Full Face': [
     'ultraformer',
     'ultra former',
@@ -101,6 +107,25 @@ const PROCEDURE_ALIASES = {
     'lateral barriga',
     'pneuzinho',
     'gordura lateral'
+  ],
+  'Lavieen BB Laser Facial - 3 sessões': [
+    'bb laser',
+    'bb laser facial'
+  ],
+  'Lavieen Melasma Facial - 3 sessões': [
+    'lavieen melasma',
+    'laveen melasma',
+    'melasma'
+  ],
+  'Preenchedor Facial': [
+    'preenchedor',
+    'preenchimento'
+  ],
+  'Bioestimulador Diamond': [
+    'bioestimulador',
+    'bioestulador',
+    'sculptra',
+    'scultra'
   ]
 };
 
@@ -383,6 +408,7 @@ function expandirAbreviacoes(texto = '') {
     .replace(/\bgoinia\b/gi, 'goiania')
     .replace(/\bestu\b/gi, 'estou')
     .replace(/\bbotoxx\b/gi, 'botox')
+    .replace(/\blaveen\b/gi, 'lavieen')
     // Bioestimulador typos
     .replace(/\bscultra\b/gi, 'sculptra')
     .replace(/\bbioestulador\b/gi, 'bioestimulador')
@@ -627,6 +653,8 @@ function detectarPerfilFlacidezFacial(texto = '', contexto = {}) {
 function detectarTemaBotoxFacial(texto = '') {
   const t = normalizeText(texto);
   const gatilhosBotoxFacial = [
+    'botox facial',
+    'botox terco superior',
     'rugas na testa',
     'linhas na testa',
     'testa',
@@ -742,7 +770,9 @@ function detectarTemaBioPreenchimento(texto = '', contexto = {}) {
   const t = normalizeText(texto);
   return [
     'bioestimulador',
+    'bioestulador',
     'sculptra',
+    'scultra',
     'diamond',
     'preenchedor',
     'preenchimento',
@@ -759,7 +789,10 @@ function detectarTemaBioPreenchimento(texto = '', contexto = {}) {
 function labelCategoriaProvavel(categoria = 'fallback') {
   const labels = {
     humano: 'atendimento humano',
+    pos_pagamento: 'pagamento / comprovante',
     localizacao: 'localização',
+    compra: 'compra / pagamento',
+    procedimento: 'procedimento',
     botox_rugas: 'botox / rugas',
     flacidez: 'flacidez',
     gordura: 'gordura',
@@ -778,23 +811,30 @@ function respostaGenericaPorCategoria(categoria = 'fallback') {
 
 function classificarIntencaoMensagem(texto = '', contexto = {}) {
   const t = normalizeText(texto);
+  const temProcedimento = !!detectarProcedimento(texto) || !!detectarBaseProcedimentoAmbiguo(texto);
 
   if (!t) {
     return { categoria: 'fallback' };
-  }
-
-  // ════ PRIORIDADE MÁXIMA: Bloquear pedidos de preço ════
-  // NUNCA deixar preço cair em outra categoria!
-  if (detectarPreco(texto) || detectarInteresseFechamento(texto)) {
-    return { categoria: 'oferta_preco' };
   }
 
   if (detectarIntencaoHumano(texto)) {
     return { categoria: 'humano' };
   }
 
+  if (detectarConfirmacaoPagamento(texto) || contexto.aguardandoComprovante) {
+    return { categoria: 'pos_pagamento' };
+  }
+
   if (identificarIntencaoOperacional(texto) || (!!identificarCidade(texto) && ['onde', 'endereco', 'telefone', 'unidade', 'mapa', 'fica', 'contato'].some((termo) => t.includes(termo)))) {
     return { categoria: 'localizacao' };
+  }
+
+  if (detectarIntencaoCompra(texto) || detectarFormaPagamento(texto) || detectarPreco(texto) || detectarInteresseFechamento(texto)) {
+    return { categoria: 'compra' };
+  }
+
+  if (temProcedimento) {
+    return { categoria: 'procedimento' };
   }
 
   if (detectarTemaBotoxFacial(texto)) {
@@ -1227,7 +1267,7 @@ function detectarBaseProcedimentoAmbiguo(texto = '') {
     return 'ultraformer';
   }
 
-  const temLavieen = t.includes('lavieen');
+  const temLavieen = t.includes('lavieen') || t.includes('bb laser');
   const lavieenEspecificos = [
     'facial completo', 'face pescoco', 'pescoco colo', 'face pescoco colo', 'bb', 'melasma',
     'olheiras', 'capilar', 'maos', 'mãos', 'rosto', 'facial'
@@ -1235,6 +1275,22 @@ function detectarBaseProcedimentoAmbiguo(texto = '') {
   const temLavieenEspecifico = lavieenEspecificos.some((k) => t.includes(k));
   if (temLavieen && !temLavieenEspecifico) {
     return 'lavieen';
+  }
+
+  if (['preenchedor', 'preenchimento'].some((k) => t.includes(k))) {
+    return 'preenchedor';
+  }
+
+  if (['bioestimulador', 'bioestulador', 'sculptra', 'scultra'].some((k) => t.includes(k))) {
+    return 'bioestimulador';
+  }
+
+  if (['endymed', 'shapper', 'small', 'intensif'].some((k) => t.includes(k))) {
+    return 'endymed';
+  }
+
+  if (['scizer', 'gordura localizada'].some((k) => t.includes(k))) {
+    return 'scizer';
   }
 
   return null;
@@ -1276,6 +1332,14 @@ function resolverProcedimentoPorBase(base = '', texto = '') {
     return null;
   }
 
+  if (base === 'preenchedor') {
+    return 'Preenchedor Facial';
+  }
+
+  if (base === 'bioestimulador') {
+    return 'Bioestimulador Diamond';
+  }
+
   return null;
 }
 
@@ -1284,6 +1348,10 @@ function resolverDesambiguacaoProcedimentoCartao(texto = '', contexto = {}) {
     contexto.procedimento_selecionado === 'Botox' ? 'botox' :
     contexto.procedimento_selecionado === 'Ultraformer MPT' ? 'ultraformer' :
     contexto.procedimento_selecionado === 'Lavieen' ? 'lavieen' :
+    contexto.procedimento_selecionado === 'Preenchedor' ? 'preenchedor' :
+    contexto.procedimento_selecionado === 'Bioestimulador' ? 'bioestimulador' :
+    contexto.procedimento_selecionado === 'Endymed' ? 'endymed' :
+    contexto.procedimento_selecionado === 'Scizer' ? 'scizer' :
     null
   );
   const base = baseDoContexto || detectarBaseProcedimentoAmbiguo(texto);
@@ -1888,6 +1956,10 @@ export default async function handler(req, res) {
       procedimentoBaseMensagem === 'botox' ? 'Botox' :
       procedimentoBaseMensagem === 'ultraformer' ? 'Ultraformer MPT' :
       procedimentoBaseMensagem === 'lavieen' ? 'Lavieen' :
+      procedimentoBaseMensagem === 'preenchedor' ? 'Preenchedor' :
+      procedimentoBaseMensagem === 'bioestimulador' ? 'Bioestimulador' :
+      procedimentoBaseMensagem === 'endymed' ? 'Endymed' :
+      procedimentoBaseMensagem === 'scizer' ? 'Scizer' :
       procedimentoDetectadoMensagem || null
     );
 
