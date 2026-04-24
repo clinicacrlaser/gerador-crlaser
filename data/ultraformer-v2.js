@@ -52,6 +52,120 @@ export const ultraformerFaq = [
   {
     procedimento: 'ultraformer',
     gatilhos: [
+      'diferenca pescoco e colo',
+      'diferença pescoço e colo',
+      'pescoco e igual colo',
+      'pescoço é igual colo',
+      'diferenca pescoco x colo',
+      'diferença pescoço x colo',
+      'colo'
+    ],
+    gatilhosContextuais: ['pescoco', 'pescoço', 'colo'],
+    resposta: 'O pescoço é uma região mais complexa 😊\n\n👉 Exige mais técnica\n👉 E normalmente usamos mais recursos no tratamento\n\nPor isso acaba sendo diferente do colo.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'papada funciona',
+      'ultraformer papada funciona',
+      'melhora papada'
+    ],
+    gatilhosContextuais: ['papada'],
+    resposta: 'O Ultraformer MPT Papada ajuda tanto na gordura quanto na flacidez 😊\n\nMuitos pacientes já têm um bom resultado com uma sessão.\n\nMas alguns podem precisar de 2 ou 3 sessões.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'quantas sessoes papada',
+      'quantas sessões papada',
+      'sessoes papada',
+      'sessões papada'
+    ],
+    gatilhosContextuais: ['papada', 'quantas sessoes', 'quantas sessões'],
+    resposta: 'Recomendamos começar com 1 sessão 😊\n\nApós cerca de 30 dias, avaliamos a necessidade de mais.\n\nAlguns pacientes fazem até 3 sessões.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'ponteiras papada',
+      'ponteira papada',
+      'ponteiras para papada',
+      'ponteiras'
+    ],
+    gatilhosContextuais: ['papada', 'ponteiras', 'ponteira'],
+    resposta: 'Utilizamos diferentes ponteiras conforme o caso 😊\n\n👉 3.0\n👉 4.5\n👉 6.0\n👉 Booster 3.0 ou 4.5\n\nIsso permite tratar gordura e flacidez ao mesmo tempo.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'papada ou lipo',
+      'ultraformer ou lipo de papada',
+      'lipo de papada',
+      'e igual lipo',
+      'é igual lipo',
+      'lipo',
+      'cirurgia de papada',
+      'cirurgia'
+    ],
+    gatilhosContextuais: ['lipo', 'cirurgia'],
+    resposta: 'A lipo de papada cirúrgica costuma ter um resultado mais intenso 😊\n\nMas o Ultraformer é uma ótima opção para quem não quer operar.\n\n👉 Sem cirurgia\n👉 Sem afastamento\n👉 E pode complementar o tratamento da flacidez\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'pescoco melhora',
+      'pescoço melhora',
+      'ultraformer pescoco',
+      'ultraformer pescoço'
+    ],
+    gatilhosContextuais: ['pescoco', 'pescoço'],
+    resposta: 'O Ultraformer MPT Pescoço é indicado para flacidez e linhas 😊\n\nEle estimula colágeno e melhora a firmeza da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'ponteiras pescoco',
+      'ponteiras pescoço',
+      'ponteiras para pescoco',
+      'ponteiras para pescoço'
+    ],
+    gatilhosContextuais: ['pescoco', 'pescoço', 'ponteiras', 'ponteira'],
+    resposta: 'Usamos diferentes ponteiras conforme o caso 😊\n\n👉 1.5 ou 2.0\n👉 3.0\n👉 4.5\n👉 Booster 3.0\n\nIsso permite tratar várias camadas da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'quantas sessoes pescoco',
+      'quantas sessões pescoço',
+      'sessao pescoco',
+      'sessão pescoço'
+    ],
+    gatilhosContextuais: ['pescoco', 'pescoço', 'quantas sessoes', 'quantas sessões'],
+    resposta: 'Geralmente começamos com 1 sessão 😊\n\nE avaliamos após cerca de 30 dias se há necessidade de repetir.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'diferenca papada e pescoco',
+      'diferença papada e pescoço',
+      'papada e pescoço',
+      'papada e pescoco',
+      'diferenca papada pescoço',
+      'diferença papada pescoço',
+      'papada x pescoco',
+      'papada x pescoço'
+    ],
+    gatilhosContextuais: ['papada', 'pescoco', 'pescoço', 'diferenca', 'diferença'],
+    resposta: 'O pescoço pode pegar a região da papada 😊\n\nMas com foco em flacidez.\n\n👉 Se o problema for gordura → papada\n👉 Se for flacidez → pescoço resolve bem\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: ['pescoço', 'pescoco'],
+    resposta: 'O Ultraformer MPT Pescoço é indicado para flacidez e linhas 😊\n\nEle estimula colágeno e melhora a firmeza da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
       'o que e ultraformer',
       'o que é ultraformer',
       'ultraformer funciona',
