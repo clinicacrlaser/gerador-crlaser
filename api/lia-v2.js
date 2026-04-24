@@ -56,12 +56,59 @@ const PROCEDURE_ALIASES = {
     'botox facial terco superior',
     'aplicacao facial',
     'toxina botulinica facial'
+  ],
+  'Ultraformer MPT Full Face': [
+    'ultraformer',
+    'ultra former',
+    'ultrafomer',
+    'ultrformer',
+    'ultra',
+    'mpt',
+    'mpt rosto',
+    'mpt face',
+    'ultra rosto',
+    'ultra face',
+    'lifting sem cirurgia',
+    'lifting rosto',
+    'flacidez rosto',
+    'pele caida rosto',
+    'quero ultra no rosto'
+  ],
+  'Ultraformer MPT Papada': [
+    'papada',
+    'gordura no queixo',
+    'queixo duplo',
+    'queixo gordo',
+    'papada caida'
+  ],
+  'Ultraformer MPT Pálpebras': [
+    'palpebra',
+    'palpebras',
+    'olho caido',
+    'olho caindo',
+    'pele do olho',
+    'flacidez olho'
+  ],
+  'Ultraformer MPT Abdome': [
+    'barriga',
+    'gordura barriga',
+    'barriga caida',
+    'flacidez barriga',
+    'abdomen'
+  ],
+  'Ultraformer MPT Flancos': [
+    'flanco',
+    'lateral barriga',
+    'pneuzinho',
+    'gordura lateral'
   ]
 };
 
 const PROCEDURE_LINK_KEYS = {
   'Botox Facial': 'Botox Facial Terço Superior Com Retorno'
 };
+
+const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Você quer fazer no rosto ou em alguma região do corpo? 😊';
 
 // ════ BLOQUEIO OBRIGATÓRIO DE PREÇOS ════
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
@@ -1038,31 +1085,56 @@ Você pode finalizar sua compra aqui 👇
 Após o pagamento, é só enviar o comprovante para a unidade e solicitar o agendamento.`;
 }
 
-function detectarProcedimento(texto = '') {
+function detectarProcedimentoDetalhado(texto = '') {
   const textoNorm = normalizeText(texto);
   const tokensTexto = textoNorm.split(' ').filter((p) => p.length >= 3);
+  const procedimentosDetectados = new Set();
+  const ultraProcedimentos = new Set([
+    'Ultraformer MPT Full Face',
+    'Ultraformer MPT Papada',
+    'Ultraformer MPT Pálpebras',
+    'Ultraformer MPT Abdome',
+    'Ultraformer MPT Flancos'
+  ]);
+
+  const ultraSemRegiao = ['ultra', 'ultraformer', 'ultra former'];
+  if (ultraSemRegiao.includes(textoNorm)) {
+    return { procedimento: null, precisaConfirmarRegiao: true };
+  }
 
   // 1) Alias/sinônimos primeiro (cartão e variações simples)
   for (const [procedimentoCanonico, aliases] of Object.entries(PROCEDURE_ALIASES)) {
     for (const alias of aliases) {
       const aliasNorm = normalizeText(alias);
       if (textoNorm.includes(aliasNorm)) {
-        return procedimentoCanonico;
+        procedimentosDetectados.add(procedimentoCanonico);
+        continue;
       }
 
       const tokensAlias = aliasNorm.split(' ').filter((p) => p.length >= 3);
       const hits = tokensAlias.filter((ta) => tokensTexto.some((tt) => palavrasParecidas(tt, ta))).length;
       if (tokensAlias.length && hits >= tokensAlias.length) {
-        return procedimentoCanonico;
+        procedimentosDetectados.add(procedimentoCanonico);
       }
     }
+  }
+
+  if (procedimentosDetectados.size > 1) {
+    const somenteUltra = Array.from(procedimentosDetectados).every((p) => ultraProcedimentos.has(p));
+    if (somenteUltra) {
+      return { procedimento: null, precisaConfirmarRegiao: true };
+    }
+  }
+
+  if (procedimentosDetectados.size === 1) {
+    return { procedimento: Array.from(procedimentosDetectados)[0], precisaConfirmarRegiao: false };
   }
   
   // 2) Busca exata pelo nome completo do procedimento
   for (const proc of PROCEDURES) {
     const procNorm = normalizeText(proc.name);
     if (textoNorm.includes(procNorm)) {
-      return proc.name;
+      return { procedimento: proc.name, precisaConfirmarRegiao: false };
     }
   }
 
@@ -1083,10 +1155,15 @@ function detectarProcedimento(texto = '') {
   }
 
   if (melhorScore >= 0.6) {
-    return melhor;
+    return { procedimento: melhor, precisaConfirmarRegiao: false };
   }
   
-  return null;
+  return { procedimento: null, precisaConfirmarRegiao: false };
+}
+
+function detectarProcedimento(texto = '') {
+  const resultado = detectarProcedimentoDetalhado(texto);
+  return resultado.procedimento;
 }
 
 function tokenize(texto = '') {
@@ -1826,7 +1903,22 @@ export default async function handler(req, res) {
       }
 
       if (formaPagamento === 'cartao') {
-        const procedimentoDetectado = detectarProcedimento(pergunta) || contexto.procedimento;
+        const procedimentoInfo = detectarProcedimentoDetalhado(pergunta);
+        const procedimentoDetectado = procedimentoInfo.procedimento || contexto.procedimento;
+
+        if (procedimentoInfo.precisaConfirmarRegiao) {
+          return res.status(200).json({
+            resposta: RESPOSTA_ULTRAFORMER_SEM_REGIAO,
+            contexto: {
+              ...contexto,
+              intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
+              formaPagamento: 'cartao',
+              cidadeCompra,
+              perguntouProcedimentoCartao: true,
+              status_compra: 'em andamento'
+            }
+          });
+        }
 
         if (!procedimentoDetectado) {
           return res.status(200).json({
@@ -1895,7 +1987,16 @@ export default async function handler(req, res) {
         });
       }
 
-      const procedimentoDetectado = detectarProcedimento(pergunta) || contexto.procedimento;
+      const procedimentoInfo = detectarProcedimentoDetalhado(pergunta);
+      const procedimentoDetectado = procedimentoInfo.procedimento || contexto.procedimento;
+
+      if (procedimentoInfo.precisaConfirmarRegiao) {
+        return res.status(200).json({
+          resposta: RESPOSTA_ULTRAFORMER_SEM_REGIAO,
+          contexto: { ...contexto, cidadeCompra, formaPagamento: 'cartao', perguntouProcedimentoCartao: true, status_compra: 'em andamento' }
+        });
+      }
+
       if (!procedimentoDetectado) {
         if (contexto.perguntouProcedimentoCartao) {
           return res.status(200).json({
@@ -2009,7 +2110,16 @@ export default async function handler(req, res) {
       }
 
       // Se houver procedimento mencionado, oferecer link
-      const procedimentoDetectado = detectarProcedimento(pergunta);
+      const procedimentoInfo = detectarProcedimentoDetalhado(pergunta);
+      const procedimentoDetectado = procedimentoInfo.procedimento;
+
+      if (procedimentoInfo.precisaConfirmarRegiao) {
+        return res.status(200).json({
+          resposta: RESPOSTA_ULTRAFORMER_SEM_REGIAO,
+          contexto: { ...contexto, status_compra: 'em andamento' }
+        });
+      }
+
       if (procedimentoDetectado && contexto.cidadeCompra) {
         const cidadesComLinks = ['brasilia', 'campinas', 'goiania', 'palmas', 'saopaulo'];
         if (cidadesComLinks.includes(normalizeText(contexto.cidadeCompra).replace(/\s+/g, ''))) {
