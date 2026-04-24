@@ -48,6 +48,21 @@ const PROCEDURES = [
   { name: 'Lavieen Mãos - 3 sessões', group: 'lavieen' }
 ];
 
+const PROCEDURE_ALIASES = {
+  'Botox Facial': [
+    'botox',
+    'botox facial',
+    'botox terco superior',
+    'botox facial terco superior',
+    'aplicacao facial',
+    'toxina botulinica facial'
+  ]
+};
+
+const PROCEDURE_LINK_KEYS = {
+  'Botox Facial': 'Botox Facial Terço Superior Com Retorno'
+};
+
 // ════ BLOQUEIO OBRIGATÓRIO DE PREÇOS ════
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
@@ -976,7 +991,7 @@ function gerarRespostaCartao(cidade = '') {
   return `Você pode pagar com cartão clicando aqui:\n\n<a href="${link}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Pagar com Cartão</a>\n\nApós o pagamento, solicite o agendamento 😊`;
 }
 
-function gerarRespostaOfertaCampanha(procedimento = '', cidade = '') {
+function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = 'html') {
   const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
   
   // Validar cidade e escolher mapeamento correto
@@ -995,11 +1010,23 @@ function gerarRespostaOfertaCampanha(procedimento = '', cidade = '') {
     return null;
   }
 
+  const procedimentoLinkKey = PROCEDURE_LINK_KEYS[procedimento] || procedimento;
+
   // Buscar o link pelo nome do procedimento
-  const link = linksMap[procedimento];
+  const link = linksMap[procedimentoLinkKey];
 
   if (!link) {
     return null;
+  }
+
+  if (formato === 'texto') {
+    return `Perfeito 😊
+
+Você pode finalizar sua compra aqui 👇
+
+${link}
+
+Após o pagamento, é só enviar o comprovante para a unidade e solicitar o agendamento.`;
   }
 
   return `Perfeito 😊
@@ -1013,13 +1040,50 @@ Após o pagamento, é só enviar o comprovante para a unidade e solicitar o agen
 
 function detectarProcedimento(texto = '') {
   const textoNorm = normalizeText(texto);
+  const tokensTexto = textoNorm.split(' ').filter((p) => p.length >= 3);
+
+  // 1) Alias/sinônimos primeiro (cartão e variações simples)
+  for (const [procedimentoCanonico, aliases] of Object.entries(PROCEDURE_ALIASES)) {
+    for (const alias of aliases) {
+      const aliasNorm = normalizeText(alias);
+      if (textoNorm.includes(aliasNorm)) {
+        return procedimentoCanonico;
+      }
+
+      const tokensAlias = aliasNorm.split(' ').filter((p) => p.length >= 3);
+      const hits = tokensAlias.filter((ta) => tokensTexto.some((tt) => palavrasParecidas(tt, ta))).length;
+      if (tokensAlias.length && hits >= tokensAlias.length) {
+        return procedimentoCanonico;
+      }
+    }
+  }
   
-  // Busca exata pelo nome completo do procedimento
+  // 2) Busca exata pelo nome completo do procedimento
   for (const proc of PROCEDURES) {
     const procNorm = normalizeText(proc.name);
     if (textoNorm.includes(procNorm)) {
       return proc.name;
     }
+  }
+
+  // 3) Aproximação por palavras para evitar repetição em pequenos erros de digitação
+  let melhor = null;
+  let melhorScore = 0;
+  for (const proc of PROCEDURES) {
+    const tokensProc = normalizeText(proc.name).split(' ').filter((p) => p.length >= 4);
+    if (!tokensProc.length) continue;
+
+    const hits = tokensProc.filter((tp) => tokensTexto.some((tt) => palavrasParecidas(tt, tp))).length;
+    const score = hits / tokensProc.length;
+
+    if (hits >= 2 && score > melhorScore) {
+      melhor = proc.name;
+      melhorScore = score;
+    }
+  }
+
+  if (melhorScore >= 0.6) {
+    return melhor;
   }
   
   return null;
@@ -1772,12 +1836,13 @@ export default async function handler(req, res) {
               intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
               formaPagamento: 'cartao',
               cidadeCompra,
+              perguntouProcedimentoCartao: true,
               status_compra: 'em andamento'
             }
           });
         }
 
-        const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra);
+        const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra, 'texto');
         if (respostaOferta) {
           return res.status(200).json({
             resposta: respostaOferta,
@@ -1787,6 +1852,7 @@ export default async function handler(req, res) {
               formaPagamento: 'cartao',
               cidadeCompra,
               procedimento: procedimentoDetectado,
+              perguntouProcedimentoCartao: false,
               status_compra: 'em andamento'
             }
           });
@@ -1807,6 +1873,7 @@ export default async function handler(req, res) {
             intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
             formaPagamento: 'cartao', 
             cidadeCompra,
+            perguntouProcedimentoCartao: true,
             status_compra: 'em andamento'
           }
         });
@@ -1830,13 +1897,20 @@ export default async function handler(req, res) {
 
       const procedimentoDetectado = detectarProcedimento(pergunta) || contexto.procedimento;
       if (!procedimentoDetectado) {
+        if (contexto.perguntouProcedimentoCartao) {
+          return res.status(200).json({
+            resposta: 'Não consegui identificar o procedimento pelo nome informado 😊\n\nPode me dizer o nome mais próximo do tratamento?',
+            contexto: { ...contexto, cidadeCompra, formaPagamento: 'cartao', status_compra: 'em andamento' }
+          });
+        }
+
         return res.status(200).json({
           resposta: 'Sem problema 😊\n\nQual procedimento você quer finalizar no cartão?',
-          contexto: { ...contexto, cidadeCompra, formaPagamento: 'cartao', status_compra: 'em andamento' }
+          contexto: { ...contexto, cidadeCompra, formaPagamento: 'cartao', perguntouProcedimentoCartao: true, status_compra: 'em andamento' }
         });
       }
 
-      const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra);
+      const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra, 'texto');
       if (respostaOferta) {
         return res.status(200).json({
           resposta: respostaOferta,
@@ -1847,6 +1921,7 @@ export default async function handler(req, res) {
             cidadeCompra,
             formaPagamento: 'cartao',
             procedimento: procedimentoDetectado,
+            perguntouProcedimentoCartao: false,
             status_compra: 'em andamento'
           }
         });
@@ -1904,6 +1979,7 @@ export default async function handler(req, res) {
               intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
               formaPagamento: 'cartao',
               cidadeCompra,
+              perguntouProcedimentoCartao: true,
               status_compra: 'em andamento'
             }
           });
