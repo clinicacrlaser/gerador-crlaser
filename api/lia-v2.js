@@ -495,7 +495,7 @@ function respostaOfertaSemanaPorCidade(cidade = '') {
 function encontrarBlocoEndymed(texto = '', contexto = {}) {
   const textoNormalizado = normalizeText(texto);
   const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
-  const contextoEndymed = procedimentoAtual === 'endymed';
+  const contextoEndymed = procedimentoAtual === 'endymed' || procedimentoAtual === 'intensif' || procedimentoAtual.includes('endymed');
 
   const matchDireto = endymedFaq.find((item) =>
     Array.isArray(item.gatilhos) &&

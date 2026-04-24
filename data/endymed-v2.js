@@ -1,5 +1,89 @@
 export const endymedFaq = [
   {
+    procedimento: 'intensif',
+    gatilhos: [
+      'o que e microagulhamento robotico',
+      'o que é microagulhamento robótico',
+      'microagulhamento robotico',
+      'microagulhamento robótico',
+      'endymed intensif',
+      'intensif'
+    ],
+    resposta: 'O Microagulhamento Robótico (Endymed Intensif) é um tratamento que usa microagulhas muito finas 😊\n\nEssas agulhas estimulam colágeno de forma mais eficiente que o microagulhamento tradicional.\n\nAlém disso, ele associa radiofrequência, potencializando ainda mais o resultado.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'intensif',
+    gatilhos: [
+      'funciona pra acne',
+      'funciona para acne',
+      'cicatriz de acne',
+      'cicatrizes de acne',
+      'poros do microagulhamento',
+      'poros do intensif',
+      'poros'
+    ],
+    gatilhosContextuais: ['acne', 'cicatriz de acne', 'cicatrizes de acne', 'poros'],
+    resposta: 'Indicamos bastante para melhorar a qualidade da pele 😊\n\n👉 Poros dilatados\n👉 Rugas finas\n👉 Cicatrizes de acne\n\nEle deixa a pele mais uniforme e com melhor textura.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'intensif',
+    gatilhos: [
+      'estrias',
+      'melhora estrias',
+      'microagulhamento para estrias',
+      'intensif para estrias'
+    ],
+    gatilhosContextuais: ['estrias'],
+    resposta: 'No corpo, usamos para melhorar 😊\n\n👉 Estrias\n👉 Linhas finas\n👉 Flacidez\n\nSempre com estímulo de colágeno.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'intensif',
+    gatilhos: [
+      'microagulhamento para flacidez',
+      'intensif para flacidez',
+      'flacidez no intensif'
+    ],
+    gatilhosContextuais: ['flacidez'],
+    resposta: 'Ele também ajuda na flacidez 😊\n\nPorque estimula colágeno de forma mais profunda e eficiente.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'intensif',
+    gatilhos: [
+      'qual diferenca do comum',
+      'qual diferença do comum',
+      'diferenca microagulhamento',
+      'diferença microagulhamento',
+      'microagulhamento comum',
+      'diferenca do microagulhamento comum'
+    ],
+    gatilhosContextuais: ['diferenca', 'diferença', 'comum'],
+    resposta: 'O Intensif é mais avançado 😊\n\n👉 Tem controle maior de profundidade\n👉 Associa radiofrequência\n👉 Estimula colágeno de forma mais potente\n\nPor isso o resultado costuma ser melhor.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'intensif',
+    gatilhos: [
+      'resultado do microagulhamento',
+      'resultado do intensif',
+      'resultado microagulhamento robotico',
+      'resultado microagulhamento robótico'
+    ],
+    gatilhosContextuais: ['resultado', 'textura'],
+    resposta: 'O foco é melhorar textura e qualidade da pele 😊\n\nCom o tempo, a pele fica mais firme, uniforme e com menos imperfeições.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'intensif',
+    gatilhos: [
+      'microagulhamento doi',
+      'microagulhamento dói',
+      'intensif doi',
+      'intensif dói',
+      'doi',
+      'dói'
+    ],
+    gatilhosContextuais: ['doi', 'dói', 'dolorido'],
+    resposta: 'Pode ter um leve desconforto 😊\n\nMas usamos anestesia para deixar o procedimento mais tranquilo.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
     procedimento: 'endymed',
     gatilhos: [
       'endymed serve pra que',
