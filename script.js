@@ -1525,6 +1525,7 @@ function initLiaV2() {
   const btnAbrirLia = document.getElementById('btnAbrirLia');
   const btnFecharLia = document.getElementById('btnFecharLia');
   const liaChat = document.getElementById('liaChat');
+  const liaOverlay = document.getElementById('liaOverlay');
   const liaMessages = document.getElementById('liaMessages');
   const liaInput = document.getElementById('liaInput');
   const btnEnviarLia = document.getElementById('btnEnviarLia');
@@ -1554,11 +1555,78 @@ function initLiaV2() {
     }
 
     liaChat.classList.remove('is-mobile-fullscreen');
+    liaChat.classList.remove('is-open');
     document.body.classList.remove('lia-mobile-open');
+    if (liaOverlay) {
+      liaOverlay.classList.remove('is-visible');
+      liaOverlay.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function abrirLiaChat() {
+    liaChat.style.display = 'block';
+
+    if (isMobileLiaViewport()) {
+      liaChat.classList.add('is-mobile-fullscreen');
+      requestAnimationFrame(function () {
+        liaChat.classList.add('is-open');
+        document.body.classList.add('lia-mobile-open');
+        if (liaOverlay) {
+          liaOverlay.classList.add('is-visible');
+          liaOverlay.setAttribute('aria-hidden', 'false');
+        }
+      });
+      return;
+    }
+
+    liaChat.classList.remove('is-mobile-fullscreen');
+    liaChat.classList.remove('is-open');
+    if (liaOverlay) {
+      liaOverlay.classList.remove('is-visible');
+      liaOverlay.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function fecharLiaChat() {
+    if (isMobileLiaViewport() && liaChat.classList.contains('is-mobile-fullscreen')) {
+      liaChat.classList.remove('is-open');
+      if (liaOverlay) {
+        liaOverlay.classList.remove('is-visible');
+        liaOverlay.setAttribute('aria-hidden', 'true');
+      }
+
+      let finalizado = false;
+      const concluir = function () {
+        if (finalizado) return;
+        finalizado = true;
+        liaChat.style.display = 'none';
+        liaChat.classList.remove('is-mobile-fullscreen');
+        document.body.classList.remove('lia-mobile-open');
+        liaChat.removeEventListener('transitionend', onTransitionEnd);
+      };
+
+      const onTransitionEnd = function (ev) {
+        if (ev.target === liaChat) {
+          concluir();
+        }
+      };
+
+      liaChat.addEventListener('transitionend', onTransitionEnd);
+      setTimeout(concluir, 320);
+      return;
+    }
+
+    liaChat.style.display = 'none';
+    document.body.classList.remove('lia-mobile-open');
+    if (liaOverlay) {
+      liaOverlay.classList.remove('is-visible');
+      liaOverlay.setAttribute('aria-hidden', 'true');
+    }
   }
 
   function appendMessage(remetente, texto, tipo) {
     const linha = document.createElement('div');
+    linha.className = `lia-message-row ${tipo}`;
     linha.style.display = 'flex';
     linha.style.flexDirection = 'column';
     linha.style.marginBottom = '12px';
@@ -1572,6 +1640,7 @@ function initLiaV2() {
     label.style.color = tipo === 'user' ? '#18C7D1' : '#7dd3fc';
 
     const bolha = document.createElement('div');
+  bolha.className = 'lia-message-bubble';
     bolha.style.maxWidth = '85%';
     bolha.style.padding = '10px 12px';
     bolha.style.borderRadius = '14px';
@@ -1604,13 +1673,31 @@ function initLiaV2() {
     linha.appendChild(label);
     linha.appendChild(bolha);
     liaMessages.appendChild(linha);
-    liaMessages.scrollTop = liaMessages.scrollHeight;
+    linha.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    return linha;
+  }
+
+  function criarDigitando() {
+    const linha = appendMessage('Lia', '', 'lia');
+    const bolha = linha.querySelector('.lia-message-bubble');
+    if (bolha) {
+      bolha.innerHTML = '<div class="lia-typing" aria-label="Lia digitando"><span></span><span></span><span></span></div>';
+    }
+    return linha;
+  }
+
+  function esperar(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   let ultimaRespostaLia = null;
   let liaContexto = {};
 
   async function enviarParaAPI(texto) {
+    const typingRow = criarDigitando();
+    const start = Date.now();
+    const atrasoHumano = 600 + Math.floor(Math.random() * 601);
+
     try {
       console.log('enviando para /api/lia-v2', texto);
       const res = await fetch('/api/lia-v2', {
@@ -1625,13 +1712,23 @@ function initLiaV2() {
       });
 
       const data = await res.json();
+      const elapsed = Date.now() - start;
+      if (elapsed < atrasoHumano) {
+        await esperar(atrasoHumano - elapsed);
+      }
       console.log('resposta da lia', data);
       liaContexto = data.contexto || {};
       const resposta = data.resposta || 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊\nMas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.';
       ultimaRespostaLia = resposta;
+      if (typingRow && typingRow.parentNode) {
+        typingRow.parentNode.removeChild(typingRow);
+      }
       appendMessage('Lia', resposta, 'lia');
     } catch (error) {
       console.error('Erro ao chamar /api/lia-v2:', error);
+      if (typingRow && typingRow.parentNode) {
+        typingRow.parentNode.removeChild(typingRow);
+      }
       appendMessage('Lia', 'Desculpe, ainda estou aprendendo e não sei te responder isso com precisão 😊\nMas se quiser, posso te ajudar com nossos tratamentos ou te mostrar as melhores opções.', 'lia');
     }
   }
@@ -1648,15 +1745,13 @@ function initLiaV2() {
     await enviarParaAPI(texto);
   }
 
-  btnAbrirLia.addEventListener('click', function () {
-    liaChat.style.display = 'block';
-    aplicarModoLia();
-  });
+  btnAbrirLia.addEventListener('click', abrirLiaChat);
 
-  btnFecharLia.addEventListener('click', function () {
-    liaChat.style.display = 'none';
-    aplicarModoLia();
-  });
+  btnFecharLia.addEventListener('click', fecharLiaChat);
+
+  if (liaOverlay) {
+    liaOverlay.addEventListener('click', fecharLiaChat);
+  }
 
   btnEnviarLia.onclick = enviarMensagemLiaV2;
 
