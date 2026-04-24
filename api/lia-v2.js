@@ -9,6 +9,7 @@ import { lavieenFaq } from '../data/lavieen-v2.js';
 import { ultraformerFaq } from '../data/ultraformer-v2.js';
 import { preenchedorFaq } from '../data/preenchedor-v2.js';
 import { scizerFaq } from '../data/scizer-v2.js';
+import { confiancaFaq } from '../data/confianca-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
@@ -763,6 +764,33 @@ function encontrarBlocoScizer(texto = '', contexto = {}) {
   return null;
 }
 
+function encontrarBlocoConfianca(texto = '', contexto = {}) {
+  const textoNormalizado = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+
+  const contextoTratamento = [
+    'ultraformer',
+    'scizer',
+    'preenchedor',
+    'bioestimulador',
+    'lavieen',
+    'endymed'
+  ].includes(procedimentoAtual);
+
+  // Avoid hijacking treatment-specific safety/originality follow-ups while in procedure context.
+  if (contextoTratamento) {
+    const somenteConfiancaGenerica = ['e seguro', 'é seguro', 'original', 'quero'].includes(textoNormalizado);
+    if (somenteConfiancaGenerica) return null;
+  }
+
+  const matchDireto = confiancaFaq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+  );
+
+  return matchDireto || null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -813,6 +841,39 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
         contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined }
+      });
+    }
+
+    const itemConfianca = encontrarBlocoConfianca(pergunta, contexto);
+    if (itemConfianca) {
+      if (itemConfianca.tipo === 'fechamento_direto') {
+        const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
+        const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
+            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined }
+          });
+        }
+
+        const respostaHumano = respostaHumanoPorCidade(cidadeAtual);
+        if (respostaHumano) {
+          return res.status(200).json({
+            resposta: respostaHumano,
+            contexto: { cidade: cidadeAtual, cidadeAtual }
+          });
+        }
+
+        return res.status(200).json({
+          resposta: itemConfianca.resposta,
+          contexto: { intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano' }
+        });
+      }
+
+      return res.status(200).json({
+        resposta: itemConfianca.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: 'confianca' }
       });
     }
 
