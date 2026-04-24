@@ -1,5 +1,15 @@
 export const faq = [
   {
+    gatilhos: [
+      'pontos botox',
+      'quais os pontos do botox',
+      'onde aplica botox',
+      'botox onde aplica',
+      'pontos de aplicacao botox'
+    ],
+    resposta: 'Na CR Laser® fazemos Botox Facial no terço superior completo 😊\n\nIsso é feito para manter a harmonia facial.\n\nAs principais regiões são:\n\n1. Rugas da testa\n2. Rugas da glabela\n3. Pés de galinha\n4. Ruguinhas do nariz, quando necessário\n\nVeja os pontos aqui:\n<a href="https://www.instagram.com/p/CtyjpsouAGy/?igshid=MzRlODBiNWFlZA==" target="_blank">https://www.instagram.com/p/CtyjpsouAGy/?igshid=MzRlODBiNWFlZA==</a>'
+  },
+  {
     gatilhos: ['lavieen melasma', 'lavieen serve para melasma'],
     resposta: 'Sim 😊 O Lavieen é uma das opções mais seguras para controle do melasma.'
   },
@@ -30,15 +40,6 @@ export const faq = [
       'porque botox dura pouco'
     ],
     resposta: 'A CR Laser® trabalha com o mesmo produto de sempre, e a diluição não foi alterada. Utilizamos o frasco de 200U diluído em 1,8 ml, o que torna a aplicação mais concentrada que o padrão. A durabilidade pode variar de pessoa para pessoa, normalmente entre 3 a 4 meses. Em alguns casos, o efeito pode começar a diminuir antes disso. Hoje vemos uma tendência geral de redução na durabilidade, não sendo algo exclusivo da CR Laser®, mas sim observado em diferentes marcas.'
-  },
-  {
-    gatilhos: [
-      'quais os pontos do botox',
-      'onde aplica botox',
-      'botox onde aplica',
-      'pontos de aplicacao botox'
-    ],
-    resposta: 'Na CR Laser® realizamos a aplicação facial com direito a retorno no terço superior completo 😊 Isso é feito para garantir harmonia facial. Por esse motivo, tratamos sempre as principais regiões:\n– Rugas da testa\n– Rugas da glabela\n– Pés de galinha\n– Ruguinhas do nariz (quando necessário)\nAssim conseguimos um resultado mais natural e equilibrado.'
   },
   {
     gatilhos: [

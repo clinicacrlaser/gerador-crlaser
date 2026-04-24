@@ -52,6 +52,17 @@ export const ultraformerFaq = [
   {
     procedimento: 'ultraformer',
     gatilhos: [
+      'pontos ultraformer',
+      'pontos mpt',
+      'pontos ultraformer full face',
+      'full face'
+    ],
+    gatilhosContextuais: ['pontos', 'full face'],
+    resposta: 'O Ultraformer MPT Full Face trata várias regiões do rosto 😊\n\n🔹 Testa\n🔹 Região periocular superior, inferior e lateral\n🔹 Lateral do rosto\n🔹 Região labial superior e inferior\n\nEle é aplicado em movimento, não de forma estática.\n\nVeja mais aqui:\n<a href="https://www.instagram.com/p/Ct2FGBnumhT/?igshid=MzRlODBiNWFlZA==" target="_blank">https://www.instagram.com/p/Ct2FGBnumhT/?igshid=MzRlODBiNWFlZA==</a>\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
       'diferenca pescoco e colo',
       'diferença pescoço e colo',
       'pescoco e igual colo',
@@ -93,7 +104,7 @@ export const ultraformerFaq = [
       'ponteiras'
     ],
     gatilhosContextuais: ['papada', 'ponteiras', 'ponteira'],
-    resposta: 'Utilizamos diferentes ponteiras conforme o caso 😊\n\n👉 3.0\n👉 4.5\n👉 6.0\n👉 Booster 3.0 ou 4.5\n\nIsso permite tratar gordura e flacidez ao mesmo tempo.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+    resposta: 'No Ultraformer MPT Papada usamos ponteiras conforme a necessidade 😊\n\n📍 Linear 6.0 para gordura localizada\n📍 Linear 4.5 para camadas mais profundas\n📍 Linear 3.0 para camadas médias\n📍 Booster 3.0 para acabamento e retração superficial\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
   },
   {
     procedimento: 'ultraformer',
@@ -113,24 +124,28 @@ export const ultraformerFaq = [
   {
     procedimento: 'ultraformer',
     gatilhos: [
+      'pontos pescoço',
+      'pontos pescoco',
       'pescoco melhora',
       'pescoço melhora',
       'ultraformer pescoco',
       'ultraformer pescoço'
     ],
     gatilhosContextuais: ['pescoco', 'pescoço'],
-    resposta: 'O Ultraformer MPT Pescoço é indicado para flacidez e linhas 😊\n\nEle estimula colágeno e melhora a firmeza da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+    resposta: 'O Ultraformer MPT Pescoço trata a região do pescoço como um todo 😊\n\nRegiões principais:\n\n🔹 Submento/papada, com foco em flacidez\n🔹 Região cervical anterior\n🔹 Região cervical lateral\n\nEle é aplicado em movimento e não é feito sobre a cartilagem tireoidea.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
   },
   {
     procedimento: 'ultraformer',
     gatilhos: [
+      'ponteiras pescoço',
+      'ponteiras pescoco',
       'ponteiras pescoco',
       'ponteiras pescoço',
       'ponteiras para pescoco',
       'ponteiras para pescoço'
     ],
     gatilhosContextuais: ['pescoco', 'pescoço', 'ponteiras', 'ponteira'],
-    resposta: 'Usamos diferentes ponteiras conforme o caso 😊\n\n👉 1.5 ou 2.0\n👉 3.0\n👉 4.5\n👉 Booster 3.0\n\nIsso permite tratar várias camadas da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+    resposta: 'No Ultraformer MPT Pescoço usamos ponteiras conforme o caso 😊\n\n📍 Linear 2.0\n📍 Linear 3.0\n📍 Linear 4.5\n📍 Booster 3.0\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
   },
   {
     procedimento: 'ultraformer',
@@ -162,6 +177,30 @@ export const ultraformerFaq = [
     procedimento: 'ultraformer',
     gatilhos: ['pescoço', 'pescoco'],
     resposta: 'O Ultraformer MPT Pescoço é indicado para flacidez e linhas 😊\n\nEle estimula colágeno e melhora a firmeza da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'terco inferior',
+      'terço inferior',
+      'ultraformer terco inferior',
+      'ultraformer terço inferior',
+      'pontos terco inferior',
+      'pontos terço inferior'
+    ],
+    gatilhosContextuais: ['terco inferior', 'terço inferior'],
+    resposta: 'O Ultraformer MPT Terço Inferior é aplicado no contorno inferior da face 😊\n\nO foco é linha de marionete, estímulo de colágeno, efeito lifting e redefinição do contorno mandibular.\n\nA aplicação é feita em movimento, nos dois lados da face.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'ultraformer',
+    gatilhos: [
+      'ponteiras terco inferior',
+      'ponteiras terço inferior',
+      'ponteira terco inferior',
+      'ponteira terço inferior'
+    ],
+    gatilhosContextuais: ['terco inferior', 'terço inferior', 'ponteiras', 'ponteira'],
+    resposta: 'No Ultraformer MPT Terço Inferior usamos:\n\n📍 Linear 4.5\n📍 Linear 3.0\n📍 Booster 3.0\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
   },
   {
     procedimento: 'ultraformer',
@@ -238,17 +277,12 @@ export const ultraformerFaq = [
   {
     procedimento: 'ultraformer',
     gatilhos: [
-      'pontos de aplicacao do ultraformer',
-      'onde aplica ultraformer',
-      'ultraformer onde aplica',
-      'pontos do ultraformer'
+      'ponteiras full face',
+      'ponteiras ultraformer full face',
+      'ponteiras mpt full face',
+      'ponteiras do ultraformer full face'
     ],
-    resposta: 'O Ultraformer é aplicado em todo o rosto 😊\n\n👉 Testa (levantar sobrancelha)\n👉 Região dos olhos (pálpebras)\n👉 Lateral do rosto (lifting)\n👉 Região da boca\n\nEle não é aplicado em pontos fixos, e sim em movimento.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
-  },
-  {
-    procedimento: 'ultraformer',
-    gatilhos: ['ponteiras do ultraformer', 'quais ponteiras usam', 'ponteiras ultraformer'],
-    resposta: 'Utilizamos diferentes ponteiras conforme a necessidade 😊\n\n👉 1.5, 2.0, 3.0 e 4.5 mm\n👉 Booster nas pálpebras e bochechas\n\nIsso permite tratar diferentes camadas da pele.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+    resposta: 'No Ultraformer MPT Full Face usamos diferentes ponteiras conforme o caso 😊\n\n📍 Linear 1.5\n📍 Linear 2.0\n📍 Linear 3.0\n📍 Linear 4.5\n📍 Booster 1.5 na área dos olhos\n📍 Booster 3.0 ou 4.5 nas bochechas\n\nEm alguns casos específicos, pode ser usada a Linear 6.0 para efeito de bichectomia.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
   },
   {
     procedimento: 'ultraformer',

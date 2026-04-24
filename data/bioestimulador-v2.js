@@ -2,6 +2,19 @@ export const bioestimuladorFaq = [
   {
     procedimento: 'bioestimulador',
     gatilhos: [
+      'pontos bioestimulador',
+      'pontos do bioestimulador',
+      'onde aplica bioestimulador',
+      'onde aplica o bioestimulador',
+      'onde aplica diamond',
+      'pontos diamond',
+      'diamond onde aplica'
+    ],
+    resposta: 'O Bioestimulador Diamond Facial pode ser aplicado em regiões estratégicas 😊\n\n🔹 Têmporas\n🔹 Malar, nas maçãs do rosto\n🔹 Lateral do rosto\n🔹 Bigode chinês, quando necessário\n\nEssas regiões servem como referência.\n\nA técnica pode variar conforme o objetivo, sempre buscando equilíbrio, firmeza e naturalidade.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+  },
+  {
+    procedimento: 'bioestimulador',
+    gatilhos: [
       'tem sculptra',
       'tem scultra',
       'voces tem sculptra',
