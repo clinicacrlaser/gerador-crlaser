@@ -17,6 +17,9 @@ const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e d
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
 const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
+const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
+const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras ajuda principalmente em flacidez leve a moderada, dando mais firmeza e melhorando o aspecto da região.\n\nMas quando já existe indicação cirúrgica, ele não substitui a cirurgia. Ele pode ser uma opção para quem não quer operar agora ou quer uma melhora sem cirurgia.\n\nSe quiser, posso te explicar como funciona o MPT Pálpebras.';
+const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nEle ajuda a firmar a pele da região e pode melhorar o aspecto das pálpebras.\n\nMas em casos cirúrgicos, o resultado costuma ser mais limitado do que uma cirurgia.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -216,6 +219,50 @@ function detectarInteresseFechamento(texto = '') {
     t.includes('quanto custa') ||
     t.includes('tenho interesse')
   );
+}
+
+function detectarTemaUltraformerPalpebras(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const contextoPalpebras = procedimentoAtual === CONTEXTO_ULTRAFORMER_PALPEBRAS || procedimentoAtual.includes('palpebras');
+  const gatilhos = [
+    'mpt palpebras',
+    'mpt palpebra',
+    'ultraformer palpebras',
+    'ultraformer palpebra',
+    'palpebra caida',
+    'retirada de palpebra',
+    'cirurgia de palpebra',
+    'blefaroplastia',
+    'bolsinha na palpebra',
+    'flacidez na palpebra',
+    'flacidez nas palpebras',
+    'palpebras',
+    'palpebra'
+  ];
+
+  if (gatilhos.some((gatilho) => t.includes(gatilho))) {
+    return true;
+  }
+
+  return contextoPalpebras && ['cirurgia', 'operar', 'operacao', 'indicação cirurgica', 'indicacao cirurgica', 'bolsinha', 'flacidez'].some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function detectarFollowUpUltraformerPalpebras(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  if (procedimentoAtual !== CONTEXTO_ULTRAFORMER_PALPEBRAS) {
+    return false;
+  }
+
+  return [
+    'e bom',
+    'é bom',
+    'vale a pena',
+    'funciona',
+    'isso funciona',
+    'ele funciona'
+  ].some((gatilho) => t.includes(normalizeText(gatilho)));
 }
 
 function detectarIntencaoAgendamento(texto = '') {
@@ -1032,6 +1079,20 @@ export default async function handler(req, res) {
     if (ehSaudacao(pergunta)) {
       console.log('CAIU NA SAUDACAO');
       return res.status(200).json({ resposta: respostaSaudacao(pergunta) });
+    }
+
+    if (detectarFollowUpUltraformerPalpebras(pergunta, contexto)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: CONTEXTO_ULTRAFORMER_PALPEBRAS }
+      });
+    }
+
+    if (detectarTemaUltraformerPalpebras(pergunta, contexto)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_ULTRAFORMER_PALPEBRAS,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: CONTEXTO_ULTRAFORMER_PALPEBRAS }
+      });
     }
 
     if (detectarInteresseFechamento(pergunta)) {
