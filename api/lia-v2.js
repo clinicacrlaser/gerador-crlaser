@@ -138,7 +138,7 @@ const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer o Ultraf
 const RESPOSTA_ULTRAFORMER_OPCOES = 'Temos algumas opções de Ultraformer MPT 😊\n\n1️⃣ Full Face\n2️⃣ Terço Inferior\n3️⃣ Papada\n4️⃣ Pescoço\n5️⃣ Colo\n6️⃣ Pálpebras\n7️⃣ Abdome\n8️⃣ Flancos\n9️⃣ Braços\n🔟 Interno de coxa\n\nQual dessas regiões você quer?';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
 const RESPOSTA_LAVIEEN_OPCOES = 'Temos algumas opções de Lavieen 😊\n\n1️⃣ Facial completo\n2️⃣ Face + Pescoço\n3️⃣ Pescoço + Colo\n4️⃣ Face + Pescoço + Colo\n5️⃣ BB Laser Facial\n6️⃣ Melasma\n7️⃣ Olheiras\n8️⃣ Capilar\n9️⃣ Mãos\n\nQual dessas opções você quer?';
-const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado, vou te direcionar para a equipe da unidade 😊';
+const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado 😊\n\nVou te direcionar para a equipe da unidade 👇';
 
 // ════ BLOQUEIO OBRIGATÓRIO DE PREÇOS ════
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
@@ -1109,6 +1109,7 @@ function gerarRespostaCartao(cidade = '') {
   }
 
   return `Você pode pagar com cartão clicando aqui:\n\n<a href="${link}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Pagar com Cartão</a>`;
+}
 
 
 function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = 'html') {
@@ -1152,6 +1153,22 @@ ${link}`;
 Você pode finalizar sua compra aqui 👇
 
 <a href="${link}" target="_blank" style="display:inline-block;margin-top:12px;padding:12px 20px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">🛒 Finalizar Compra</a>`;
+}
+
+function procedimentoCorrespondeBase(procedimento = '', base = '') {
+  if (!procedimento || !base) return false;
+  const p = normalizeText(procedimento);
+
+  if (base === 'botox') return p.includes('botox');
+  if (base === 'ultraformer') return p.includes('ultraformer');
+  if (base === 'lavieen') return p.includes('lavieen');
+  if (base === 'preenchedor') return p.includes('preenchedor');
+  if (base === 'bioestimulador') return p.includes('bioestimulador');
+  if (base === 'endymed') return p.includes('endymed');
+  if (base === 'scizer') return p.includes('scizer');
+
+  return false;
+}
 
 
 function detectarProcedimentoDetalhado(texto = '') {
@@ -1359,30 +1376,49 @@ function resolverDesambiguacaoProcedimentoCartao(texto = '', contexto = {}) {
     return { procedimento, base, precisaPerguntar: false, respostaPergunta: '', tentativas: 0, redirecionar: false };
   }
 
-  const tentativasAtuais = contexto.procedimentoBase === base ? Number(contexto.tentativasProcedimento || 0) : 0;
-  const tentativas = tentativasAtuais + 1;
+  const tentativasAtuais = contexto.procedimentoBase === base ? Number(contexto.tentativas_pergunta || 0) : 0;
 
-  if (base === 'botox' && tentativas >= 2) {
-    return { procedimento: null, base, precisaPerguntar: false, respostaPergunta: '', tentativas, redirecionar: true };
+  if (tentativasAtuais <= 0) {
+    if (base === 'botox') {
+      return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_BOTOX_DESAMBIGUACAO, tentativas: 1, redirecionar: false };
+    }
+
+    if (base === 'ultraformer') {
+      return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_ULTRAFORMER_SEM_REGIAO, tentativas: 1, redirecionar: false };
+    }
+
+    if (base === 'lavieen') {
+      return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_LAVIEEN_SEM_REGIAO, tentativas: 1, redirecionar: false };
+    }
   }
 
-  if ((base === 'ultraformer' || base === 'lavieen') && tentativas >= 3) {
-    return { procedimento: null, base, precisaPerguntar: false, respostaPergunta: '', tentativas, redirecionar: true };
+  // Na etapa de pergunta 2, tentar interpretar com aproximação e, se falhar, perguntar pela ultima vez.
+  if (tentativasAtuais === 1) {
+    const procedimentoAproximado = detectarProcedimento(texto);
+    if (procedimentoCorrespondeBase(procedimentoAproximado, base)) {
+      return { procedimento: procedimentoAproximado, base, precisaPerguntar: false, respostaPergunta: '', tentativas: 0, redirecionar: false };
+    }
+
+    if (base === 'botox') {
+      return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_BOTOX_DESAMBIGUACAO, tentativas: 2, redirecionar: false };
+    }
+
+    if (base === 'ultraformer') {
+      return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_ULTRAFORMER_OPCOES, tentativas: 2, redirecionar: false };
+    }
+
+    if (base === 'lavieen') {
+      return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_LAVIEEN_OPCOES, tentativas: 2, redirecionar: false };
+    }
   }
 
-  if (base === 'botox') {
-    return { procedimento: null, base, precisaPerguntar: true, respostaPergunta: RESPOSTA_BOTOX_DESAMBIGUACAO, tentativas, redirecionar: false };
+  // Depois de 2 perguntas, se ainda nao entender, redirecionar.
+  const procedimentoAproximadoFinal = detectarProcedimento(texto);
+  if (procedimentoCorrespondeBase(procedimentoAproximadoFinal, base)) {
+    return { procedimento: procedimentoAproximadoFinal, base, precisaPerguntar: false, respostaPergunta: '', tentativas: 0, redirecionar: false };
   }
 
-  if (base === 'ultraformer') {
-    const respostaPergunta = tentativas === 1 ? RESPOSTA_ULTRAFORMER_SEM_REGIAO : RESPOSTA_ULTRAFORMER_OPCOES;
-    return { procedimento: null, base, precisaPerguntar: true, respostaPergunta, tentativas, redirecionar: false };
-  }
-
-  if (base === 'lavieen') {
-    const respostaPergunta = tentativas === 1 ? RESPOSTA_LAVIEEN_SEM_REGIAO : RESPOSTA_LAVIEEN_OPCOES;
-    return { procedimento: null, base, precisaPerguntar: true, respostaPergunta, tentativas, redirecionar: false };
-  }
+  return { procedimento: null, base, precisaPerguntar: false, respostaPergunta: '', tentativas: tentativasAtuais, redirecionar: true };
 
   return { procedimento: null, base: null, precisaPerguntar: false, respostaPergunta: '', tentativas: 0, redirecionar: false };
 }
@@ -1980,7 +2016,7 @@ export default async function handler(req, res) {
       if (!cidadeParaLocalizar) {
         return res.status(200).json({
           resposta: RESPOSTA_CIDADE,
-          contexto: contexto
+          contexto: { ...contexto, tentativas_pergunta: 0 }
         });
       }
 
@@ -1992,7 +2028,7 @@ export default async function handler(req, res) {
       if (respostaLocalizacao) {
         return res.status(200).json({
           resposta: respostaLocalizacao.resposta,
-          contexto: { ...contexto, ...respostaLocalizacao.contexto }
+          contexto: { ...contexto, ...respostaLocalizacao.contexto, tentativas_pergunta: 0 }
         });
       }
     }
@@ -2268,7 +2304,7 @@ export default async function handler(req, res) {
               formaPagamento: 'cartao',
               cidadeCompra,
               procedimentoBase: desambiguacao.base,
-              tentativasProcedimento: desambiguacao.tentativas,
+              tentativas_pergunta: desambiguacao.tentativas,
               perguntouProcedimentoCartao: true,
               status_compra: 'em andamento'
             }
@@ -2282,6 +2318,17 @@ export default async function handler(req, res) {
         const procedimentoDetectado = desambiguacao.procedimento || procedimentoInfo.procedimento || contexto.procedimento || procedimentoDoContexto;
 
         if (!procedimentoDetectado) {
+          const tentativasPergunta = Number(contexto.tentativas_pergunta || 0) + 1;
+          if (tentativasPergunta >= 2) {
+            const respostaWhatsapp = respostaWhatsappPorCidade(cidadeCompra);
+            if (respostaWhatsapp) {
+              return res.status(200).json({
+                resposta: `${RESPOSTA_DIRECIONAR_LINK_ERRADO}\n\n${respostaWhatsapp}`,
+                contexto: { ...contexto, intencao: 'compra_finalizada_equipe', cidadeCompra, intencaoCompra: 'equipe', tentativas_pergunta: 0, status_compra: 'em andamento' }
+              });
+            }
+          }
+
           return res.status(200).json({
             resposta: 'Sem problema 😊\n\nQual procedimento você quer finalizar no cartão?',
             contexto: {
@@ -2290,7 +2337,7 @@ export default async function handler(req, res) {
               formaPagamento: 'cartao',
               cidadeCompra,
               procedimentoBase: contexto.procedimentoBase || null,
-              tentativasProcedimento: Number(contexto.tentativasProcedimento || 0),
+              tentativas_pergunta: tentativasPergunta,
               perguntouProcedimentoCartao: true,
               status_compra: 'em andamento'
             }
@@ -2308,7 +2355,7 @@ export default async function handler(req, res) {
               cidadeCompra,
               cidadeAtual: cidadeCompra,
               procedimentoBase: desambiguacao.base || contexto.procedimentoBase || null,
-              tentativasProcedimento: 0,
+              tentativas_pergunta: 0,
               procedimento: procedimentoDetectado,
               procedimentoAtual: procedimentoDetectado,
               aguardandoComprovante: true,
@@ -2334,7 +2381,7 @@ export default async function handler(req, res) {
             formaPagamento: 'cartao', 
             cidadeCompra,
             procedimentoBase: contexto.procedimentoBase || null,
-            tentativasProcedimento: Number(contexto.tentativasProcedimento || 0),
+            tentativas_pergunta: Number(contexto.tentativas_pergunta || 0) + 1,
             perguntouProcedimentoCartao: true,
             status_compra: 'em andamento'
           }
@@ -2376,7 +2423,7 @@ export default async function handler(req, res) {
             cidadeCompra,
             formaPagamento: 'cartao',
             procedimentoBase: desambiguacao.base,
-            tentativasProcedimento: desambiguacao.tentativas,
+            tentativas_pergunta: desambiguacao.tentativas,
             perguntouProcedimentoCartao: true,
             status_compra: 'em andamento'
           }
@@ -2388,13 +2435,24 @@ export default async function handler(req, res) {
 
       if (!procedimentoDetectado) {
         if (contexto.perguntouProcedimentoCartao) {
+          const tentativasPergunta = Number(contexto.tentativas_pergunta || 0) + 1;
+          if (tentativasPergunta >= 2) {
+            const respostaWhatsapp = respostaWhatsappPorCidade(cidadeCompra);
+            if (respostaWhatsapp) {
+              return res.status(200).json({
+                resposta: `${RESPOSTA_DIRECIONAR_LINK_ERRADO}\n\n${respostaWhatsapp}`,
+                contexto: { ...contexto, intencao: 'compra_finalizada_equipe', cidadeCompra, intencaoCompra: 'equipe', tentativas_pergunta: 0, status_compra: 'em andamento' }
+              });
+            }
+          }
+
           return res.status(200).json({
             resposta: 'Não consegui identificar o procedimento pelo nome informado 😊\n\nPode me dizer o nome mais próximo do tratamento?',
             contexto: {
               ...contexto,
               cidadeCompra,
               formaPagamento: 'cartao',
-              tentativasProcedimento: Number(contexto.tentativasProcedimento || 0) + 1,
+              tentativas_pergunta: tentativasPergunta,
               status_compra: 'em andamento'
             }
           });
@@ -2407,7 +2465,7 @@ export default async function handler(req, res) {
             cidadeCompra,
             formaPagamento: 'cartao',
             perguntouProcedimentoCartao: true,
-            tentativasProcedimento: Number(contexto.tentativasProcedimento || 0),
+            tentativas_pergunta: Number(contexto.tentativas_pergunta || 0) + 1,
             status_compra: 'em andamento'
           }
         });
@@ -2425,7 +2483,7 @@ export default async function handler(req, res) {
             cidadeCompra,
             formaPagamento: 'cartao',
             procedimentoBase: desambiguacao.base || contexto.procedimentoBase || null,
-            tentativasProcedimento: 0,
+            tentativas_pergunta: 0,
             procedimento: procedimentoDetectado,
             procedimentoAtual: procedimentoDetectado,
             aguardandoComprovante: true,
@@ -2445,7 +2503,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         resposta: 'Sem problema 😊\n\nQual procedimento você quer finalizar no cartão?',
-        contexto: { ...contexto, cidadeCompra, formaPagamento: 'cartao', status_compra: 'em andamento' }
+        contexto: { ...contexto, cidadeCompra, formaPagamento: 'cartao', tentativas_pergunta: Number(contexto.tentativas_pergunta || 0) + 1, status_compra: 'em andamento' }
       });
     }
 
@@ -2571,7 +2629,7 @@ export default async function handler(req, res) {
       if (!cidadeAtual) {
         return res.status(200).json({
           resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
-          contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined }
+          contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined, tentativas_pergunta: 0 }
         });
       }
 
@@ -2579,13 +2637,13 @@ export default async function handler(req, res) {
       if (respostaHumano) {
         return res.status(200).json({
           resposta: respostaHumano,
-          contexto: { cidade: cidadeAtual, cidadeAtual }
+          contexto: { cidade: cidadeAtual, cidadeAtual, tentativas_pergunta: 0 }
         });
       }
 
       return res.status(200).json({
         resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
-        contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined }
+        contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined, tentativas_pergunta: 0 }
       });
     }
 
