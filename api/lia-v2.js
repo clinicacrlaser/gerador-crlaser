@@ -223,6 +223,41 @@ const LINKS_CAMPANHA_SEXTOUU_GOIANIA = {
   'Bioestimulador Diamond': 'https://cielolink.com.br/4l02GKP'
 };
 
+// ════ LINKS DE PAGAMENTO - CAMPANHA SEXTOUU - PALMAS ════
+const LINKS_CAMPANHA_SEXTOUU_PALMAS = {
+  'Ultraformer MPT Full Face': 'https://cielolink.com.br/4pWxfEt',
+  'Ultraformer MPT Terço Inferior': 'https://cielolink.com.br/4gwYO37',
+  'Ultraformer MPT Papada': 'https://cielolink.com.br/43jpYF9',
+  'Ultraformer MPT Bichectomia': 'https://cielolink.com.br/4gwYO37',
+  'Ultraformer MPT Pescoço (Pega Papada com Foco em Flacidez)': 'https://cielolink.com.br/4htLaOz',
+  'Ultraformer MPT Colo': 'https://cielolink.com.br/421rBXD',
+  'Ultraformer MPT Pálpebras': 'https://cielolink.com.br/4kEvokX',
+  'Ultraformer MPT Abdome': 'https://cielolink.com.br/442qoAM',
+  'Ultraformer MPT Flancos': 'https://cielolink.com.br/4mtqtmV',
+  'Ultraformer MPT Braços Região do Tchau': 'https://cielolink.com.br/44tQmx0',
+  'Ultraformer MPT Gordura do Sutiã': 'https://cielolink.com.br/4lm5Mcg',
+  'Ultraformer MPT Gordura Pré-Axilar': 'https://cielolink.com.br/4encYCO',
+  'Ultraformer MPT Bananinha': 'https://cielolink.com.br/4kUz2aa',
+  'Ultraformer MPT Interno de Coxa': 'https://cielolink.com.br/44vVv7J',
+  'Ultraformer MPT Monte de Vênus': 'https://cielolink.com.br/3HUpPAl',
+  'Ultraformer MPT Rejuvenescimento Íntimo': 'https://cielolink.com.br/3G2CJeZ',
+  'Ultraformer MPT Joelho': 'https://cielolink.com.br/43YlG6Z',
+  'Ultraformer MPT Mãos': 'https://cielolink.com.br/44cXY5M',
+  'Lavieen Facial Completo - 3 sessões': 'https://cielolink.com.br/3ZOPUa6',
+  'Lavieen Facial + Pescoço - 3 sessões': 'https://cielolink.com.br/3T4T4mn',
+  'Lavieen Pescoço + Colo - 3 sessões': 'https://cielolink.com.br/4lo0VYd',
+  'Lavieen Face + Pescoço + Colo - 3 sessões': 'https://cielolink.com.br/3Icqw7X',
+  'Lavieen BB Laser Facial - 3 sessões': 'https://cielolink.com.br/3TEUqEs',
+  'Lavieen Melasma Facial - 3 sessões': 'https://cielolink.com.br/4lHjZ3Z',
+  'Lavieen Olheiras - 3 sessões': 'https://cielolink.com.br/3GbM7gn',
+  'Lavieen Capilar - 3 sessões': 'https://cielolink.com.br/3HVBYoy',
+  'Lavieen Mãos - 3 sessões': 'https://cielolink.com.br/4k2G6Ap',
+  'Botox Facial Terço Superior Com Retorno': 'https://cielolink.com.br/4m1v7dh',
+  'Botox Suor Axilar': 'https://cielolink.com.br/4bGnHHA',
+  'Preenchedor Facial': 'https://cielolink.com.br/417PGLr',
+  'Bioestimulador Diamond': 'https://cielolink.com.br/430UpzN'
+};
+
 function normalizeText(texto = '') {
   return texto
     .toLowerCase()
@@ -875,6 +910,8 @@ function gerarRespostaOfertaCampanha(procedimento = '', cidade = '') {
     linksMap = LINKS_CAMPANHA_SEXTOUU_CAMPINAS;
   } else if (cidadeNorm === 'goiania') {
     linksMap = LINKS_CAMPANHA_SEXTOUU_GOIANIA;
+  } else if (cidadeNorm === 'palmas') {
+    linksMap = LINKS_CAMPANHA_SEXTOUU_PALMAS;
   } else {
     return null;
   }
@@ -1572,8 +1609,8 @@ export default async function handler(req, res) {
         // Verificar se mencionou um procedimento
         const procedimentoDetectado = detectarProcedimento(pergunta);
         
-        // Verificar se a cidade tem links de campanha (Brasília, Campinas ou Goiânia)
-        const cidadesComLinks = ['brasilia', 'campinas', 'goiania'];
+        // Verificar se a cidade tem links de campanha (Brasília, Campinas, Goiânia ou Palmas)
+        const cidadesComLinks = ['brasilia', 'campinas', 'goiania', 'palmas'];
         if (procedimentoDetectado && cidadesComLinks.includes(cidadeAtual)) {
           // Tentar buscar link da campanha
           const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeAtual);
