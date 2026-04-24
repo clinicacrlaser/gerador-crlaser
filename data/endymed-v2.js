@@ -39,8 +39,7 @@ export const endymedFaq = [
     gatilhos: [
       'quantas sessoes de endymed',
       'quantas sessoes endymed',
-      'endymed quantas sessoes',
-      'quantas sessoes'
+      'endymed quantas sessoes'
     ],
     gatilhosContextuais: ['quantas sessoes', 'sessoes'],
     resposta: 'O protocolo varia conforme o tipo 😊\n\n👉 Endymed Ifine, Small e Shapper:  \nSão 6 sessões, geralmente com intervalo de 1 semana.\n\n👉 Endymed Intensif:  \nSão 3 sessões com intervalo médio de 30 dias.'
@@ -59,7 +58,7 @@ export const endymedFaq = [
   },
   {
     procedimento: 'endymed',
-    gatilhos: ['endymed doi', 'endymed dói', 'doi', 'dói', 'dolorido'],
+    gatilhos: ['endymed doi', 'endymed dói'],
     gatilhosContextuais: ['doi', 'dói', 'dolorido'],
     resposta: 'É um tratamento bem tranquilo 😊\n\nNos protocolos tradicionais (Small, Shapper, Ifine) é indolor.\n\nNo Intensif pode ter um leve desconforto, mas é bem tolerável.'
   },

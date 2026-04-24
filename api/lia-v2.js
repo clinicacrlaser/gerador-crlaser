@@ -5,6 +5,7 @@ import { faq } from '../data/faq-v2.js';
 import { sugestoes } from '../data/sugestoes-v2.js';
 import { bioestimuladorFaq } from '../data/bioestimulador-v2.js';
 import { indicacoes } from '../data/indicacoes-v2.js';
+import { lavieenFaq } from '../data/lavieen-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
@@ -533,6 +534,36 @@ function encontrarBlocoBioestimulador(texto = '', contexto = {}) {
   return null;
 }
 
+function encontrarBlocoLavieen(texto = '', contexto = {}) {
+  const textoNormalizado = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const contextoLavieen = procedimentoAtual === 'lavieen';
+  const mencionaProcedimentoConcorrente = [
+    'botox',
+    'bioestimulador',
+    'diamond',
+    'sculptra',
+    'endymed',
+    'ultraformer',
+    'preenchedor'
+  ].some((termo) => textoNormalizado.includes(termo));
+
+  const matchDireto = lavieenFaq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+  );
+  if (matchDireto && !mencionaProcedimentoConcorrente) return matchDireto;
+
+  if (contextoLavieen) {
+    return lavieenFaq.find((item) =>
+      Array.isArray(item.gatilhosContextuais) &&
+      item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+    ) || null;
+  }
+
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -851,6 +882,14 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: itemBio.resposta,
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemBio.procedimento || 'bioestimulador' }
+      });
+    }
+
+    const itemLavieen = encontrarBlocoLavieen(pergunta, contexto);
+    if (itemLavieen) {
+      return res.status(200).json({
+        resposta: itemLavieen.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemLavieen.procedimento || 'lavieen' }
       });
     }
 
