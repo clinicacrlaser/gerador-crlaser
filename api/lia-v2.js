@@ -11,12 +11,20 @@ const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Ca
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
 const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
+const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   goiania: 'https://wa.me/5562985499102?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   palmas: 'https://wa.me/5563981226319?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   saopaulo: 'https://wa.me/5511967292039?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es'
+};
+const LINKS_OFERTA_SEMANA = {
+  campinas: 'https://wa.me/5519991818366?text=Quero%20ver%20a%20oferta%20da%20semana',
+  brasilia: 'https://wa.me/5561981316493?text=Quero%20ver%20a%20oferta%20da%20semana',
+  goiania: 'https://wa.me/5562985499102?text=Quero%20ver%20a%20oferta%20da%20semana',
+  palmas: 'https://wa.me/5563981226319?text=Quero%20ver%20a%20oferta%20da%20semana',
+  saopaulo: 'https://wa.me/5511967292039?text=Quero%20ver%20a%20oferta%20da%20semana'
 };
 
 function normalizeText(texto = '') {
@@ -196,6 +204,10 @@ function detectarInteresseFechamento(texto = '') {
   const t = normalizeText(texto);
   return (
     ['quero', 'sim', 'tenho interesse', 'interesse', 'quero sim', 'pode mandar', 'manda'].includes(t) ||
+    t.includes('valores') ||
+    t.includes('oferta') ||
+    t.includes('oferta da semana') ||
+    t.includes('me passa os valores') ||
     t.includes('quanto custa') ||
     t.includes('tenho interesse')
   );
@@ -468,6 +480,17 @@ function respostaWhatsappPorCidade(cidade = '') {
   return `Perfeito 😊\n\nVou te direcionar direto para a unidade de ${nomeCidade} 👇\n\n<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
 }
 
+function respostaOfertaSemanaPorCidade(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const linkOferta = LINKS_OFERTA_SEMANA[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+
+  if (!linkOferta) return null;
+
+  return `Perfeito 😊\n\nVou te direcionar para a oferta da semana da unidade de ${nomeCidade} 👇\n\n<a href="${linkOferta}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Ver oferta da semana</a>`;
+}
+
 function encontrarBlocoEndymed(texto = '', contexto = {}) {
   const textoNormalizado = normalizeText(texto);
   const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
@@ -553,17 +576,23 @@ export default async function handler(req, res) {
     if (contexto.intencao === 'aguardando_cidade_whatsapp') {
       const cidadeNoMsg = unidadeDetectada ? unidadeDetectada.cidade : null;
       if (cidadeNoMsg) {
-        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeNoMsg);
-        if (respostaWhatsapp) {
+        const tipoLink = contexto.tipoLink || 'whatsapp';
+        const respostaLink = tipoLink === 'oferta_semana'
+          ? respostaOfertaSemanaPorCidade(cidadeNoMsg)
+          : respostaWhatsappPorCidade(cidadeNoMsg);
+
+        if (respostaLink) {
           return res.status(200).json({
-            resposta: respostaWhatsapp,
-            contexto: { cidade: cidadeNoMsg }
+            resposta: respostaLink,
+            contexto: { cidade: cidadeNoMsg, cidadeAtual: cidadeNoMsg }
           });
         }
       }
 
       return res.status(200).json({
-        resposta: 'Me fala sua cidade que te envio o contato direto da unidade mais próxima 😊',
+        resposta: contexto.tipoLink === 'oferta_semana'
+          ? RESPOSTA_OFERTA_SEMANA_SEM_CIDADE
+          : 'Me fala sua cidade que te envio o contato direto da unidade mais próxima 😊',
         contexto
       });
     }
@@ -628,14 +657,14 @@ export default async function handler(req, res) {
     }
 
     if (contexto.intencao === 'conduzindo_indicacao') {
-      const cidadeContexto = contexto.cidade || null;
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
 
       if (detectarIntencaoAgendamento(pergunta)) {
         if (!cidadeAtual) {
           return res.status(200).json({
             resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
-            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp' }
+            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'whatsapp', cidadeAtual: cidadeAtual || undefined }
           });
         }
 
@@ -643,7 +672,7 @@ export default async function handler(req, res) {
         if (respostaWhatsapp) {
           return res.status(200).json({
             resposta: respostaWhatsapp,
-            contexto: { cidade: cidadeAtual }
+            contexto: { cidade: cidadeAtual, cidadeAtual }
           });
         }
       }
@@ -651,16 +680,16 @@ export default async function handler(req, res) {
       if (detectarInteresseFechamento(pergunta)) {
         if (!cidadeAtual) {
           return res.status(200).json({
-            resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
-            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp' }
+            resposta: RESPOSTA_OFERTA_SEMANA_SEM_CIDADE,
+            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'oferta_semana', cidadeAtual: cidadeAtual || undefined }
           });
         }
 
-        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
-        if (respostaWhatsapp) {
+        const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
+        if (respostaOferta) {
           return res.status(200).json({
-            resposta: respostaWhatsapp,
-            contexto: { cidade: cidadeAtual }
+            resposta: respostaOferta,
+            contexto: { cidade: cidadeAtual, cidadeAtual }
           });
         }
       }
@@ -669,14 +698,14 @@ export default async function handler(req, res) {
       if (passos >= 2) {
         return res.status(200).json({
           resposta: RESPOSTA_FECHAMENTO_LEVE,
-          contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined }
+          contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined, cidadeAtual: cidadeAtual || undefined }
         });
       }
 
       const perguntaConducao = perguntaContinuidadePorProblema(contexto.procedimentoAtual || '');
       return res.status(200).json({
         resposta: perguntaConducao || 'O que mais te incomoda hoje?',
-        contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined }
+        contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined, cidadeAtual: cidadeAtual || undefined }
       });
     }
 
@@ -687,21 +716,21 @@ export default async function handler(req, res) {
     }
 
     if (detectarInteresseFechamento(pergunta)) {
-      const cidadeContexto = contexto.cidade || null;
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
 
       if (!cidadeAtual) {
         return res.status(200).json({
-          resposta: RESPOSTA_AGENDAMENTO_SEM_CIDADE,
-          contexto: { intencao: 'aguardando_cidade_whatsapp' }
+          resposta: RESPOSTA_OFERTA_SEMANA_SEM_CIDADE,
+          contexto: { intencao: 'aguardando_cidade_whatsapp', tipoLink: 'oferta_semana', cidadeAtual: cidadeAtual || undefined }
         });
       }
 
-      const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
-      if (respostaWhatsapp) {
+      const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
+      if (respostaOferta) {
         return res.status(200).json({
-          resposta: respostaWhatsapp,
-          contexto: { cidade: cidadeAtual }
+          resposta: respostaOferta,
+          contexto: { cidade: cidadeAtual, cidadeAtual }
         });
       }
     }
