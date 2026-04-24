@@ -7,6 +7,7 @@ import { bioestimuladorFaq } from '../data/bioestimulador-v2.js';
 import { indicacoes } from '../data/indicacoes-v2.js';
 import { lavieenFaq } from '../data/lavieen-v2.js';
 import { ultraformerFaq } from '../data/ultraformer-v2.js';
+import { preenchedorFaq } from '../data/preenchedor-v2.js';
 
 const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
@@ -541,6 +542,11 @@ function encontrarBlocoUltraformer(texto = '', contexto = {}) {
   const contextoUltraformer = procedimentoAtual === 'ultraformer' || procedimentoAtual.includes('ultraformer');
   const contextoOutroProcedimento = ['lavieen', 'endymed', 'intensif', 'bioestimulador', 'diamond', 'botox'].includes(procedimentoAtual);
   const mencionaUltraformer = ['ultraformer', 'mpt'].some((termo) => textoNormalizado.includes(termo));
+  const mencionaPreenchedor = ['preenchedor', 'preenchimento', 'acido hialuronico', 'ácido hialurônico'].some((termo) => textoNormalizado.includes(normalizeText(termo)));
+
+  if (mencionaPreenchedor && !mencionaUltraformer && !contextoUltraformer) {
+    return null;
+  }
 
   if (contextoOutroProcedimento && !contextoUltraformer && !mencionaUltraformer) {
     return null;
@@ -584,6 +590,59 @@ function encontrarBlocoLavieen(texto = '', contexto = {}) {
 
   if (contextoLavieen) {
     return lavieenFaq.find((item) =>
+      Array.isArray(item.gatilhosContextuais) &&
+      item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+    ) || null;
+  }
+
+  return null;
+}
+
+function encontrarBlocoPreenchedor(texto = '', contexto = {}) {
+  const textoNormalizado = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const contextoPreenchedor = procedimentoAtual === 'preenchedor' || procedimentoAtual.includes('preenchedor') || procedimentoAtual.includes('harmonizacao');
+  const mencionaPreenchedor = [
+    'preenchedor',
+    'preenchimento',
+    'acido hialuronico',
+    'ácido hialurônico',
+    'ampolas',
+    'labios',
+    'lábios',
+    'olheira',
+    'olheiras',
+    'bigode chines',
+    'bigode chinês',
+    'md codes',
+    'harmonizacao',
+    'harmonização',
+    'mento',
+    'orelha',
+    'orelhas',
+    'top model'
+  ].some((termo) => textoNormalizado.includes(normalizeText(termo)));
+
+  const concorrentesSemPreenchedor = ['lavieen', 'endymed', 'intensif', 'bioestimulador', 'diamond', 'botox'].some((termo) => textoNormalizado.includes(termo)) && !textoNormalizado.includes('preenchedor');
+
+  if (!contextoPreenchedor && !mencionaPreenchedor) {
+    if (!['e definitivo', 'é definitivo', 'dura quanto', 'quantas ampolas'].some((g) => textoNormalizado.includes(normalizeText(g)))) {
+      return null;
+    }
+  }
+
+  if (concorrentesSemPreenchedor && !contextoPreenchedor) {
+    return null;
+  }
+
+  const matchDireto = preenchedorFaq.find((item) =>
+    Array.isArray(item.gatilhos) &&
+    item.gatilhos.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
+  );
+  if (matchDireto) return matchDireto;
+
+  if (contextoPreenchedor) {
+    return preenchedorFaq.find((item) =>
       Array.isArray(item.gatilhosContextuais) &&
       item.gatilhosContextuais.some((gatilho) => textoNormalizado.includes(normalizeText(gatilho)))
     ) || null;
@@ -926,6 +985,14 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: itemLavieen.resposta,
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemLavieen.procedimento || 'lavieen' }
+      });
+    }
+
+    const itemPreenchedor = encontrarBlocoPreenchedor(pergunta, contexto);
+    if (itemPreenchedor) {
+      return res.status(200).json({
+        resposta: itemPreenchedor.resposta,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemPreenchedor.procedimento || 'preenchedor' }
       });
     }
 
