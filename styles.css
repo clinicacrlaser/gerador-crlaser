@@ -800,6 +800,10 @@ body {
     display: none !important;
   }
 
+  #btnCopiarQA {
+    display: none;
+  }
+
   #liaChat.is-mobile-fullscreen {
     position: fixed !important;
     top: 0 !important;
