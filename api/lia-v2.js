@@ -28,12 +28,12 @@ const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília,
 
 const RESPOSTA_FORMA_PAGAMENTO = 'Perfeito 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão';
 
-// ════ PLACEHOLDERS PARA PIX ════
-const PIX_BRASILIA = 'INSERIR_PIX_BRASILIA';
-const PIX_CAMPINAS = 'INSERIR_PIX_CAMPINAS';
-const PIX_GOIANIA = 'INSERIR_PIX_GOIANIA';
-const PIX_PALMAS = 'INSERIR_PIX_PALMAS';
-const PIX_SAO_PAULO = 'INSERIR_PIX_SAO_PAULO';
+// ════ CHAVES DE PIX REAIS - CR LASER® ════
+const PIX_BRASILIA = 'Pix CR Laser® Brasília:\n\n🔽🔽\n\n43.713.316/0001-33';
+const PIX_CAMPINAS = 'Pix CR Laser® Campinas:\n\nObs.: O Pix é o CNPJ\n\n🔽🔽\n\n60.970.806/0001-34';
+const PIX_GOIANIA = 'PIX CR Laser® Goiânia:\n\n🔽🔽\n\n39.252.455/0001-30';
+const PIX_PALMAS = 'PIX CR Laser® Palmas:\n\n🔽🔽\n\n18.986.800/0001-99';
+const PIX_SAO_PAULO = 'Pix CR Laser® São Paulo:\n\nObs.: O Pix é o CNPJ\n\n🔽🔽\n\n54.153.510/0001-28';
 
 // ════ PLACEHOLDERS PARA LINKS DE CARTÃO ════
 const LINK_CARTAO_BRASILIA = 'INSERIR_LINK_CARTAO_BRASILIA';
@@ -680,14 +680,12 @@ function detectarFormaPagamento(texto = '') {
 function gerarRespostaPix(cidade = '') {
   const cidadeNorm = normalizeText(cidade);
   const pix = PIX_POR_CIDADE[cidadeNorm];
-  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
-  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
 
-  if (!pix || pix.startsWith('INSERIR_')) {
-    return `Chave PIX de ${nomeCidade}:\n\n${pix}\n\nApós o pagamento, envie o comprovante para a unidade e solicite o agendamento 😊`;
+  if (!pix) {
+    return 'Desculpe, não encontrei a chave Pix desta unidade. Você pode falar direto com a equipe!';
   }
 
-  return `Chave PIX de ${nomeCidade}:\n\n${pix}\n\nApós o pagamento, envie o comprovante para a unidade e solicite o agendamento 😊`;
+  return `${pix}\n\nApós o pagamento, é só enviar o comprovante para a unidade e solicitar o agendamento 😊`;
 }
 
 function gerarRespostaCartao(cidade = '') {
