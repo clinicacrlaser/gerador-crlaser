@@ -678,7 +678,7 @@ function detectarFormaPagamento(texto = '') {
 }
 
 function gerarRespostaPix(cidade = '') {
-  const cidadeNorm = normalizeText(cidade);
+  const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
   const pix = PIX_POR_CIDADE[cidadeNorm];
 
   if (!pix) {
