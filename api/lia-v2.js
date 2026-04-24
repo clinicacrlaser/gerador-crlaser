@@ -20,6 +20,8 @@ const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melho
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
 const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras ajuda principalmente em flacidez leve a moderada, dando mais firmeza e melhorando o aspecto da região.\n\nMas quando já existe indicação cirúrgica, ele não substitui a cirurgia. Ele pode ser uma opção para quem não quer operar agora ou quer uma melhora sem cirurgia.\n\nSe quiser, posso te explicar como funciona o MPT Pálpebras.';
 const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nEle ajuda a firmar a pele da região e pode melhorar o aspecto das pálpebras.\n\nMas em casos cirúrgicos, o resultado costuma ser mais limitado do que uma cirurgia.';
+const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, provavelmente o Bioestimulador faz mais sentido 😊\n\nEle ajuda muito quando existe flacidez com perda de estrutura ou volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
+const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, provavelmente o Ultraformer MPT faz mais sentido 😊\n\nEle costuma ser uma ótima opção quando existe flacidez em um rosto com mais volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -265,6 +267,78 @@ function detectarFollowUpUltraformerPalpebras(texto = '', contexto = {}) {
   ].some((gatilho) => t.includes(normalizeText(gatilho)));
 }
 
+function detectarPerfilFlacidezFacial(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  if (!['flacidez_rosto', 'perda_volume'].includes(procedimentoAtual)) {
+    return null;
+  }
+
+  const sinaisRostoMagro = [
+    'magro',
+    'fino',
+    'rosto murcho',
+    'perdi volume',
+    'emagreci',
+    'chupado'
+  ];
+  if (sinaisRostoMagro.some((gatilho) => t.includes(normalizeText(gatilho)))) {
+    return 'magro';
+  }
+
+  const sinaisRostoCheio = [
+    'cheio',
+    'mais cheio',
+    'gordinho',
+    'rosto pesado',
+    'tenho volume',
+    'bochecha',
+    'papada'
+  ];
+  if (sinaisRostoCheio.some((gatilho) => t.includes(normalizeText(gatilho)))) {
+    return 'cheio';
+  }
+
+  return null;
+}
+
+function responderIntencaoOperacional(intencao, unidade) {
+  if (intencao === 'horario') {
+    return { resposta: RESPOSTA_HORARIO };
+  }
+
+  if (!['endereco', 'telefone', 'mapa'].includes(intencao)) {
+    return null;
+  }
+
+  if (!unidade) {
+    return {
+      resposta: RESPOSTA_CIDADE,
+      contexto: { intencao: 'aguardando_apenas_cidade' }
+    };
+  }
+
+  if (intencao === 'endereco') {
+    return {
+      resposta: `📍 ${unidade.nomeCompleto}\n\n${unidade.endereco}\n\n📞 ${unidade.telefone}`
+    };
+  }
+
+  if (intencao === 'telefone') {
+    const respostaWhatsapp = respostaWhatsappPorCidade(unidade.cidade);
+    if (respostaWhatsapp) {
+      return {
+        resposta: respostaWhatsapp,
+        contexto: { cidade: unidade.cidade }
+      };
+    }
+
+    return { resposta: `📞 ${unidade.telefone}` };
+  }
+
+  return { resposta: `📍 Mapa:\n${unidade.mapa}` };
+}
+
 function detectarIntencaoAgendamento(texto = '') {
   const t = normalizeText(texto);
 
@@ -500,8 +574,12 @@ function identificarProblema(texto = '') {
 function perguntaConducaoPorProblema(problema = '') {
   const p = normalizeText(problema);
 
-  if (p === 'flacidez_rosto' || p === 'perda_volume') {
-    return '👉 Você sente mais flacidez ou perda de volume?';
+  if (p === 'flacidez_rosto') {
+    return 'Seu rosto hoje é mais magro ou mais cheio?';
+  }
+
+  if (p === 'perda_volume') {
+    return '👉 Essa região te incomoda há muito tempo?';
   }
 
   if (p === 'papada' || p === 'gordura') {
@@ -518,11 +596,15 @@ function perguntaConducaoPorProblema(problema = '') {
 function perguntaContinuidadePorProblema(problema = '') {
   const p = normalizeText(problema);
 
+  if (p === 'flacidez_rosto' || p === 'perda_volume') {
+    return 'Seu rosto hoje é mais magro ou mais cheio?';
+  }
+
   if (p === 'papada' || p === 'gordura') {
     return '👉 Essa região te incomoda há muito tempo?';
   }
 
-  if (p === 'flacidez_rosto' || p === 'perda_volume' || p === 'flacidez_corpo') {
+  if (p === 'flacidez_corpo') {
     return '👉 Essa região te incomoda há muito tempo?';
   }
 
@@ -1025,6 +1107,31 @@ export default async function handler(req, res) {
     if (contexto.intencao === 'conduzindo_indicacao') {
       const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
+      const unidadeContexto = cidadeAtual ? unidades.find((u) => u.cidade === cidadeAtual) : null;
+      const unidadeAtual = unidadeDetectada || unidadeContexto;
+      const intencaoOperacional = identificarIntencaoOperacional(pergunta);
+
+      if (intencaoOperacional) {
+        const respostaOperacional = responderIntencaoOperacional(intencaoOperacional, unidadeAtual);
+        if (respostaOperacional) {
+          return res.status(200).json(respostaOperacional);
+        }
+      }
+
+      const perfilFlacidezFacial = detectarPerfilFlacidezFacial(pergunta, contexto);
+      if (perfilFlacidezFacial === 'magro') {
+        return res.status(200).json({
+          resposta: RESPOSTA_FLACIDEZ_ROSTO_MAGRO,
+          contexto: { intencao: 'aguardando_interesse', procedimentoAtual: 'bioestimulador', cidade: cidadeAtual || undefined, cidadeAtual: cidadeAtual || undefined }
+        });
+      }
+
+      if (perfilFlacidezFacial === 'cheio') {
+        return res.status(200).json({
+          resposta: RESPOSTA_FLACIDEZ_ROSTO_CHEIO,
+          contexto: { intencao: 'aguardando_interesse', procedimentoAtual: 'ultraformer', cidade: cidadeAtual || undefined, cidadeAtual: cidadeAtual || undefined }
+        });
+      }
 
       if (detectarIntencaoAgendamento(pergunta)) {
         if (!cidadeAtual) {
@@ -1158,41 +1265,11 @@ export default async function handler(req, res) {
     const intencao = identificarIntencaoOperacional(pergunta);
     const unidade = unidadeDetectada;
 
-    if (intencao === 'horario') {
-      return res.status(200).json({ resposta: RESPOSTA_HORARIO });
-    }
-
-    if (intencao === 'endereco' || intencao === 'telefone' || intencao === 'mapa') {
-      if (!unidade) {
-        return res.status(200).json({ 
-          resposta: RESPOSTA_CIDADE,
-          contexto: { intencao: 'aguardando_apenas_cidade' }
-        });
+    if (intencao) {
+      const respostaOperacional = responderIntencaoOperacional(intencao, unidade);
+      if (respostaOperacional) {
+        return res.status(200).json(respostaOperacional);
       }
-
-      if (intencao === 'endereco') {
-        return res.status(200).json({
-          resposta: `📍 ${unidade.nomeCompleto}\n\n${unidade.endereco}\n\n📞 ${unidade.telefone}`
-        });
-      }
-
-      if (intencao === 'telefone') {
-        const respostaWhatsapp = respostaWhatsappPorCidade(unidade.cidade);
-        if (respostaWhatsapp) {
-          return res.status(200).json({
-            resposta: respostaWhatsapp,
-            contexto: { cidade: unidade.cidade }
-          });
-        }
-
-        return res.status(200).json({
-          resposta: `📞 ${unidade.telefone}`
-        });
-      }
-
-      return res.status(200).json({
-        resposta: `📍 Mapa:\n${unidade.mapa}`
-      });
     }
 
     if (cidadeDetectada && unidadeDetectada) {

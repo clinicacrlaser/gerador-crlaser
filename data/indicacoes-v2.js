@@ -54,7 +54,7 @@ export const indicacoes = [
       'emagreci',
       'mounjaro'
     ],
-    resposta: 'Depende um pouco do seu tipo de rosto 😊\n\n👉 Se for uma flacidez com mais volume, o Ultraformer MPT costuma ser uma ótima opção\n👉 Se for uma flacidez com perda de estrutura, o Bioestimulador funciona muito bem\n\nEm muitos casos, combinar os dois é o ideal.\n\nSe quiser, posso te orientar melhor para o seu caso 😉'
+    resposta: 'Para flacidez facial, a melhor indicação depende muito do tipo de rosto 😊'
   },
   {
     problema: 'rugas',
