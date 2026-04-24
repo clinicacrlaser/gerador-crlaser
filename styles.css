@@ -379,6 +379,18 @@ body {
   color: var(--text-muted);
 }
 
+.offer-range-highlight {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(24, 199, 209, 0.32);
+  background: linear-gradient(100deg, rgba(30, 95, 175, 0.14) 0%, rgba(24, 199, 209, 0.1) 100%);
+  color: #a8e9ef;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
 /* ── WRAPPER DE CAMPO ── */
 .field-wrap {
   position: relative;

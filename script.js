@@ -134,6 +134,14 @@ function ensureOfferRangeSelected() {
   }
 }
 
+function updateOfferRangeHighlight() {
+  const rangeSelect = document.getElementById('faixaOferta');
+  const hint = document.getElementById('faixaDestaque');
+  if (!rangeSelect || !hint) return;
+
+  hint.hidden = rangeSelect.value !== '2';
+}
+
 function activateBotoxHighlight() {
   const procedureSelect = document.getElementById('procedimento');
   if (!procedureSelect) {
@@ -167,12 +175,18 @@ function handleProcedureChangeForHighlight() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const procedureSelect = document.getElementById('procedimento');
+  const rangeSelect = document.getElementById('faixaOferta');
 
   if (procedureSelect) {
     procedureSelect.addEventListener('change', handleProcedureChangeForHighlight);
   }
 
+  if (rangeSelect) {
+    rangeSelect.addEventListener('change', updateOfferRangeHighlight);
+  }
+
   renderBotoxHighlightState();
+  updateOfferRangeHighlight();
 });
 
 
