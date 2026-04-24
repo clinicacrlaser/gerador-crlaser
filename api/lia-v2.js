@@ -235,6 +235,28 @@ function detectarIntencaoAgendamento(texto = '') {
   return palavrasFuzzy.some((p) => palavrasParecidas(p, 'agendar') || palavrasParecidas(p, 'agenda'));
 }
 
+function detectarIntencaoHumano(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'quero falar com alguem',
+    'quero falar com alguém',
+    'quero falar com atendente',
+    'falar com atendente',
+    'quero atendente',
+    'humano',
+    'quero humano',
+    'falar com pessoa',
+    'falar com a clinica',
+    'falar com a clínica',
+    'quero agendar direto',
+    'me chama no whatsapp',
+    'tem alguem ai',
+    'tem alguém aí',
+    'tem alguem',
+    'tem alguém'
+  ].some((g) => t.includes(normalizeText(g)));
+}
+
 function tokenize(texto = '') {
   const stopwords = new Set(['a', 'o', 'as', 'os', 'de', 'do', 'da', 'dos', 'das', 'e', 'em', 'no', 'na', 'nos', 'nas', 'com', 'por', 'para', 'que', 'qual', 'quais']);
   return normalizeText(texto)
@@ -484,6 +506,53 @@ function respostaWhatsappPorCidade(cidade = '') {
   return `Perfeito 😊\n\nVou te direcionar direto para a unidade de ${nomeCidade} 👇\n\n<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
 }
 
+function respostaHumanoPorCidade(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+
+  if (!linkWhatsapp) return null;
+
+  return `Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nÉ só clicar aqui e falar com a equipe da unidade de ${nomeCidade} 👇\n\n<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
+}
+
+function respostaCurtaComConducao(resposta = '') {
+  if (!resposta) return 'Me fala sua principal dúvida que eu te ajudo?';
+
+  // Preserve operational/address/map payloads.
+  if (resposta.includes('📍') || resposta.includes('📞') || resposta.startsWith('📍 Mapa:')) {
+    return resposta;
+  }
+
+  const linhasOriginais = resposta
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l, i, arr) => !(l === '' && arr[i - 1] === ''));
+
+  const linhaBotao = linhasOriginais.find((l) => l.includes('<a href='));
+  let linhas = linhasOriginais.filter((l) => !l.includes('<a href='));
+
+  // Keep content objective in up to 4-6 lines.
+  linhas = linhas.slice(0, 5);
+  if (linhaBotao) {
+    linhas.push(linhaBotao);
+  }
+
+  let texto = linhas.join('\n').trim();
+  const ultimaLinha = linhas[linhas.length - 1] || '';
+  const terminaComAcaoOuPergunta =
+    ultimaLinha.includes('<a href=') ||
+    /\?$/.test(ultimaLinha) ||
+    /^(quer|prefere|me fala|clique|pode clicar)/i.test(normalizeText(ultimaLinha));
+
+  if (!terminaComAcaoOuPergunta) {
+    texto = `${texto}\nQuer que eu te passe os valores?`;
+  }
+
+  return texto;
+}
+
 function respostaOfertaSemanaPorCidade(cidade = '') {
   const cidadeNorm = normalizeText(cidade);
   const linkOferta = LINKS_OFERTA_SEMANA[cidadeNorm];
@@ -721,6 +790,32 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
+    // Prioridade máxima: pediu humano = direcionamento imediato ao WhatsApp.
+    if (detectarIntencaoHumano(pergunta)) {
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
+          contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined }
+        });
+      }
+
+      const respostaHumano = respostaHumanoPorCidade(cidadeAtual);
+      if (respostaHumano) {
+        return res.status(200).json({
+          resposta: respostaHumano,
+          contexto: { cidade: cidadeAtual, cidadeAtual }
+        });
+      }
+
+      return res.status(200).json({
+        resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
+        contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined }
+      });
+    }
+
     // Continuação de contexto — deve vir antes de todas as outras regras
     
     // Se está esperando apenas a resposta de cidade, enviar dados direto
@@ -740,7 +835,9 @@ export default async function handler(req, res) {
         const tipoLink = contexto.tipoLink || 'whatsapp';
         const respostaLink = tipoLink === 'oferta_semana'
           ? respostaOfertaSemanaPorCidade(cidadeNoMsg)
-          : respostaWhatsappPorCidade(cidadeNoMsg);
+          : tipoLink === 'humano'
+            ? respostaHumanoPorCidade(cidadeNoMsg)
+            : respostaWhatsappPorCidade(cidadeNoMsg);
 
         if (respostaLink) {
           return res.status(200).json({
@@ -753,7 +850,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: contexto.tipoLink === 'oferta_semana'
           ? RESPOSTA_OFERTA_SEMANA_SEM_CIDADE
-          : 'Me fala sua cidade que te envio o contato direto da unidade mais próxima 😊',
+          : 'Me fala sua cidade que te envio o contato da unidade mais próxima.',
         contexto
       });
     }
@@ -931,7 +1028,7 @@ export default async function handler(req, res) {
     const itemEndymed = encontrarBlocoEndymed(pergunta, contexto);
     if (itemEndymed) {
       return res.status(200).json({
-        resposta: itemEndymed.resposta,
+        resposta: respostaCurtaComConducao(itemEndymed.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemEndymed.procedimento || 'endymed' }
       });
     }
@@ -989,7 +1086,7 @@ export default async function handler(req, res) {
     const correcao = encontrarCorrecao(pergunta);
     if (correcao) {
       return res.status(200).json({
-        resposta: correcao,
+        resposta: respostaCurtaComConducao(correcao),
         contexto: { intencao: 'aguardando_interesse' }
       });
     }
@@ -1010,7 +1107,7 @@ export default async function handler(req, res) {
     const itemScizer = encontrarBlocoScizer(pergunta, contexto);
     if (itemScizer) {
       return res.status(200).json({
-        resposta: itemScizer.resposta,
+        resposta: respostaCurtaComConducao(itemScizer.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemScizer.procedimento || 'scizer' }
       });
     }
@@ -1018,7 +1115,7 @@ export default async function handler(req, res) {
     const itemUltraformer = encontrarBlocoUltraformer(pergunta, contexto);
     if (itemUltraformer) {
       return res.status(200).json({
-        resposta: itemUltraformer.resposta,
+        resposta: respostaCurtaComConducao(itemUltraformer.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemUltraformer.procedimento || 'ultraformer' }
       });
     }
@@ -1026,7 +1123,7 @@ export default async function handler(req, res) {
     const itemBio = encontrarBlocoBioestimulador(pergunta, contexto);
     if (itemBio) {
       return res.status(200).json({
-        resposta: itemBio.resposta,
+        resposta: respostaCurtaComConducao(itemBio.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemBio.procedimento || 'bioestimulador' }
       });
     }
@@ -1034,7 +1131,7 @@ export default async function handler(req, res) {
     const itemLavieen = encontrarBlocoLavieen(pergunta, contexto);
     if (itemLavieen) {
       return res.status(200).json({
-        resposta: itemLavieen.resposta,
+        resposta: respostaCurtaComConducao(itemLavieen.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemLavieen.procedimento || 'lavieen' }
       });
     }
@@ -1042,7 +1139,7 @@ export default async function handler(req, res) {
     const itemPreenchedor = encontrarBlocoPreenchedor(pergunta, contexto);
     if (itemPreenchedor) {
       return res.status(200).json({
-        resposta: itemPreenchedor.resposta,
+        resposta: respostaCurtaComConducao(itemPreenchedor.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: itemPreenchedor.procedimento || 'preenchedor' }
       });
     }
@@ -1052,7 +1149,7 @@ export default async function handler(req, res) {
       const rawGatilho = Array.isArray(itemFaq.gatilhos) ? itemFaq.gatilhos[0] : null;
       const procAtual = rawGatilho && rawGatilho.split(' ').length <= 2 ? rawGatilho : null;
       return res.status(200).json({
-        resposta: itemFaq.resposta,
+        resposta: respostaCurtaComConducao(itemFaq.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: procAtual }
       });
     }
@@ -1062,7 +1159,7 @@ export default async function handler(req, res) {
       const rawSug = Array.isArray(itemSugestao.gatilhos) ? itemSugestao.gatilhos[0] : null;
       const procSug = rawSug && rawSug.split(' ').length <= 2 ? rawSug : null;
       return res.status(200).json({
-        resposta: itemSugestao.resposta,
+        resposta: respostaCurtaComConducao(itemSugestao.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: procSug }
       });
     }
