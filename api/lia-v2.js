@@ -23,6 +23,7 @@ const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve
 const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, provavelmente o Bioestimulador faz mais sentido 😊\n\nEle ajuda muito quando existe flacidez com perda de estrutura ou volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
 const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, provavelmente o Ultraformer MPT faz mais sentido 😊\n\nEle costuma ser uma ótima opção quando existe flacidez em um rosto com mais volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
 const RESPOSTA_BOTOX_FACIAL_RUGAS = 'Para rugas na testa e linhas de expressão, normalmente indicamos Botox facial 😊\n\nNa CR Laser® fazemos aplicação facial com direito a retorno no terço superior completo, buscando um resultado natural e equilibrado.\n\nSe quiser, posso te passar a melhor condição da semana.';
+const RESPOSTA_INTENCAO_GENERICA = 'Consigo te ajudar sim 😊\n\nIsso costuma estar relacionado a {categoria}.\n\nSe quiser, me conta um pouco melhor que te explico direitinho.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -309,6 +310,9 @@ function detectarTemaBotoxFacial(texto = '') {
     'rugas na testa',
     'linhas na testa',
     'testa',
+    'testa marcada',
+    'minha testa ta marcada',
+    'minha testa esta marcada',
     'ruga da testa',
     'glabela',
     'ruga entre as sobrancelhas',
@@ -331,7 +335,6 @@ function detectarTemaBotoxFacial(texto = '') {
     'durabilidade',
     'dura quanto',
     'quanto tempo dura',
-    'marca',
     'toxina',
     'bioestimulador',
     'preenchedor',
@@ -347,11 +350,152 @@ function detectarTemaBotoxFacial(texto = '') {
     'boca'
   ];
 
-  if (exclusoes.some((gatilho) => t.includes(normalizeText(gatilho)))) {
+  const exclusoesEspecificas = [
+    'qual marca',
+    'marca do botox',
+    'que marca',
+    'qual toxina'
+  ];
+
+  if (exclusoes.some((gatilho) => t.includes(normalizeText(gatilho))) || exclusoesEspecificas.some((gatilho) => t.includes(normalizeText(gatilho)))) {
     return false;
   }
 
   return gatilhosBotoxFacial.some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function detectarTemaFlacidez(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const itemIndicacao = identificarProblema(texto);
+
+  if (['flacidez_rosto', 'flacidez_corpo', 'perda_volume'].includes(procedimentoAtual)) {
+    return true;
+  }
+
+  if (itemIndicacao && ['flacidez_rosto', 'flacidez_corpo', 'perda_volume'].includes(itemIndicacao.problema)) {
+    return true;
+  }
+
+  return [
+    'pele ta mole',
+    'pele esta mole',
+    'minha pele ta mole',
+    'meu rosto caiu',
+    'rosto caiu',
+    'tenho bochecha caida',
+    'bochecha caida',
+    'bochecha caiu',
+    'meu rosto caiu',
+    'pele frouxa',
+    'rosto caido',
+    'pele caida'
+  ].some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function detectarTemaGordura(texto = '', contexto = {}) {
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const itemIndicacao = identificarProblema(texto);
+  if (['gordura', 'papada'].includes(procedimentoAtual)) {
+    return true;
+  }
+
+  if (itemIndicacao && ['gordura', 'papada'].includes(itemIndicacao.problema)) {
+    return true;
+  }
+
+  const t = normalizeText(texto);
+  return ['gordura localizada', 'papada', 'bochecha pesada', 'rosto pesado'].some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function detectarTemaBioPreenchimento(texto = '', contexto = {}) {
+  const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
+  const itemIndicacao = identificarProblema(texto);
+  if (['bioestimulador', 'diamond', 'preenchedor', 'harmonizacao', 'harmonizacao facial'].includes(procedimentoAtual)) {
+    return true;
+  }
+
+  if (itemIndicacao && itemIndicacao.problema === 'perda_volume') {
+    return true;
+  }
+
+  const t = normalizeText(texto);
+  return [
+    'bioestimulador',
+    'sculptra',
+    'diamond',
+    'preenchedor',
+    'preenchimento',
+    'acido hialuronico',
+    'perdi volume',
+    'rosto murcho',
+    'rosto chupado',
+    'labios',
+    'bigode chines',
+    'olheira'
+  ].some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function labelCategoriaProvavel(categoria = 'fallback') {
+  const labels = {
+    humano: 'atendimento humano',
+    localizacao: 'localização',
+    botox_rugas: 'botox / rugas',
+    flacidez: 'flacidez',
+    gordura: 'gordura',
+    bio_preenchimento: 'bioestimulador / preenchimento',
+    duvidas_gerais: 'dúvidas gerais',
+    oferta_preco: 'oferta / preço',
+    fallback: 'tratamentos faciais'
+  };
+
+  return labels[categoria] || labels.fallback;
+}
+
+function respostaGenericaPorCategoria(categoria = 'fallback') {
+  return RESPOSTA_INTENCAO_GENERICA.replace('{categoria}', labelCategoriaProvavel(categoria));
+}
+
+function classificarIntencaoMensagem(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+
+  if (!t) {
+    return { categoria: 'fallback' };
+  }
+
+  if (detectarIntencaoHumano(texto)) {
+    return { categoria: 'humano' };
+  }
+
+  if (identificarIntencaoOperacional(texto) || (!!identificarCidade(texto) && ['onde', 'endereco', 'telefone', 'unidade', 'mapa', 'fica', 'contato'].some((termo) => t.includes(termo)))) {
+    return { categoria: 'localizacao' };
+  }
+
+  if (detectarTemaBotoxFacial(texto)) {
+    return { categoria: 'botox_rugas' };
+  }
+
+  if (detectarTemaFlacidez(texto, contexto)) {
+    return { categoria: 'flacidez' };
+  }
+
+  if (detectarTemaGordura(texto, contexto)) {
+    return { categoria: 'gordura' };
+  }
+
+  if (detectarTemaBioPreenchimento(texto, contexto)) {
+    return { categoria: 'bio_preenchimento' };
+  }
+
+  if (encontrarCorrecao(texto) || encontrarFaq(texto) || encontrarSugestao(texto) || encontrarBlocoUltraformer(texto, contexto) || encontrarBlocoBioestimulador(texto, contexto) || encontrarBlocoPreenchedor(texto, contexto) || encontrarBlocoLavieen(texto, contexto) || encontrarBlocoEndymed(texto, contexto) || encontrarBlocoScizer(texto, contexto)) {
+    return { categoria: 'duvidas_gerais' };
+  }
+
+  if (detectarPreco(texto) || detectarInteresseFechamento(texto)) {
+    return { categoria: 'oferta_preco' };
+  }
+
+  return { categoria: 'fallback' };
 }
 
 function responderIntencaoOperacional(intencao, unidade) {
@@ -984,9 +1128,11 @@ export default async function handler(req, res) {
     const contexto = req.body?.contexto || {};
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
+    const intencaoInterpretada = classificarIntencaoMensagem(pergunta, contexto);
 
     console.log('PERGUNTA RECEBIDA:', pergunta);
     console.log('TEXTO NORMALIZADO:', msg);
+    console.log('INTENCAO CLASSIFICADA:', intencaoInterpretada.categoria);
 
     if (!msg) {
       console.log('CAIU NO FALLBACK');
@@ -1000,7 +1146,7 @@ export default async function handler(req, res) {
     }
 
     // Prioridade máxima: pediu humano = direcionamento imediato ao WhatsApp.
-    if (detectarIntencaoHumano(pergunta)) {
+    if (intencaoInterpretada.categoria === 'humano') {
       const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
 
@@ -1026,7 +1172,7 @@ export default async function handler(req, res) {
     }
 
     const itemConfianca = encontrarBlocoConfianca(pergunta, contexto);
-    if (itemConfianca) {
+    if (itemConfianca && intencaoInterpretada.categoria !== 'oferta_preco') {
       if (itemConfianca.tipo === 'fechamento_direto') {
         const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
         const cidadeAtual = cidadeDetectada || cidadeContexto;
@@ -1144,6 +1290,23 @@ export default async function handler(req, res) {
     }
 
     // Continuação de contexto — cliente fez follow-up após resposta sobre procedimento/oferta
+    if (intencaoInterpretada.categoria === 'localizacao') {
+      const intencaoLocalizacao = identificarIntencaoOperacional(pergunta);
+      const respostaOperacional = responderIntencaoOperacional(intencaoLocalizacao, unidadeDetectada);
+      if (respostaOperacional) {
+        return res.status(200).json(respostaOperacional);
+      }
+
+      if (cidadeDetectada && unidadeDetectada) {
+        const nomeCidade = unidadeDetectada.nomeCompleto.replace('CR Laser® ', '');
+
+        return res.status(200).json({
+          resposta: `Perfeito 😊\nTemos uma unidade em ${nomeCidade}.\n\nQuer que eu te envie o endereço ou o telefone?`,
+          contexto: { cidade: cidadeDetectada, intencao: 'aguardando_endereco_ou_telefone' }
+        });
+      }
+    }
+
     if (contexto.intencao === 'aguardando_interesse') {
       const ambos = msg.includes('os dois') || msg.includes('ambos') || msg.includes('os 2');
       const quer = ['quero', 'sim', 'ok', 'claro', 'pode ser', 'manda', 'pode mandar'].includes(msg) || ambos;
@@ -1254,7 +1417,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (detectarInteresseFechamento(pergunta)) {
+    if (intencaoInterpretada.categoria === 'oferta_preco' && detectarInteresseFechamento(pergunta)) {
       const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
 
@@ -1274,7 +1437,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (detectarPreco(pergunta)) {
+    if (intencaoInterpretada.categoria === 'oferta_preco' && detectarPreco(pergunta)) {
       return res.status(200).json({ resposta: RESPOSTA_PRECO });
     }
 
@@ -1317,14 +1480,14 @@ export default async function handler(req, res) {
     const intencao = identificarIntencaoOperacional(pergunta);
     const unidade = unidadeDetectada;
 
-    if (intencao) {
+    if (intencaoInterpretada.categoria === 'localizacao' && intencao) {
       const respostaOperacional = responderIntencaoOperacional(intencao, unidade);
       if (respostaOperacional) {
         return res.status(200).json(respostaOperacional);
       }
     }
 
-    if (cidadeDetectada && unidadeDetectada) {
+    if (intencaoInterpretada.categoria === 'localizacao' && cidadeDetectada && unidadeDetectada) {
       const nomeCidade = unidadeDetectada.nomeCompleto.replace('CR Laser® ', '');
 
       return res.status(200).json({
@@ -1349,6 +1512,18 @@ export default async function handler(req, res) {
         contexto: {
           intencao: 'conduzindo_indicacao',
           procedimentoAtual: itemIndicacao.problema,
+          passosConducao: 0,
+          cidade: cidadeDetectada || contexto.cidade
+        }
+      });
+    }
+
+    if (intencaoInterpretada.categoria === 'flacidez') {
+      return res.status(200).json({
+        resposta: 'Para flacidez facial, a melhor indicação depende muito do tipo de rosto 😊\n\nSeu rosto hoje é mais magro ou mais cheio?',
+        contexto: {
+          intencao: 'conduzindo_indicacao',
+          procedimentoAtual: 'flacidez_rosto',
           passosConducao: 0,
           cidade: cidadeDetectada || contexto.cidade
         }
@@ -1395,7 +1570,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (detectarTemaBotoxFacial(pergunta)) {
+    if (intencaoInterpretada.categoria === 'botox_rugas' && detectarTemaBotoxFacial(pergunta)) {
       return res.status(200).json({
         resposta: RESPOSTA_BOTOX_FACIAL_RUGAS,
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: 'botox' }
@@ -1435,14 +1610,21 @@ export default async function handler(req, res) {
       });
     }
 
+    if (intencaoInterpretada.categoria !== 'fallback') {
+      return res.status(200).json({
+        resposta: respostaGenericaPorCategoria(intencaoInterpretada.categoria),
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: intencaoInterpretada.categoria }
+      });
+    }
+
     console.log('CAIU NO FALLBACK');
     return res.status(200).json({
-      resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
+      resposta: 'Consigo te ajudar sim 😊\n\nSe quiser, me conta um pouco melhor o que está te incomodando que eu te explico direitinho.'
     });
   } catch {
     console.log('CAIU NO FALLBACK');
     return res.status(200).json({
-      resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
+      resposta: 'Consigo te ajudar sim 😊\n\nSe quiser, me conta um pouco melhor o que está te incomodando que eu te explico direitinho.'
     });
   }
 }
