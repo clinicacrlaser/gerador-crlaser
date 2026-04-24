@@ -11,18 +11,23 @@ import { preenchedorFaq } from '../data/preenchedor-v2.js';
 import { scizerFaq } from '../data/scizer-v2.js';
 import { confiancaFaq } from '../data/confianca-v2.js';
 
-const RESPOSTA_PRECO = 'Para ver os valores certinhos, o ideal é consultar direto no nosso sistema 😊\nÉ bem simples de usar e você vai conseguir ver tudo organizado por procedimento e faixa de oferta.\nPode acessar por aqui mesmo e testar, você vai gostar 😉';
+// ════ BLOQUEIO OBRIGATÓRIO DE PREÇOS ════
+// A Lia NUNCA informa valores. Sempre direciona para o sistema.
+const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
 const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
-const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras ajuda principalmente em flacidez leve a moderada, dando mais firmeza e melhorando o aspecto da região.\n\nMas quando já existe indicação cirúrgica, ele não substitui a cirurgia. Ele pode ser uma opção para quem não quer operar agora ou quer uma melhora sem cirurgia.\n\nSe quiser, posso te explicar como funciona o MPT Pálpebras.';
-const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nEle ajuda a firmar a pele da região e pode melhorar o aspecto das pálpebras.\n\nMas em casos cirúrgicos, o resultado costuma ser mais limitado do que uma cirurgia.';
-const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, provavelmente o Bioestimulador faz mais sentido 😊\n\nEle ajuda muito quando existe flacidez com perda de estrutura ou volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
-const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, provavelmente o Ultraformer MPT faz mais sentido 😊\n\nEle costuma ser uma ótima opção quando existe flacidez em um rosto com mais volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
-const RESPOSTA_BOTOX_FACIAL_RUGAS = 'Para rugas na testa e linhas de expressão, normalmente indicamos Botox facial 😊\n\nNa CR Laser® fazemos aplicação facial com direito a retorno no terço superior completo, buscando um resultado natural e equilibrado.\n\nSe quiser, posso te passar a melhor condição da semana.';
+
+// ════ RESPOSTAS PADRONIZADAS COM AUTORIDADE (MODELO OFICIAL CR LASER®) ════
+// Estrutura: Responder → Autoridade (Equipamento Original, Segurança, ANVISA) → Direcionar
+const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras é um tratamento não-invasivo que atua na flacidez, estimulando colágeno e melhorando o contorno.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Todas as ponteiras são originais e ANVISA aprovadas\n\n👉 Você pode gerar sua oferta agora direto no sistema';
+const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nO Ultraformer estimula colágeno e melhora firmeza da pele.\n\nAqui na CR Laser®:\n- Equipamentos próprios\n- Ponteiras originais\n- ANVISA aprovado\n\n👉 Clique em gerar oferta e veja as condições de hoje';
+const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, o Bioestimulador faz mais sentido 😊\n\nEle estimula colágeno natural, ajudando a restaurar estrutura e volume.\n\nAqui na CR Laser®:\n- Bioestimulador original (Diamond)\n- Aplicação por especialistas certificados\n- ANVISA aprovado\n\n👉 Você pode gerar sua oferta agora direto no sistema';
+const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, o Ultraformer MPT faz mais sentido 😊\n\nÉ uma ótima opção quando existe flacidez em rosto com mais volume, oferecendo lifting sem cirurgia.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Ponteiras originais e ANVISA aprovadas\n\n👉 Clique em gerar oferta e veja as condições de hoje';
+const RESPOSTA_BOTOX_FACIAL_RUGAS = 'Para rugas na testa e linhas de expressão, o Botox é uma ótima solução 😊\n\nFazemos aplicação completa no terço superior com retorno, buscando resultado natural e equilibrado.\n\nAqui na CR Laser®:\n- Toxina Botulínica original importada\n- Aplicação por especialistas certificados\n- Resultado natural garantido\n\n👉 Você pode gerar sua oferta agora direto no sistema';
 const RESPOSTA_INTENCAO_GENERICA = 'Consigo te ajudar sim 😊\n\nIsso costuma estar relacionado a {categoria}.\n\nSe quiser, me conta um pouco melhor que te explico direitinho.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -463,6 +468,12 @@ function classificarIntencaoMensagem(texto = '', contexto = {}) {
     return { categoria: 'fallback' };
   }
 
+  // ════ PRIORIDADE MÁXIMA: Bloquear pedidos de preço ════
+  // NUNCA deixar preço cair em outra categoria!
+  if (detectarPreco(texto) || detectarInteresseFechamento(texto)) {
+    return { categoria: 'oferta_preco' };
+  }
+
   if (detectarIntencaoHumano(texto)) {
     return { categoria: 'humano' };
   }
@@ -489,10 +500,6 @@ function classificarIntencaoMensagem(texto = '', contexto = {}) {
 
   if (encontrarCorrecao(texto) || encontrarFaq(texto) || encontrarSugestao(texto) || encontrarBlocoUltraformer(texto, contexto) || encontrarBlocoBioestimulador(texto, contexto) || encontrarBlocoPreenchedor(texto, contexto) || encontrarBlocoLavieen(texto, contexto) || encontrarBlocoEndymed(texto, contexto) || encontrarBlocoScizer(texto, contexto)) {
     return { categoria: 'duvidas_gerais' };
-  }
-
-  if (detectarPreco(texto) || detectarInteresseFechamento(texto)) {
-    return { categoria: 'oferta_preco' };
   }
 
   return { categoria: 'fallback' };
@@ -870,10 +877,13 @@ function respostaCurtaComConducao(resposta = '') {
   const terminaComAcaoOuPergunta =
     ultimaLinha.includes('<a href=') ||
     /\?$/.test(ultimaLinha) ||
-    /^(quer|prefere|me fala|clique|pode clicar)/i.test(normalizeText(ultimaLinha));
+    /^(quer|prefere|me fala|clique|pode clicar)/i.test(normalizeText(ultimaLinha)) ||
+    ultimaLinha.includes('👉');
 
-  if (!terminaComAcaoOuPergunta) {
-    texto = `${texto}\nQuer que eu te passe os valores?`;
+  // ════ BLOQUEIO OBRIGATÓRIO: NUNCA pedir "valores" ════
+  // Se a resposta não termina com ação clara, direcionar ao sistema (NÃO pedir valores)
+  if (!terminaComAcaoOuPergunta && !texto.includes('👉')) {
+    texto = `${texto}\n\n👉 Você pode gerar sua oferta agora direto no sistema`;
   }
 
   return texto;
