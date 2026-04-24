@@ -7,7 +7,7 @@ export const faq = [
       'botox onde aplica',
       'pontos de aplicacao botox'
     ],
-    resposta: 'Na CR Laser® fazemos Botox Facial no terço superior completo 😊\n\nIsso é feito para manter a harmonia facial.\n\nAs principais regiões são:\n\n1. Rugas da testa\n2. Rugas da glabela\n3. Pés de galinha\n4. Ruguinhas do nariz, quando necessário\n\nVeja os pontos aqui:\n<a href="https://www.instagram.com/p/CtyjpsouAGy/?igshid=MzRlODBiNWFlZA==" target="_blank">https://www.instagram.com/p/CtyjpsouAGy/?igshid=MzRlODBiNWFlZA==</a>'
+    resposta: 'Na CR Laser® fazemos Botox Facial no terço superior completo 😊\n\nAs principais regiões são:\n1. Rugas da testa\n2. Rugas da glabela\n3. Pés de galinha\n4. Ruguinhas do nariz, quando necessário'
   },
   {
     gatilhos: ['lavieen melasma', 'lavieen serve para melasma'],

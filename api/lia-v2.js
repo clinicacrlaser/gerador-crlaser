@@ -22,6 +22,7 @@ const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultrafor
 const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nEle ajuda a firmar a pele da região e pode melhorar o aspecto das pálpebras.\n\nMas em casos cirúrgicos, o resultado costuma ser mais limitado do que uma cirurgia.';
 const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, provavelmente o Bioestimulador faz mais sentido 😊\n\nEle ajuda muito quando existe flacidez com perda de estrutura ou volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
 const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, provavelmente o Ultraformer MPT faz mais sentido 😊\n\nEle costuma ser uma ótima opção quando existe flacidez em um rosto com mais volume.\n\nSe quiser, posso te passar a melhor condição da semana.';
+const RESPOSTA_BOTOX_FACIAL_RUGAS = 'Para rugas na testa e linhas de expressão, normalmente indicamos Botox facial 😊\n\nNa CR Laser® fazemos aplicação facial com direito a retorno no terço superior completo, buscando um resultado natural e equilibrado.\n\nSe quiser, posso te passar a melhor condição da semana.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
   brasilia: 'https://wa.me/5561981316493?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -300,6 +301,57 @@ function detectarPerfilFlacidezFacial(texto = '', contexto = {}) {
   }
 
   return null;
+}
+
+function detectarTemaBotoxFacial(texto = '') {
+  const t = normalizeText(texto);
+  const gatilhosBotoxFacial = [
+    'rugas na testa',
+    'linhas na testa',
+    'testa',
+    'ruga da testa',
+    'glabela',
+    'ruga entre as sobrancelhas',
+    'bravo',
+    'pes de galinha',
+    'rugas nos olhos',
+    'linhas de expressao',
+    'botox',
+    'aplicacao facial'
+  ];
+
+  const exclusoes = [
+    'axila',
+    'axilar',
+    'suor',
+    'hiperidrose',
+    'pontos',
+    'onde aplica',
+    'quais os pontos',
+    'durabilidade',
+    'dura quanto',
+    'quanto tempo dura',
+    'marca',
+    'toxina',
+    'bioestimulador',
+    'preenchedor',
+    'ultraformer',
+    'idade',
+    'quantos anos',
+    'fica natural',
+    'fica duro',
+    'repetir',
+    'parar botox',
+    'diluicao',
+    'diluicao',
+    'boca'
+  ];
+
+  if (exclusoes.some((gatilho) => t.includes(normalizeText(gatilho)))) {
+    return false;
+  }
+
+  return gatilhosBotoxFacial.some((gatilho) => t.includes(normalizeText(gatilho)));
 }
 
 function responderIntencaoOperacional(intencao, unidade) {
@@ -1343,12 +1395,20 @@ export default async function handler(req, res) {
       });
     }
 
+    if (detectarTemaBotoxFacial(pergunta)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_BOTOX_FACIAL_RUGAS,
+        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: 'botox' }
+      });
+    }
+
     const itemFaq = encontrarFaq(pergunta);
     if (itemFaq) {
       const rawGatilho = Array.isArray(itemFaq.gatilhos) ? itemFaq.gatilhos[0] : null;
       const procAtual = rawGatilho && rawGatilho.split(' ').length <= 2 ? rawGatilho : null;
+      const preservarRespostaCompleta = Array.isArray(itemFaq.gatilhos) && itemFaq.gatilhos.includes('pontos botox');
       return res.status(200).json({
-        resposta: respostaCurtaComConducao(itemFaq.resposta),
+        resposta: preservarRespostaCompleta ? itemFaq.resposta : respostaCurtaComConducao(itemFaq.resposta),
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: procAtual }
       });
     }
