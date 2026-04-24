@@ -391,6 +391,18 @@ body {
   letter-spacing: 0.2px;
 }
 
+.upsell-hint {
+  margin-top: -2px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(168, 233, 239, 0.24);
+  background: linear-gradient(100deg, rgba(24, 199, 209, 0.08) 0%, rgba(30, 95, 175, 0.08) 100%);
+  color: #cfeef1;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
 /* ── WRAPPER DE CAMPO ── */
 .field-wrap {
   position: relative;

@@ -31,6 +31,11 @@ let secondProcedureAdded = false;
 let originalOfferText = '';
 let originalDiscountPct = 0;
 
+const ULTRAFORMER_UPSELL_MESSAGES = {
+  FACIAL: 'Você também pode considerar adicionar o Ultraformer MPT Pescoço para um resultado mais completo 😊',
+  PESCOCO: 'Para um resultado mais harmônico, muitos pacientes combinam com o Ultraformer MPT Facial 😊',
+};
+
 /* ── FORMATAÇÃO ── */
 
 /**
@@ -142,6 +147,26 @@ function updateOfferRangeHighlight() {
   hint.hidden = rangeSelect.value !== '2';
 }
 
+function updateUltraformerUpsellHint() {
+  const procedureSelect = document.getElementById('procedimento');
+  const hint = document.getElementById('ultraformerUpsellHint');
+  if (!procedureSelect || !hint) {
+    return;
+  }
+
+  const selectedText = procedureSelect.selectedOptions?.[0]?.textContent?.trim() || '';
+  let message = '';
+
+  if (selectedText.includes('Ultraformer MPT Full Face') || selectedText.includes('Ultraformer MPT Facial')) {
+    message = ULTRAFORMER_UPSELL_MESSAGES.FACIAL;
+  } else if (selectedText.includes('Ultraformer MPT Pescoço')) {
+    message = ULTRAFORMER_UPSELL_MESSAGES.PESCOCO;
+  }
+
+  hint.textContent = message;
+  hint.hidden = message === '';
+}
+
 function activateBotoxHighlight() {
   const procedureSelect = document.getElementById('procedimento');
   if (!procedureSelect) {
@@ -171,6 +196,7 @@ function handleProcedureChangeForHighlight() {
   }
 
   renderBotoxHighlightState();
+  updateUltraformerUpsellHint();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -187,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderBotoxHighlightState();
   updateOfferRangeHighlight();
+  updateUltraformerUpsellHint();
 });
 
 
