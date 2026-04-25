@@ -147,6 +147,7 @@ const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor
 const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer?\n\nRosto, pescoço ou outra região?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting sem cirurgia.\n\nVocê quer ver a condição da campanha atual ou já deseja finalizar a compra?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting.\n\nVocê quer gerar a oferta ou tirar alguma dúvida antes?';
+const RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO = 'Perfeito 😊\n\nVocê escolheu {procedimento}.\n\nVocê quer gerar a oferta ou tirar alguma dúvida antes?';
 const RESPOSTA_ULTRAFORMER_OPCOES = 'Temos algumas opções de Ultraformer MPT 😊\n\n1️⃣ Full Face\n2️⃣ Terço Inferior\n3️⃣ Papada\n4️⃣ Pescoço\n5️⃣ Colo\n6️⃣ Pálpebras\n7️⃣ Abdome\n8️⃣ Flancos\n9️⃣ Braços\n🔟 Interno de coxa\n\nQual dessas regiões você quer?';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
 const RESPOSTA_LAVIEEN_OPCOES = 'Temos algumas opções de Lavieen 😊\n\n1️⃣ Facial completo\n2️⃣ Face + Pescoço\n3️⃣ Pescoço + Colo\n4️⃣ Face + Pescoço + Colo\n5️⃣ BB Laser Facial\n6️⃣ Melasma\n7️⃣ Olheiras\n8️⃣ Capilar\n9️⃣ Mãos\n\nQual dessas opções você quer?';
@@ -633,6 +634,108 @@ function detectarInteresseFechamento(texto = '') {
 function detectarConfirmacaoOferta(texto = '') {
   const t = normalizeText(texto);
   return ['quero', 'quero sim', 'pode mandar', 'manda', 'sim', 'pode'].includes(t);
+}
+
+function interpretarCidadePorRespostaCurta(texto = '') {
+  const t = normalizeText(texto);
+  if (['brasilia', 'brasilia', 'bsb'].includes(t)) return 'brasilia';
+  if (['campinas'].includes(t)) return 'campinas';
+  if (['goiania', 'goiania', 'gyn'].includes(t)) return 'goiania';
+  if (['palmas', 'pmw'].includes(t)) return 'palmas';
+  if (['sao paulo', 'sao paulo', 'sp', 'spj'].includes(t)) return 'saopaulo';
+  return null;
+}
+
+function resolverProcedimentoCurtoPorBase(texto = '', base = '') {
+  const t = normalizeText(texto);
+
+  if (base === 'ultraformer') {
+    if (['rosto', 'face', 'facial'].includes(t)) return 'Ultraformer MPT Full Face';
+    if (['pescoco', 'pescoço'].includes(t)) return 'Ultraformer MPT Pescoço (Pega Papada com Foco em Flacidez)';
+    if (['papada'].includes(t)) return 'Ultraformer MPT Papada';
+    if (['palpebras', 'palpebra', 'pálpebras', 'pálpebra', 'olhos', 'olho'].includes(t)) return 'Ultraformer MPT Pálpebras';
+    if (['abdome', 'barriga'].includes(t)) return 'Ultraformer MPT Abdome';
+    return null;
+  }
+
+  if (base === 'botox') {
+    if (['facial', 'rosto', 'testa', 'rugas'].includes(t)) return 'Botox Facial';
+    if (['suor', 'axila', 'axilar', 'hiperidrose'].includes(t)) return 'Botox Suor Axilar';
+    return null;
+  }
+
+  if (base === 'lavieen') {
+    if (['melasma'].includes(t)) return 'Lavieen Melasma Facial - 3 sessões';
+    if (['rosto', 'facial'].includes(t)) return 'Lavieen Facial Completo - 3 sessões';
+    if (['bb', 'bb laser'].includes(t)) return 'Lavieen BB Laser Facial - 3 sessões';
+    if (['olheiras'].includes(t)) return 'Lavieen Olheiras - 3 sessões';
+    if (['capilar', 'cabelo'].includes(t)) return 'Lavieen Capilar - 3 sessões';
+    if (['maos', 'mãos'].includes(t)) return 'Lavieen Mãos - 3 sessões';
+    return null;
+  }
+
+  return null;
+}
+
+function interpretarRespostaCurtaContextual(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  const ultima = normalizeText(contexto.ultimaPerguntaBot || '');
+  const base = contexto.procedimentoBase || contexto?.liaContext?.procedimentoBase || null;
+
+  const perguntouUltra =
+    contexto.intencao === 'aguardando_regiao_ultraformer' ||
+    ultima === normalizeText(RESPOSTA_ULTRAFORMER_SEM_REGIAO);
+  if (perguntouUltra) {
+    const procedimento = resolverProcedimentoCurtoPorBase(t, 'ultraformer');
+    if (procedimento) return { tipo: 'procedimento', base: 'ultraformer', procedimento };
+  }
+
+  const perguntouBotox =
+    ultima === normalizeText(RESPOSTA_BOTOX_DESAMBIGUACAO) ||
+    (base === 'botox' && contexto.intencao === 'aguardando_interesse');
+  if (perguntouBotox) {
+    const procedimento = resolverProcedimentoCurtoPorBase(t, 'botox');
+    if (procedimento) return { tipo: 'procedimento', base: 'botox', procedimento };
+  }
+
+  const perguntouLavieen =
+    ultima === normalizeText(RESPOSTA_LAVIEEN_SEM_REGIAO) ||
+    (base === 'lavieen' && contexto.intencao === 'aguardando_interesse');
+  if (perguntouLavieen) {
+    const procedimento = resolverProcedimentoCurtoPorBase(t, 'lavieen');
+    if (procedimento) return { tipo: 'procedimento', base: 'lavieen', procedimento };
+  }
+
+  const contextosCidade = [
+    'aguardando_apenas_cidade',
+    'aguardando_cidade_whatsapp',
+    'fluxo_compra_aguardando_cidade_sistema',
+    'fluxo_compra_aguardando_cidade_equipe',
+    'aguardando_cidade_para_confirmacao_oferta',
+    'aguardando_cidade_comprovante'
+  ];
+  const perguntouCidade =
+    contextosCidade.includes(contexto.intencao) ||
+    ultima.includes(normalizeText('qual unidade fica melhor pra você')) ||
+    ultima.includes(normalizeText('me fala sua cidade'));
+  if (perguntouCidade) {
+    const cidade = interpretarCidadePorRespostaCurta(t);
+    if (cidade) return { tipo: 'cidade', cidade };
+  }
+
+  const contextosPagamento = [
+    'fluxo_compra_aguardando_pagamento',
+    'confirmacao_oferta_aguardando_pagamento'
+  ];
+  const perguntouPagamento =
+    contextosPagamento.includes(contexto.intencao) ||
+    ultima === normalizeText(RESPOSTA_FORMA_PAGAMENTO);
+  if (perguntouPagamento) {
+    const formaPagamento = interpretarFormaPagamentoPorRespostaCurta(t) || detectarFormaPagamento(t);
+    if (formaPagamento) return { tipo: 'pagamento', formaPagamento };
+  }
+
+  return null;
 }
 
 function detectarTemaUltraformerPalpebras(texto = '', contexto = {}) {
@@ -2327,6 +2430,20 @@ export default async function handler(req, res) {
       });
     }
 
+    if (msg === 'cidade') {
+      return res.status(200).json({
+        resposta: RESPOSTA_CONFIRMAR_CIDADE_OFERTA,
+        contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'whatsapp', ultimaPerguntaBot: RESPOSTA_CONFIRMAR_CIDADE_OFERTA }
+      });
+    }
+
+    if (msg === 'pagamento') {
+      return res.status(200).json({
+        resposta: RESPOSTA_FORMA_PAGAMENTO,
+        contexto: { ...contexto, intencao: 'confirmacao_oferta_aguardando_pagamento', ultimaPerguntaBot: RESPOSTA_FORMA_PAGAMENTO }
+      });
+    }
+
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
@@ -3252,6 +3369,138 @@ export default async function handler(req, res) {
             contexto: contexto
           });
         }
+      }
+    }
+
+    const respostaCurtaContextual = interpretarRespostaCurtaContextual(pergunta, contexto);
+    if (respostaCurtaContextual) {
+      if (respostaCurtaContextual.tipo === 'procedimento') {
+        const procedimento = respostaCurtaContextual.procedimento;
+        const respostaProcedimento = procedimento === 'Ultraformer MPT Full Face'
+          ? RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO
+          : RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO.replace('{procedimento}', procedimento);
+
+        return res.status(200).json({
+          resposta: respostaProcedimento,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_interesse',
+            procedimentoBase: respostaCurtaContextual.base,
+            procedimentoFinal: procedimento,
+            procedimento: procedimento,
+            procedimentoAtual: procedimento,
+            procedimento_selecionado: procedimento,
+            ultimaPerguntaBot: respostaProcedimento
+          }
+        });
+      }
+
+      if (respostaCurtaContextual.tipo === 'cidade') {
+        const cidadeAtual = respostaCurtaContextual.cidade;
+
+        if (contexto.intencao === 'fluxo_compra_aguardando_cidade_equipe') {
+          const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
+          if (respostaWhatsapp) {
+            return res.status(200).json({
+              resposta: respostaWhatsapp,
+              contexto: { cidade: cidadeAtual, cidadeAtual, intencao: 'compra_finalizada_equipe', intencaoCompra: 'equipe', cidadeCompra: cidadeAtual }
+            });
+          }
+        }
+
+        if (contexto.intencao === 'fluxo_compra_aguardando_cidade_sistema') {
+          return res.status(200).json({
+            resposta: RESPOSTA_FORMA_PAGAMENTO,
+            contexto: {
+              ...contexto,
+              intencao: 'fluxo_compra_aguardando_pagamento',
+              cidadeCompra: cidadeAtual,
+              cidade: cidadeAtual,
+              cidadeAtual,
+              intencaoCompra: 'sistema',
+              ultimaPerguntaBot: RESPOSTA_FORMA_PAGAMENTO
+            }
+          });
+        }
+
+        if (contexto.intencao === 'aguardando_cidade_para_confirmacao_oferta') {
+          return res.status(200).json({
+            resposta: RESPOSTA_FORMA_PAGAMENTO,
+            contexto: {
+              ...contexto,
+              cidade: cidadeAtual,
+              cidadeAtual,
+              intencao: 'confirmacao_oferta_aguardando_pagamento',
+              intencaoCompra: 'sistema',
+              ultimaPerguntaBot: RESPOSTA_FORMA_PAGAMENTO
+            }
+          });
+        }
+
+        if (contexto.intencao === 'aguardando_cidade_whatsapp') {
+          const tipoLink = contexto.tipoLink || 'whatsapp';
+          const respostaLink = tipoLink === 'oferta_semana'
+            ? respostaOfertaSemanaPorCidade(cidadeAtual)
+            : tipoLink === 'humano'
+              ? respostaHumanoPorCidade(cidadeAtual)
+              : respostaWhatsappPorCidade(cidadeAtual);
+
+          if (respostaLink) {
+            return res.status(200).json({
+              resposta: respostaLink,
+              contexto: { cidade: cidadeAtual, cidadeAtual }
+            });
+          }
+        }
+
+        if (contexto.intencao === 'aguardando_apenas_cidade') {
+          const unidadeCurta = unidades.find((u) => u.cidade === cidadeAtual);
+          if (unidadeCurta) {
+            return res.status(200).json({
+              resposta: `📍 ${unidadeCurta.nomeCompleto}\n\n${unidadeCurta.endereco}\n\n📞 ${unidadeCurta.telefone}`,
+              contexto: { cidade: cidadeAtual, cidadeAtual }
+            });
+          }
+        }
+
+        return res.status(200).json({
+          resposta: `Perfeito 😊\n\nVocê escolheu ${cidadeAtual === 'saopaulo' ? 'São Paulo' : cidadeAtual.charAt(0).toUpperCase() + cidadeAtual.slice(1)}.`,
+          contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual }
+        });
+      }
+
+      if (respostaCurtaContextual.tipo === 'pagamento') {
+        const cidadeAtual = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+        const forma = respostaCurtaContextual.formaPagamento;
+
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: RESPOSTA_CONFIRMAR_CIDADE_OFERTA,
+            contexto: { ...contexto, intencao: 'aguardando_cidade_para_confirmacao_oferta', ultimaPerguntaBot: RESPOSTA_CONFIRMAR_CIDADE_OFERTA }
+          });
+        }
+
+        if (contexto.intencao === 'confirmacao_oferta_aguardando_pagamento') {
+          const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
+          if (respostaOferta) {
+            return res.status(200).json({
+              resposta: respostaOferta,
+              contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual, formaPagamento: forma, intencao: 'aguardando_interesse' }
+            });
+          }
+        }
+
+        if (forma === 'pix') {
+          return res.status(200).json({
+            resposta: gerarRespostaPix(cidadeAtual),
+            contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual, cidadeCompra: cidadeAtual, formaPagamento: 'pix', intencao: 'fluxo_pagamento_aguardando_confirmacao' }
+          });
+        }
+
+        return res.status(200).json({
+          resposta: 'Sem problema 😊\n\nQual procedimento você quer finalizar no cartão?',
+          contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual, cidadeCompra: cidadeAtual, formaPagamento: 'cartao', intencao: 'fluxo_pagamento_aguardando_procedimento_cartao' }
+        });
       }
     }
 
