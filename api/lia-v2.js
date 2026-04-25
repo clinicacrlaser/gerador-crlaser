@@ -165,6 +165,7 @@ const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que
 const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
+const RESPOSTA_REFORCO_POS_LINK = 'Se quiser, me avisa aqui que eu te acompanho no agendamento 😊';
 const RESPOSTA_ESCOLHA_DIRETA_PADRAO = 'Você prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER = 'Você prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_ESCOLHA_DIRETA_BOTOX = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida antes?';
@@ -1587,6 +1588,9 @@ function detectarConfirmacaoPagamento(texto = '') {
     t.includes('mando o comprovante onde') ||
     t.includes('enviei') ||
     t.includes('pageui') ||
+    t.includes('fiz o pagamento') ||
+    t.includes('fiz pagamento') ||
+    t === 'pronto' ||
     t.includes('paguei') ||
     t === 'ja paguei' ||
     t === 'já paguei' ||
@@ -1599,14 +1603,32 @@ function detectarConfirmacaoPagamento(texto = '') {
     t === 'mando o comprovante onde' ||
     t === 'enviei' ||
     t === 'pageui' ||
+    t === 'fiz o pagamento' ||
+    t === 'fiz pagamento' ||
+    t === 'pronto' ||
     t === 'paguei'
   );
+}
+
+function anexarReforcoPosLink(resposta = '') {
+  if (!resposta || typeof resposta !== 'string') return resposta;
+
+  const respostaNorm = normalizeText(resposta);
+  if (respostaNorm.includes(normalizeText(RESPOSTA_REFORCO_POS_LINK))) {
+    return resposta;
+  }
+
+  const temLink = resposta.includes('<a href=') || /https?:\/\//i.test(resposta);
+  if (!temLink) {
+    return resposta;
+  }
+
+  return `${resposta}\n\n${RESPOSTA_REFORCO_POS_LINK}`;
 }
 
 function gerarRespostaComprovanteUnidade(cidade = '') {
   const cidadeNorm = normalizeText(cidade);
   const unidade = unidades.find((u) => u.cidade === cidadeNorm);
-  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
 
   if (!unidade) {
     return null;
@@ -1614,11 +1636,7 @@ function gerarRespostaComprovanteUnidade(cidade = '') {
 
   return `Perfeito 😊
 
-O comprovante deve ser enviado para o WhatsApp da unidade de ${nomeCidade}.
-
-O agendamento também é feito direto por lá.
-
-📍 ${unidade.nomeCompleto}
+Envie o comprovante no WhatsApp da unidade para agendar:
 
 📞 ${unidade.telefone}`;
 }
@@ -2587,6 +2605,9 @@ export default async function handler(req, res) {
       const statusResponse = statusOriginal(code);
       const jsonOriginal = statusResponse.json.bind(statusResponse);
       statusResponse.json = (payload) => {
+        if (payload && typeof payload === 'object' && typeof payload.resposta === 'string') {
+          payload.resposta = anexarReforcoPosLink(payload.resposta);
+        }
         if (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, 'contexto')) {
           const contextoResposta = payload.contexto || {};
           payload.contexto = sincronizarLiaContext({ ...contexto, ...contextoResposta }, pergunta);
@@ -2689,7 +2710,7 @@ export default async function handler(req, res) {
       null;
     const procedimentoFinalFechamento = extrairProcedimentoFinalContexto(contexto);
 
-    if (procedimentoFinalFechamento && cidadeFechamento && formaPagamentoFechamento) {
+    if (!detectarConfirmacaoPagamento(pergunta) && procedimentoFinalFechamento && cidadeFechamento && formaPagamentoFechamento) {
       const respostaLinkFechamento =
         gerarRespostaOfertaCampanha(procedimentoFinalFechamento, cidadeFechamento, 'texto') ||
         gerarRespostaOfertaCampanha(
@@ -3479,13 +3500,41 @@ export default async function handler(req, res) {
 
       // Verificar se cliente confirmou o pagamento
       if (detectarConfirmacaoPagamento(pergunta)) {
+        const cidadeCompra = contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || cidadeDetectada;
+        if (!cidadeCompra) {
+          return res.status(200).json({
+            resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+            contexto: { ...contexto, aguardandoComprovante: true, aguardando_comprovante: true, intencao: 'aguardando_cidade_comprovante', status_compra: 'em andamento' }
+          });
+        }
+
+        const respostaComprovante = gerarRespostaComprovanteUnidade(cidadeCompra);
+        if (respostaComprovante) {
+          return res.status(200).json({
+            resposta: respostaComprovante,
+            contexto: {
+              ...contexto,
+              cidade: cidadeCompra,
+              cidadeAtual: cidadeCompra,
+              cidadeCompra,
+              aguardandoComprovante: true,
+              aguardando_comprovante: true,
+              intencao: 'aguardando_cidade_comprovante',
+              statusPagamento: 'confirmado',
+              status_compra: 'em andamento'
+            }
+          });
+        }
+
         return res.status(200).json({
-          resposta: 'Perfeito 😊\n\nRecebemos a confirmação! Você irá receber um email com os detalhes da sua compra.\n\nMuitíssimo obrigado! Qualquer dúvida, estamos aqui 🎉',
+          resposta: 'Perfeito 😊\n\nMe confirma a unidade para eu te passar o WhatsApp correto e seguir com o agendamento.',
           contexto: { 
             ...contexto, 
-            intencao: 'compra_finalizada_sistema',
+            intencao: 'aguardando_cidade_comprovante',
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
             statusPagamento: 'confirmado',
-            status_compra: 'finalizada'
+            status_compra: 'em andamento'
           }
         });
       }
