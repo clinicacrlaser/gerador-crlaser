@@ -166,6 +166,7 @@ const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
 const RESPOSTA_OPCOES_COMPRA = 'Você pode comprar aqui comigo, de forma mais rápida e prática, ou falar direto com a equipe da unidade 😊\n\nApós a compra, é só enviar o comprovante para a unidade de atendimento e solicitar o agendamento.\n\n➖️➖️➖️➖️\n📍 Como fica mais fácil para você?\n\n1️⃣ Comprar aqui pelo sistema\n2️⃣ Falar com a equipe da unidade';
 
 const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
+const RESPOSTA_CONFIRMAR_CIDADE_OFERTA = 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 
 const RESPOSTA_FORMA_PAGAMENTO = 'Perfeito 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão';
 
@@ -626,6 +627,11 @@ function detectarInteresseFechamento(texto = '') {
     t.includes('me passa os valores') ||
     t.includes('tenho interesse')
   );
+}
+
+function detectarConfirmacaoOferta(texto = '') {
+  const t = normalizeText(texto);
+  return ['quero', 'quero sim', 'pode mandar', 'manda', 'sim', 'pode'].includes(t);
 }
 
 function detectarTemaUltraformerPalpebras(texto = '', contexto = {}) {
@@ -3131,9 +3137,16 @@ export default async function handler(req, res) {
         });
       }
 
+      const respostaConfianca = itemConfianca.resposta || '';
+      const terminaComOfertaSemana = normalizeText(respostaConfianca).includes(normalizeText(RESPOSTA_FECHAMENTO_LEVE));
+
       return res.status(200).json({
-        resposta: itemConfianca.resposta,
-        contexto: { intencao: 'aguardando_interesse', procedimentoAtual: 'confianca' }
+        resposta: respostaConfianca,
+        contexto: {
+          intencao: terminaComOfertaSemana ? 'aguardando_aceite_oferta_semana' : 'aguardando_interesse',
+          procedimentoAtual: 'confianca',
+          ultimaPerguntaBot: terminaComOfertaSemana ? RESPOSTA_FECHAMENTO_LEVE : respostaConfianca
+        }
       });
     }
 
@@ -3275,16 +3288,119 @@ export default async function handler(req, res) {
       }
     }
 
+    if (contexto.intencao === 'aguardando_cidade_para_confirmacao_oferta') {
+      const cidadeNoMsg = unidadeDetectada ? unidadeDetectada.cidade : null;
+      const cidadeAtual = cidadeNoMsg || contexto.cidadeAtual || contexto.cidade || null;
+      const formaPagamentoContexto = contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
+      const formaPagamentoMensagem = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
+      const formaPagamentoAtual = formaPagamentoMensagem || formaPagamentoContexto;
+
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_CONFIRMAR_CIDADE_OFERTA,
+          contexto: { ...contexto, intencao: 'aguardando_cidade_para_confirmacao_oferta', ultimaPerguntaBot: RESPOSTA_CONFIRMAR_CIDADE_OFERTA }
+        });
+      }
+
+      if (formaPagamentoAtual) {
+        const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
+        if (respostaOferta) {
+          return res.status(200).json({
+            resposta: respostaOferta,
+            contexto: {
+              ...contexto,
+              cidade: cidadeAtual,
+              cidadeAtual,
+              formaPagamento: formaPagamentoAtual,
+              intencao: 'aguardando_interesse'
+            }
+          });
+        }
+      }
+
+      return res.status(200).json({
+        resposta: RESPOSTA_FORMA_PAGAMENTO,
+        contexto: {
+          ...contexto,
+          cidade: cidadeAtual,
+          cidadeAtual,
+          intencao: 'confirmacao_oferta_aguardando_pagamento',
+          intencaoCompra: 'sistema',
+          ultimaPerguntaBot: RESPOSTA_FORMA_PAGAMENTO
+        }
+      });
+    }
+
+    if (contexto.intencao === 'confirmacao_oferta_aguardando_pagamento') {
+      const cidadeAtual = contexto.cidadeAtual || contexto.cidade || cidadeDetectada || null;
+      const formaPagamentoMensagem = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
+      const formaPagamentoAtual = formaPagamentoMensagem || contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
+
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_CONFIRMAR_CIDADE_OFERTA,
+          contexto: { ...contexto, intencao: 'aguardando_cidade_para_confirmacao_oferta', ultimaPerguntaBot: RESPOSTA_CONFIRMAR_CIDADE_OFERTA }
+        });
+      }
+
+      if (!formaPagamentoAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_FORMA_PAGAMENTO,
+          contexto: {
+            ...contexto,
+            cidade: cidadeAtual,
+            cidadeAtual,
+            intencao: 'confirmacao_oferta_aguardando_pagamento',
+            ultimaPerguntaBot: RESPOSTA_FORMA_PAGAMENTO
+          }
+        });
+      }
+
+      const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
+      if (respostaOferta) {
+        return res.status(200).json({
+          resposta: respostaOferta,
+          contexto: {
+            ...contexto,
+            cidade: cidadeAtual,
+            cidadeAtual,
+            formaPagamento: formaPagamentoAtual,
+            intencao: 'aguardando_interesse'
+          }
+        });
+      }
+    }
+
     if (contexto.intencao === 'aguardando_aceite_oferta_semana') {
       const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
-      const aceitouOferta = detectarInteresseFechamento(pergunta) || detectarConfirmacao(pergunta) || ehRespostaCurta(pergunta);
+      const formaPagamentoContexto = contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
+      const aceitouOferta = detectarConfirmacaoOferta(pergunta) || detectarInteresseFechamento(pergunta) || detectarConfirmacao(pergunta) || ehRespostaCurta(pergunta);
 
       if (aceitouOferta) {
         if (!cidadeAtual) {
           return res.status(200).json({
-            resposta: RESPOSTA_OFERTA_SEMANA_SEM_CIDADE,
-            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'oferta_semana', cidadeAtual: cidadeAtual || undefined }
+            resposta: RESPOSTA_CONFIRMAR_CIDADE_OFERTA,
+            contexto: {
+              ...contexto,
+              intencao: 'aguardando_cidade_para_confirmacao_oferta',
+              cidadeAtual: cidadeAtual || undefined,
+              ultimaPerguntaBot: RESPOSTA_CONFIRMAR_CIDADE_OFERTA
+            }
+          });
+        }
+
+        if (!formaPagamentoContexto) {
+          return res.status(200).json({
+            resposta: RESPOSTA_FORMA_PAGAMENTO,
+            contexto: {
+              ...contexto,
+              cidade: cidadeAtual,
+              cidadeAtual,
+              intencao: 'confirmacao_oferta_aguardando_pagamento',
+              intencaoCompra: 'sistema',
+              ultimaPerguntaBot: RESPOSTA_FORMA_PAGAMENTO
+            }
           });
         }
 
@@ -3292,7 +3408,7 @@ export default async function handler(req, res) {
         if (respostaOferta) {
           return res.status(200).json({
             resposta: respostaOferta,
-            contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual, intencao: 'aguardando_interesse' }
+            contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual, formaPagamento: formaPagamentoContexto, intencao: 'aguardando_interesse' }
           });
         }
       }
