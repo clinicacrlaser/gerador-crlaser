@@ -1239,6 +1239,16 @@ function extrairProcedimentoFinalContexto(contexto = {}) {
   return null;
 }
 
+function extrairFormaPagamentoContexto(contexto = {}) {
+  return (
+    contexto.formaPagamento ||
+    contexto.pagamento ||
+    contexto?.liaContext?.formaPagamento ||
+    contexto?.liaContext?.pagamento ||
+    null
+  );
+}
+
 function mensagemDefineProcedimentoEspecifico(texto = '', base = '', procedimentoFinal = '') {
   const t = normalizeText(texto);
   if (!procedimentoFinal) return false;
@@ -1286,7 +1296,7 @@ function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
     }
   }
 
-  const formaPagamento = formaMensagem || contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
+  const formaPagamento = formaMensagem || extrairFormaPagamentoContexto(contexto);
   const etapa = contexto.etapa || contexto?.liaContext?.etapa || null;
   const aguardandoComprovante = contextoComprovanteAtivo(contexto);
 
@@ -1295,6 +1305,7 @@ function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
     procedimentoBase: procedimentoBase || null,
     procedimentoFinal: procedimentoFinal || null,
     formaPagamento: formaPagamento || null,
+    pagamento: formaPagamento || null,
     etapa: etapa || null,
     aguardandoComprovante: !!aguardandoComprovante
   };
@@ -1306,6 +1317,7 @@ function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
     procedimentoBase: procedimentoBase || contexto.procedimentoBase || null,
     procedimentoFinal: procedimentoFinal || contexto.procedimentoFinal || null,
     formaPagamento: formaPagamento || contexto.formaPagamento || null,
+    pagamento: formaPagamento || contexto.pagamento || null,
     etapa: etapa || contexto.etapa || null,
     aguardandoComprovante: !!aguardandoComprovante,
     aguardando_comprovante: !!aguardandoComprovante
@@ -2735,12 +2747,10 @@ export default async function handler(req, res) {
     }
 
     const cidadeFechamento = extrairCidadeContexto(contexto);
-    const formaPagamentoFechamento =
-      pagamentoDetectado ||
-      contexto.formaPagamento ||
-      contexto?.liaContext?.formaPagamento ||
-      null;
-    const procedimentoFinalFechamento = extrairProcedimentoFinalContexto(contexto);
+    const formaPagamentoFechamento = pagamentoDetectado || extrairFormaPagamentoContexto(contexto);
+    const procedimentoFinalFechamento =
+      extrairProcedimentoFinalContexto(contexto) ||
+      resolverProcedimentoCompraPorContexto(contexto);
 
     if (!detectarConfirmacaoPagamento(pergunta) && procedimentoFinalFechamento && cidadeFechamento && formaPagamentoFechamento) {
       const respostaLinkFechamento =
@@ -3063,6 +3073,37 @@ export default async function handler(req, res) {
     // ════ FLUXO DE COMPRA - DETECÇÃO DE INTENÇÃO ════
     if (detectarIntencaoCompra(pergunta)) {
       const cidadeCompra = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+      const formaPagamentoCompra = extrairFormaPagamentoContexto(contexto);
+      const procedimentoCompra = resolverProcedimentoCompraPorContexto({
+        ...contexto,
+        procedimento: procedimentoSelecionadoMensagem || contexto.procedimento,
+        procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado
+      });
+
+      if (cidadeCompra && formaPagamentoCompra && procedimentoCompra) {
+        const respostaOferta = gerarRespostaOfertaCampanha(procedimentoCompra, cidadeCompra, 'texto');
+        if (respostaOferta) {
+          return res.status(200).json({
+            resposta: `${respostaOferta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+            contexto: {
+              ...contexto,
+              cidade: cidadeCompra,
+              cidadeAtual: cidadeCompra,
+              cidadeCompra,
+              formaPagamento: formaPagamentoCompra,
+              pagamento: formaPagamentoCompra,
+              procedimento: procedimentoCompra,
+              procedimentoAtual: procedimentoCompra,
+              procedimentoFinal: procedimentoCompra,
+              procedimento_selecionado: procedimentoCompra,
+              intencao: 'fluxo_pagamento_aguardando_confirmacao',
+              aguardandoComprovante: true,
+              aguardando_comprovante: true,
+              status_compra: 'em andamento'
+            }
+          });
+        }
+      }
 
       if (!cidadeCompra) {
         return res.status(200).json({
@@ -3174,8 +3215,64 @@ export default async function handler(req, res) {
 
     // ════ FLUXO DE COMPRA - SISTEMA AGUARDANDO CIDADE ════
     if (contexto.intencao === 'fluxo_compra_aguardando_cidade_sistema') {
-      const cidadeAtual = cidadeDetectada;
+      const cidadeAtual = cidadeDetectada || contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || contexto?.liaContext?.cidade || null;
       if (cidadeAtual) {
+        const formaPagamentoSalva = extrairFormaPagamentoContexto(contexto);
+        const procedimentoSalvo = resolverProcedimentoCompraPorContexto({
+          ...contexto,
+          procedimento: procedimentoSelecionadoMensagem || contexto.procedimento,
+          procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado
+        });
+
+        if (formaPagamentoSalva === 'pix') {
+          return res.status(200).json({
+            resposta: gerarRespostaPix(cidadeAtual),
+            contexto: {
+              ...contexto,
+              intencao: 'fluxo_pagamento_aguardando_confirmacao',
+              cidade: cidadeAtual,
+              cidadeAtual,
+              cidadeCompra: cidadeAtual,
+              intencaoCompra: 'sistema',
+              formaPagamento: 'pix',
+              pagamento: 'pix',
+              procedimento: procedimentoSalvo || contexto.procedimento,
+              procedimentoAtual: procedimentoSalvo || contexto.procedimentoAtual,
+              procedimentoFinal: procedimentoSalvo || contexto.procedimentoFinal,
+              procedimento_selecionado: procedimentoSalvo || contexto.procedimento_selecionado,
+              aguardandoComprovante: true,
+              aguardando_comprovante: true,
+              status_compra: 'em andamento'
+            }
+          });
+        }
+
+        if (formaPagamentoSalva === 'cartao' && procedimentoSalvo) {
+          const respostaOfertaSalva = gerarRespostaOfertaCampanha(procedimentoSalvo, cidadeAtual, 'texto');
+          if (respostaOfertaSalva) {
+            return res.status(200).json({
+              resposta: `${respostaOfertaSalva}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+              contexto: {
+                ...contexto,
+                intencao: 'fluxo_pagamento_aguardando_confirmacao',
+                cidade: cidadeAtual,
+                cidadeAtual,
+                cidadeCompra: cidadeAtual,
+                intencaoCompra: 'sistema',
+                formaPagamento: 'cartao',
+                pagamento: 'cartao',
+                procedimento: procedimentoSalvo,
+                procedimentoAtual: procedimentoSalvo,
+                procedimentoFinal: procedimentoSalvo,
+                procedimento_selecionado: procedimentoSalvo,
+                aguardandoComprovante: true,
+                aguardando_comprovante: true,
+                status_compra: 'em andamento'
+              }
+            });
+          }
+        }
+
         // Verificar se mencionou um procedimento
         const perguntaNorm = normalizeText(pergunta);
         const nomesCidade = unidadeDetectada ? unidadeDetectada.nomes.map((n) => normalizeText(n)) : [];
@@ -3253,8 +3350,8 @@ export default async function handler(req, res) {
         });
       }
 
-      const formaPagamento = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
-      const cidadeCompra = contexto.cidadeCompra || cidadeDetectada;
+      const formaPagamento = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta) || extrairFormaPagamentoContexto(contexto);
+      const cidadeCompra = contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || cidadeDetectada;
 
       if (!cidadeCompra) {
         return res.status(200).json({
@@ -3272,6 +3369,7 @@ export default async function handler(req, res) {
             intencao: 'fluxo_pagamento_aguardando_confirmacao',
             intencaoCompra: 'sistema', 
             formaPagamento: 'pix', 
+            pagamento: 'pix',
             cidadeCompra,
             procedimentoAtual: contexto.procedimento || contexto.procedimento_selecionado || undefined,
             aguardandoComprovante: true,
@@ -3284,6 +3382,33 @@ export default async function handler(req, res) {
       }
 
       if (formaPagamento === 'cartao') {
+        const procedimentoDoContextoDireto = resolverProcedimentoCompraPorContexto(contexto);
+        if (procedimentoDoContextoDireto) {
+          const respostaOfertaDireta = gerarRespostaOfertaCampanha(procedimentoDoContextoDireto, cidadeCompra, 'texto');
+          if (respostaOfertaDireta) {
+            return res.status(200).json({
+              resposta: `${respostaOfertaDireta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+              contexto: {
+                ...contexto,
+                intencao: 'fluxo_pagamento_aguardando_confirmacao',
+                formaPagamento: 'cartao',
+                pagamento: 'cartao',
+                cidade: cidadeCompra,
+                cidadeAtual: cidadeCompra,
+                cidadeCompra,
+                procedimento: procedimentoDoContextoDireto,
+                procedimentoAtual: procedimentoDoContextoDireto,
+                procedimentoFinal: procedimentoDoContextoDireto,
+                procedimento_selecionado: procedimentoDoContextoDireto,
+                aguardandoComprovante: true,
+                aguardando_comprovante: true,
+                perguntouProcedimentoCartao: false,
+                status_compra: 'em andamento'
+              }
+            });
+          }
+        }
+
         const desambiguacao = resolverDesambiguacaoProcedimentoCartao(pergunta, contexto);
         if (desambiguacao.redirecionar) {
           const respostaWhatsapp = respostaWhatsappPorCidade(cidadeCompra);
@@ -3302,6 +3427,7 @@ export default async function handler(req, res) {
               ...contexto,
               intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
               formaPagamento: 'cartao',
+              pagamento: 'cartao',
               cidadeCompra,
               procedimentoBase: desambiguacao.base,
               tentativas_pergunta: desambiguacao.tentativas,
@@ -3352,6 +3478,7 @@ export default async function handler(req, res) {
               ...contexto,
               intencao: 'fluxo_pagamento_aguardando_confirmacao',
               formaPagamento: 'cartao',
+              pagamento: 'cartao',
               cidadeCompra,
               cidadeAtual: cidadeCompra,
               procedimentoBase: desambiguacao.base || contexto.procedimentoBase || null,
@@ -3380,6 +3507,7 @@ export default async function handler(req, res) {
             ...contexto,
             intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
             formaPagamento: 'cartao', 
+            pagamento: 'cartao',
             cidadeCompra,
             procedimentoBase: contexto.procedimentoBase || null,
             tentativas_pergunta: Number(contexto.tentativas_pergunta || 0) + 1,
@@ -3403,6 +3531,33 @@ export default async function handler(req, res) {
           resposta: RESPOSTA_QUAL_UNIDADE,
           contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_cidade_sistema', status_compra: 'em andamento' }
         });
+      }
+
+      const procedimentoDoContextoDireto = resolverProcedimentoCompraPorContexto(contexto);
+      if (procedimentoDoContextoDireto) {
+        const respostaOfertaDireta = gerarRespostaOfertaCampanha(procedimentoDoContextoDireto, cidadeCompra, 'texto');
+        if (respostaOfertaDireta) {
+          return res.status(200).json({
+            resposta: `${respostaOfertaDireta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+            contexto: {
+              ...contexto,
+              intencao: 'fluxo_pagamento_aguardando_confirmacao',
+              cidade: cidadeCompra,
+              cidadeAtual: cidadeCompra,
+              cidadeCompra,
+              formaPagamento: 'cartao',
+              pagamento: 'cartao',
+              procedimento: procedimentoDoContextoDireto,
+              procedimentoAtual: procedimentoDoContextoDireto,
+              procedimentoFinal: procedimentoDoContextoDireto,
+              procedimento_selecionado: procedimentoDoContextoDireto,
+              aguardandoComprovante: true,
+              aguardando_comprovante: true,
+              perguntouProcedimentoCartao: false,
+              status_compra: 'em andamento'
+            }
+          });
+        }
       }
 
       const desambiguacao = resolverDesambiguacaoProcedimentoCartao(pergunta, contexto);
