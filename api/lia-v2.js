@@ -147,17 +147,17 @@ const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor
 const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer?\n\nRosto, pescoço ou outra região?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting sem cirurgia.\n\nVocê quer ver a condição da campanha atual ou já deseja finalizar a compra?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting.\n\nVocê quer gerar a oferta ou tirar alguma dúvida antes?';
-const RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO = 'Perfeito 😊\n\nVocê escolheu {procedimento}.\n\nVocê quer gerar a oferta ou tirar alguma dúvida antes?';
-const RESPOSTA_ULTRAFORMER_OPCOES = 'Temos algumas opções de Ultraformer MPT 😊\n\n1️⃣ Full Face\n2️⃣ Terço Inferior\n3️⃣ Papada\n4️⃣ Pescoço\n5️⃣ Colo\n6️⃣ Pálpebras\n7️⃣ Abdome\n8️⃣ Flancos\n9️⃣ Braços\n🔟 Interno de coxa\n\nQual dessas regiões você quer?';
+const RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO = 'Perfeito 😊\n\nQuer ver a oferta ou tirar dúvida?';
+const RESPOSTA_ULTRAFORMER_OPCOES = 'Perfeito 😊\n\nQual região você quer tratar no Ultraformer?\nEx.: rosto, papada, pescoço, abdome.';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
-const RESPOSTA_LAVIEEN_OPCOES = 'Temos algumas opções de Lavieen 😊\n\n1️⃣ Facial completo\n2️⃣ Face + Pescoço\n3️⃣ Pescoço + Colo\n4️⃣ Face + Pescoço + Colo\n5️⃣ BB Laser Facial\n6️⃣ Melasma\n7️⃣ Olheiras\n8️⃣ Capilar\n9️⃣ Mãos\n\nQual dessas opções você quer?';
+const RESPOSTA_LAVIEEN_OPCOES = 'Perfeito 😊\n\nQual opção do Lavieen você quer?\nEx.: facial, melasma, olheiras, capilar.';
 const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado 😊\n\nVou te direcionar para a equipe da unidade 👇';
 
 // ════ BLOQUEIO OBRIGATÓRIO DE PREÇOS ════
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
-const RESPOSTA_PRECO_SISTEMA = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara ver a condição atual, é só usar o sistema aqui na tela:\n\n1️⃣ Escolha o procedimento\n2️⃣ Selecione a faixa da oferta\n3️⃣ Clique em Gerar Oferta\n\nAssim você vê o valor certinho.';
+const RESPOSTA_PRECO_SISTEMA = 'Claro 😊\n\nÉ só gerar no sistema aqui na tela.\nQuer ajuda?';
 const RESPOSTA_CONTINUIDADE_PRECO_SISTEMA = 'Perfeito 😊\n\nQualquer dúvida na hora de gerar a oferta, me chama por aqui.';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
@@ -167,7 +167,7 @@ const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melho
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
 
 // ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
-const RESPOSTA_OPCOES_COMPRA = 'Você pode comprar aqui comigo, de forma mais rápida e prática, ou falar direto com a equipe da unidade 😊\n\nApós a compra, é só enviar o comprovante para a unidade de atendimento e solicitar o agendamento.\n\n➖️➖️➖️➖️\n📍 Como fica mais fácil para você?\n\n1️⃣ Comprar aqui pelo sistema\n2️⃣ Falar com a equipe da unidade';
+const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nComo você prefere seguir?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
 
 const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_CONFIRMAR_CIDADE_OFERTA = 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
@@ -3372,7 +3372,7 @@ export default async function handler(req, res) {
       if (respostaCurtaAposLink(pergunta)) {
         const cidadeCompra = contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || cidadeDetectada;
         return res.status(200).json({
-          resposta: 'Perfeito 😊\n\nDepois do pagamento, envie o comprovante para o WhatsApp da unidade para solicitar o agendamento.',
+          resposta: 'Depois de pagar, envie o comprovante no WhatsApp da unidade para agendar.',
           contexto: {
             ...contexto,
             cidade: cidadeCompra || contexto.cidade,
@@ -3494,7 +3494,7 @@ export default async function handler(req, res) {
 
       // Se nenhuma das opções acima, oferecer os próximos passos
       return res.status(200).json({
-        resposta: 'Perfeito 😊\n\nDepois do pagamento, envie o comprovante para o WhatsApp da unidade para solicitar o agendamento.',
+        resposta: 'Depois de pagar, envie o comprovante no WhatsApp da unidade para agendar.',
         contexto: {
           ...contexto,
           cidadeAtual: contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || cidadeDetectada,
@@ -4075,11 +4075,11 @@ export default async function handler(req, res) {
       let respostaExplicacao = null;
 
       if (baseContexto === 'ultraformer') {
-        respostaExplicacao = 'O Ultraformer MPT é um tratamento de ultrassom microfocado 😊\n\nEle ajuda a melhorar a flacidez e dar efeito lifting sem cirurgia.\n\nO resultado é progressivo, estimulando colágeno ao longo dos meses.\n\nSe quiser, posso te indicar a melhor opção para o seu caso.';
+        respostaExplicacao = 'O Ultraformer melhora flacidez e dá efeito lifting 😊';
       } else if (baseContexto === 'botox') {
-        respostaExplicacao = 'O Botox ajuda a suavizar rugas e linhas de expressão 😊\n\nÉ uma aplicação rápida, com efeito natural e sem necessidade de repouso.\n\nSe quiser, posso te orientar melhor para o seu caso.';
+        respostaExplicacao = 'O Botox suaviza rugas com aplicação rápida e efeito natural 😊';
       } else if (baseContexto === 'bioestimulador') {
-        respostaExplicacao = 'O bioestimulador estimula o colágeno natural da pele 😊\n\nEle melhora a firmeza e ajuda a recuperar estrutura ao longo do tempo.';
+        respostaExplicacao = 'O bioestimulador estimula colágeno e melhora firmeza da pele 😊';
       }
 
       if (respostaExplicacao) {
@@ -4094,6 +4094,14 @@ export default async function handler(req, res) {
           }
         });
       }
+
+      return res.status(200).json({
+        resposta: 'Funciona assim 😊\n\nEscolha procedimento e faixa no sistema, depois clique em Gerar Oferta.',
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse'
+        }
+      });
     }
 
 
