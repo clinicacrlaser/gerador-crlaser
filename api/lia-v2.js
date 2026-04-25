@@ -157,7 +157,7 @@ const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado �
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
-const RESPOSTA_ORIENTAR_OFERTAS_SISTEMA = 'Claro 😊\n\nPara ver as ofertas, é só usar o sistema aqui na tela:\n\n1️⃣ Escolha o procedimento\n2️⃣ Selecione a faixa da oferta\n3️⃣ Clique em Gerar Oferta\n\nAssim você vê a condição atual certinha.';
+const RESPOSTA_PRECO_SISTEMA = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara ver a condição atual, é só usar o sistema aqui na tela:\n\n1️⃣ Escolha o procedimento\n2️⃣ Selecione a faixa da oferta\n3️⃣ Clique em Gerar Oferta\n\nAssim você vê o valor certinho.';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
@@ -2694,41 +2694,11 @@ export default async function handler(req, res) {
     }
 
     if (intencaoPrincipal === 'PRECO' && detectarPrecoProcedimento(pergunta)) {
-      const cidadeContexto = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
-      const cidadeAtual = cidadeDetectada || cidadeContexto;
-      const procedimentoPorBase = procedimentoBaseMensagem ? resolverProcedimentoPorBase(procedimentoBaseMensagem, pergunta) : null;
-      const procedimentoAtual = procedimentoDetectadoMensagem || procedimentoPorBase || contexto.procedimento || contexto.procedimento_selecionado || undefined;
-      const respostaPreco = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara ver a condição atual, é melhor gerar direto no sistema.';
-
-      if (!cidadeAtual) {
-        return res.status(200).json({
-          resposta: `${respostaPreco}\n\n${RESPOSTA_QUAL_UNIDADE}`,
-          contexto: {
-            ...contexto,
-            intencao: 'fluxo_compra_aguardando_cidade_sistema',
-            procedimento: procedimentoAtual,
-            procedimentoAtual: procedimentoAtual,
-            procedimento_selecionado: procedimentoAtual || contexto.procedimento_selecionado || undefined,
-            procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
-            status_compra: 'em andamento'
-          }
-        });
-      }
-
       return res.status(200).json({
-        resposta: `${respostaPreco}\n\n${RESPOSTA_FORMA_PAGAMENTO}`,
+        resposta: RESPOSTA_PRECO_SISTEMA,
         contexto: {
           ...contexto,
-          cidade: cidadeAtual,
-          cidadeAtual,
-          cidadeCompra: cidadeAtual,
-          intencao: 'fluxo_compra_aguardando_pagamento',
-          intencaoCompra: 'sistema',
-          procedimento: procedimentoAtual,
-          procedimentoAtual: procedimentoAtual,
-          procedimento_selecionado: procedimentoAtual || contexto.procedimento_selecionado || undefined,
-          procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
-          status_compra: 'em andamento'
+          intencao: 'aguardando_interesse'
         }
       });
     }
@@ -2802,12 +2772,27 @@ export default async function handler(req, res) {
 
     // ════ FLUXO DE COMPRA - DETECÇÃO DE INTENÇÃO ════
     if (detectarIntencaoCompra(pergunta)) {
+      const cidadeCompra = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+
+      if (!cidadeCompra) {
+        return res.status(200).json({
+          resposta: RESPOSTA_QUAL_UNIDADE,
+          contexto: {
+            ...contexto,
+            intencao: 'fluxo_compra_aguardando_cidade_sistema',
+            procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+            procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
+            status_compra: 'em andamento'
+          }
+        });
+      }
+
       return res.status(200).json({
         resposta: RESPOSTA_OPCOES_COMPRA,
         contexto: {
           ...contexto,
           intencao: 'fluxo_compra_opcoes',
-          cidade: cidadeDetectada || contexto.cidade || undefined,
+          cidade: cidadeCompra,
           procedimento_selecionado: procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
           procedimentoBase: procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
           status_compra: 'em andamento'
@@ -4004,51 +3989,22 @@ export default async function handler(req, res) {
       delete contextoAtualizado.tipoLink;
 
       return res.status(200).json({
-        resposta: RESPOSTA_ORIENTAR_OFERTAS_SISTEMA,
+        resposta: RESPOSTA_PRECO_SISTEMA,
         contexto: contextoAtualizado
       });
     }
 
     if (intencaoPrincipal === 'PRECO' && detectarInteresseFechamento(pergunta)) {
-      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
-      const cidadeAtual = cidadeDetectada || cidadeContexto;
-
-      if (!cidadeAtual) {
-        return res.status(200).json({
-          resposta: RESPOSTA_OFERTA_SEMANA_SEM_CIDADE,
-          contexto: { intencao: 'aguardando_cidade_whatsapp', tipoLink: 'oferta_semana', cidadeAtual: cidadeAtual || undefined }
-        });
-      }
-
-      const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
-      if (respostaOferta) {
-        return res.status(200).json({
-          resposta: respostaOferta,
-          contexto: { cidade: cidadeAtual, cidadeAtual }
-        });
-      }
+      return res.status(200).json({
+        resposta: RESPOSTA_PRECO_SISTEMA,
+        contexto: { ...contexto, intencao: 'aguardando_interesse' }
+      });
     }
 
     if (intencaoPrincipal === 'PRECO' && detectarPreco(pergunta)) {
-      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
-      const cidadeAtual = cidadeDetectada || cidadeContexto;
-      
-      // REGRA CRÍTICA: PRECO ≠ COMPRA
-      // Se não tiver cidade, NUNCA enviar link. Sempre perguntar cidade primeiro.
-      if (!cidadeAtual) {
-        return res.status(200).json({
-          resposta: RESPOSTA_PRECO_SEM_CIDADE,
-          contexto: {
-            ...contexto,
-            intencao: 'aguardando_cidade_para_preco'
-          }
-        });
-      }
-      
-      // Se tiver cidade, retorna resposta genérica de preço
       return res.status(200).json({
-        resposta: RESPOSTA_PRECO,
-        contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual }
+        resposta: RESPOSTA_PRECO_SISTEMA,
+        contexto: { ...contexto, intencao: 'aguardando_interesse' }
       });
     }
 
