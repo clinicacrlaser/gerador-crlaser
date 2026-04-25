@@ -158,6 +158,7 @@ const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado �
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_PRECO_SISTEMA = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara ver a condição atual, é só usar o sistema aqui na tela:\n\n1️⃣ Escolha o procedimento\n2️⃣ Selecione a faixa da oferta\n3️⃣ Clique em Gerar Oferta\n\nAssim você vê o valor certinho.';
+const RESPOSTA_CONTINUIDADE_PRECO_SISTEMA = 'Perfeito 😊\n\nQualquer dúvida na hora de gerar a oferta, me chama por aqui.';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
@@ -554,6 +555,11 @@ function detectarConfirmacao(texto = '') {
 function ehRespostaCurta(texto = '') {
   const t = normalizeText(texto);
   return ['ok', 'sim', 'certo', 'pode', 'entendi', 'beleza', 'ta', 'tá', 'perfeito', 'claro'].includes(t);
+}
+
+function detectarConfirmacaoCurtaPosPrecoSistema(texto = '') {
+  const t = normalizeText(texto);
+  return ['ok', 'entendi', 'certo', 'beleza', 'obrigado', 'obrigada', 'ta', 'tá'].includes(t);
 }
 
 function interpretarFormaPagamentoPorRespostaCurta(texto = '') {
@@ -2698,7 +2704,8 @@ export default async function handler(req, res) {
         resposta: RESPOSTA_PRECO_SISTEMA,
         contexto: {
           ...contexto,
-          intencao: 'aguardando_interesse'
+          intencao: 'aguardando_interesse',
+          ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA
         }
       });
     }
@@ -3497,6 +3504,20 @@ export default async function handler(req, res) {
       }
     }
 
+    if (
+      normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
+      detectarConfirmacaoCurtaPosPrecoSistema(pergunta)
+    ) {
+      return res.status(200).json({
+        resposta: RESPOSTA_CONTINUIDADE_PRECO_SISTEMA,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          ultimaPerguntaBot: RESPOSTA_CONTINUIDADE_PRECO_SISTEMA
+        }
+      });
+    }
+
     const respostaCurtaContextual = interpretarRespostaCurtaContextual(pergunta, contexto);
     if (respostaCurtaContextual) {
       if (respostaCurtaContextual.tipo === 'procedimento') {
@@ -3990,21 +4011,21 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: contextoAtualizado
+        contexto: { ...contextoAtualizado, ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
       });
     }
 
     if (intencaoPrincipal === 'PRECO' && detectarInteresseFechamento(pergunta)) {
       return res.status(200).json({
         resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: { ...contexto, intencao: 'aguardando_interesse' }
+        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
       });
     }
 
     if (intencaoPrincipal === 'PRECO' && detectarPreco(pergunta)) {
       return res.status(200).json({
         resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: { ...contexto, intencao: 'aguardando_interesse' }
+        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
       });
     }
 
