@@ -145,8 +145,8 @@ const PROCEDURE_LINK_KEYS = {
 
 const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor axilar? 😊';
 const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer?\n\nRosto, pescoço ou outra região?';
-const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting sem cirurgia.\n\nVocê quer ver a condição da campanha atual ou já deseja finalizar a compra?';
-const RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting.\n\nVocê quer gerar a oferta ou tirar alguma dúvida antes?';
+const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'O Ultraformer melhora a flacidez e dá efeito lifting 😊\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO = 'O Ultraformer melhora a flacidez e dá efeito lifting 😊\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO = 'Perfeito 😊\n\nQuer ver a oferta ou tirar dúvida?';
 const RESPOSTA_ULTRAFORMER_OPCOES = 'Perfeito 😊\n\nQual região você quer tratar no Ultraformer?\nEx.: rosto, papada, pescoço, abdome.';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
@@ -165,6 +165,9 @@ const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que
 const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
+const RESPOSTA_ESCOLHA_DIRETA_PADRAO = 'Você prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER = 'Você prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_ESCOLHA_DIRETA_BOTOX = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida antes?';
 
 // ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
 const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nComo você prefere seguir?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
@@ -206,11 +209,11 @@ const LINK_CARTAO_POR_CIDADE = {
 
 // ════ RESPOSTAS PADRONIZADAS COM AUTORIDADE (MODELO OFICIAL CR LASER®) ════
 // Estrutura: Responder → Autoridade (Equipamento Original, Segurança, ANVISA) → Direcionar
-const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras é um tratamento não-invasivo que atua na flacidez, estimulando colágeno e melhorando o contorno.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Todas as ponteiras são originais e ANVISA aprovadas\n\n👉 Você pode gerar sua oferta agora direto no sistema';
-const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nO Ultraformer estimula colágeno e melhora firmeza da pele.\n\nAqui na CR Laser®:\n- Equipamentos próprios\n- Ponteiras originais\n- ANVISA aprovado\n\n👉 Clique em gerar oferta e veja as condições de hoje';
-const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, o Bioestimulador faz mais sentido 😊\n\nEle estimula colágeno natural, ajudando a restaurar estrutura e volume.\n\nAqui na CR Laser®:\n- Bioestimulador original (Diamond)\n- Aplicação por especialistas certificados\n- ANVISA aprovado\n\n👉 Você pode gerar sua oferta agora direto no sistema';
-const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, o Ultraformer MPT faz mais sentido 😊\n\nÉ uma ótima opção quando existe flacidez em rosto com mais volume, oferecendo lifting sem cirurgia.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Ponteiras originais e ANVISA aprovadas\n\n👉 Clique em gerar oferta e veja as condições de hoje';
-const RESPOSTA_BOTOX_FACIAL_RUGAS = 'Para rugas na testa e linhas de expressão, o Botox é uma ótima solução 😊\n\nFazemos aplicação completa no terço superior com retorno, buscando resultado natural e equilibrado.\n\nAqui na CR Laser®:\n- Toxina Botulínica original importada\n- Aplicação por especialistas certificados\n- Resultado natural garantido\n\n👉 Você pode gerar sua oferta agora direto no sistema';
+const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultraformer MPT Pálpebras é um tratamento não-invasivo que atua na flacidez, estimulando colágeno e melhorando o contorno.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Todas as ponteiras são originais e ANVISA aprovadas\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nO Ultraformer estimula colágeno e melhora firmeza da pele.\n\nAqui na CR Laser®:\n- Equipamentos próprios\n- Ponteiras originais\n- ANVISA aprovado\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, o Bioestimulador faz mais sentido 😊\n\nEle estimula colágeno natural, ajudando a restaurar estrutura e volume.\n\nAqui na CR Laser®:\n- Bioestimulador original (Diamond)\n- Aplicação por especialistas certificados\n- ANVISA aprovado\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, o Ultraformer MPT faz mais sentido 😊\n\nÉ uma ótima opção quando existe flacidez em rosto com mais volume, oferecendo lifting sem cirurgia.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Ponteiras originais e ANVISA aprovadas\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
+const RESPOSTA_BOTOX_FACIAL_RUGAS = 'O Botox suaviza rugas e tem efeito natural 😊\n\nFazemos aplicação completa no terço superior com retorno, buscando resultado natural e equilibrado.\n\nAqui na CR Laser®:\n- Toxina Botulínica original importada\n- Aplicação por especialistas certificados\n- Resultado natural garantido\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida antes?';
 const RESPOSTA_INTENCAO_GENERICA = 'Consigo te ajudar sim 😊\n\nIsso costuma estar relacionado a {categoria}.\n\nSe quiser, me conta um pouco melhor que te explico direitinho.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -681,6 +684,33 @@ function detectarInteresseFechamento(texto = '') {
     t.includes('me passa os valores') ||
     t.includes('tenho interesse')
   );
+}
+
+function detectarEscolhaOfertaDireta(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    ['1', 'oferta', 'ver oferta', 'ver a oferta', 'quero ver a oferta'].includes(t) ||
+    t.includes('ver oferta') ||
+    t.includes('ver a oferta') ||
+    t.includes('quero oferta')
+  );
+}
+
+function detectarEscolhaDuvidaDireta(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    ['2', 'duvida', 'dúvida', 'tirar duvida', 'tirar dúvida'].includes(t) ||
+    t.includes('mais duvida') ||
+    t.includes('mais dúvida') ||
+    t.includes('tirar duvida') ||
+    t.includes('tirar dúvida')
+  );
+}
+
+function montarFechamentoEscolhaDireta(base = '') {
+  if (base === 'ultraformer') return RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER;
+  if (base === 'botox') return RESPOSTA_ESCOLHA_DIRETA_BOTOX;
+  return RESPOSTA_ESCOLHA_DIRETA_PADRAO;
 }
 
 function detectarConfirmacaoOferta(texto = '') {
@@ -2279,11 +2309,26 @@ function respostaCurtaComConducao(resposta = '') {
     /\?$/.test(ultimaLinha) ||
     /^(quer|prefere|me fala|clique|pode clicar)/i.test(normalizeText(ultimaLinha)) ||
     ultimaLinha.includes('👉');
+  const textoNormalizado = normalizeText(texto);
+  const respostaJaTemEscolhaDireta =
+    texto.includes('1️⃣') ||
+    textoNormalizado.includes('voce prefere') ||
+    textoNormalizado.includes('voce quer');
+  const respostaOperacional =
+    textoNormalizado.includes('qual unidade') ||
+    textoNormalizado.includes('forma de pagamento') ||
+    textoNormalizado.includes('endereco ou o telefone') ||
+    textoNormalizado.includes('qual procedimento');
 
   // ════ BLOQUEIO OBRIGATÓRIO: NUNCA pedir "valores" ════
   // Se a resposta não termina com ação clara, direcionar ao sistema (NÃO pedir valores)
   if (!terminaComAcaoOuPergunta && !texto.includes('👉')) {
     texto = `${texto}\n\n👉 Você pode gerar sua oferta agora direto no sistema`;
+  }
+
+  if (!respostaJaTemEscolhaDireta && !respostaOperacional) {
+    const base = normalizarProcedimentoBase(texto);
+    texto = `${texto}\n\n${montarFechamentoEscolhaDireta(base)}`;
   }
 
   return texto;
@@ -3859,6 +3904,31 @@ export default async function handler(req, res) {
     }
 
     if (contexto.intencao === 'aguardando_interesse') {
+      if (detectarEscolhaOfertaDireta(pergunta)) {
+        return res.status(200).json({
+          resposta: RESPOSTA_OPCOES_COMPRA,
+          contexto: {
+            ...contexto,
+            intencao: 'fluxo_compra_opcoes',
+            intencaoCompra: 'sistema',
+            status_compra: 'em andamento',
+            ultimaPerguntaBot: RESPOSTA_OPCOES_COMPRA
+          }
+        });
+      }
+
+      if (detectarEscolhaDuvidaDireta(pergunta)) {
+        const respostaDuvida = 'Perfeito 😊\n\nMe fala sua dúvida e eu te explico de forma direta.';
+        return res.status(200).json({
+          resposta: respostaDuvida,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_interesse',
+            ultimaPerguntaBot: respostaDuvida
+          }
+        });
+      }
+
       const ambos = msg.includes('os dois') || msg.includes('ambos') || msg.includes('os 2');
       const quer = ['quero', 'sim', 'ok', 'claro', 'pode ser', 'manda', 'pode mandar'].includes(msg) || ambos;
       if (quer) {
@@ -4119,17 +4189,20 @@ export default async function handler(req, res) {
     if (detectarPedidoMaisInformacaoTratamento(pergunta)) {
       const baseContexto = baseProcedimentoContexto(contexto);
       let respostaExplicacao = null;
+      let fechamentoEscolhaDireta = RESPOSTA_ESCOLHA_DIRETA_PADRAO;
 
       if (baseContexto === 'ultraformer') {
         respostaExplicacao = 'O Ultraformer melhora flacidez e dá efeito lifting 😊';
+        fechamentoEscolhaDireta = RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER;
       } else if (baseContexto === 'botox') {
         respostaExplicacao = 'O Botox suaviza rugas com aplicação rápida e efeito natural 😊';
+        fechamentoEscolhaDireta = RESPOSTA_ESCOLHA_DIRETA_BOTOX;
       } else if (baseContexto === 'bioestimulador') {
         respostaExplicacao = 'O bioestimulador estimula colágeno e melhora firmeza da pele 😊';
       }
 
       if (respostaExplicacao) {
-        const respostaFinal = `${respostaExplicacao}\n\nQuer ver a oferta ou prefere tirar mais dúvidas?`;
+        const respostaFinal = `${respostaExplicacao}\n\n${fechamentoEscolhaDireta}`;
         return res.status(200).json({
           resposta: respostaFinal,
           contexto: {
@@ -4142,7 +4215,7 @@ export default async function handler(req, res) {
       }
 
       return res.status(200).json({
-        resposta: 'Funciona assim 😊\n\nEscolha procedimento e faixa no sistema, depois clique em Gerar Oferta.',
+        resposta: `Funciona assim 😊\n\nEscolha procedimento e faixa no sistema, depois clique em Gerar Oferta.\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`,
         contexto: {
           ...contexto,
           intencao: 'aguardando_interesse'
@@ -4319,6 +4392,20 @@ export default async function handler(req, res) {
 
     const itemIndicacao = identificarProblema(pergunta);
     if (itemIndicacao) {
+      if (contexto.intencao === 'aguardando_interesse') {
+        const respostaPosExplicacao = respostaCurtaComConducao(itemIndicacao.resposta);
+        return res.status(200).json({
+          resposta: respostaPosExplicacao,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_interesse',
+            procedimentoAtual: itemIndicacao.problema,
+            ultimaPerguntaBot: respostaPosExplicacao,
+            cidade: cidadeDetectada || contexto.cidade
+          }
+        });
+      }
+
       return res.status(200).json({
         resposta: montarRespostaIndicacaoComConducao(itemIndicacao),
         contexto: {
@@ -4331,12 +4418,23 @@ export default async function handler(req, res) {
     }
 
     if (intencaoInterpretada.categoria === 'flacidez') {
+      const baseAtualFlacidez = baseProcedimentoContexto(contexto);
+      const contextoUltra =
+        baseAtualFlacidez === 'ultraformer' ||
+        normalizeText(contexto.procedimentoAtual || '').includes('ultraformer') ||
+        detectarTermoUltraAproximado(pergunta);
+      const respostaFlacidez = contextoUltra
+        ? `O Ultraformer melhora a flacidez e dá efeito lifting 😊\n\n${RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER}`
+        : `Para flacidez, temos opções que melhoram firmeza e efeito lifting 😊\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`;
+
       return res.status(200).json({
-        resposta: 'Para flacidez facial, a melhor indicação depende muito do tipo de rosto 😊\n\nSeu rosto hoje é mais magro ou mais cheio?',
+        resposta: respostaFlacidez,
         contexto: {
-          intencao: 'conduzindo_indicacao',
-          procedimentoAtual: 'flacidez_rosto',
-          passosConducao: 0,
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: contextoUltra ? 'ultraformer' : (baseAtualFlacidez || null),
+          procedimentoAtual: contextoUltra ? 'Ultraformer MPT Full Face' : (contexto.procedimentoAtual || 'flacidez'),
+          ultimaPerguntaBot: respostaFlacidez,
           cidade: cidadeDetectada || contexto.cidade
         }
       });
