@@ -708,6 +708,17 @@ function detectarEscolhaDuvidaDireta(texto = '') {
   );
 }
 
+function detectarHesitacaoIndeciso(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'vou ver',
+    'depois',
+    'ok',
+    'entendi',
+    'beleza'
+  ].includes(t);
+}
+
 function montarFechamentoEscolhaDireta(base = '') {
   if (base === 'ultraformer') return RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER;
   if (base === 'botox') return RESPOSTA_ESCOLHA_DIRETA_BOTOX;
@@ -1399,6 +1410,10 @@ function intencaoContextoCompativel(contexto = {}, intencaoPrincipal = '', texto
 
   if (estado === 'aguardando_aceite_oferta_semana') {
     return ['COMPRA', 'PRECO'].includes(intencaoPrincipal) || respostaCurta;
+  }
+
+  if (estado === 'recuperacao_indeciso') {
+    return ['COMPRA', 'PRECO', 'PAGAMENTO', 'PROCEDIMENTO', 'FALLBACK'].includes(intencaoPrincipal) || respostaCurta || temCidade;
   }
 
   return true;
@@ -3789,12 +3804,14 @@ export default async function handler(req, res) {
       normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
       detectarConfirmacaoCurtaPosPrecoSistema(pergunta)
     ) {
+      const respostaRecuperacao = 'Perfeito 😊\n\nSe quiser, posso já deixar sua oferta pronta pra você garantir o valor de hoje.';
       return res.status(200).json({
-        resposta: RESPOSTA_CONTINUIDADE_PRECO_SISTEMA,
+        resposta: respostaRecuperacao,
         contexto: {
           ...contexto,
-          intencao: 'aguardando_interesse',
-          ultimaPerguntaBot: RESPOSTA_CONTINUIDADE_PRECO_SISTEMA
+          intencao: 'recuperacao_indeciso',
+          etapaRecuperacaoIndeciso: 'inicial',
+          ultimaPerguntaBot: respostaRecuperacao
         }
       });
     }
@@ -3952,7 +3969,69 @@ export default async function handler(req, res) {
       }
     }
 
+    if (contexto.intencao === 'recuperacao_indeciso') {
+      if (detectarEscolhaOfertaDireta(pergunta) || detectarInteresseFechamento(pergunta) || detectarIntencaoCompra(pergunta)) {
+        return res.status(200).json({
+          resposta: RESPOSTA_PRECO_SISTEMA,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_interesse',
+            ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA
+          }
+        });
+      }
+
+      if (detectarEscolhaDuvidaDireta(pergunta)) {
+        const respostaDuvida = 'Perfeito 😊\n\nMe fala sua dúvida e eu te explico de forma direta.';
+        return res.status(200).json({
+          resposta: respostaDuvida,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_interesse',
+            ultimaPerguntaBot: respostaDuvida
+          }
+        });
+      }
+
+      if (contexto.etapaRecuperacaoIndeciso === 'pergunta_final') {
+        const respostaSeguimento = 'Perfeito 😊\n\nPosso gerar agora e te acompanhar passo a passo.';
+        return res.status(200).json({
+          resposta: respostaSeguimento,
+          contexto: {
+            ...contexto,
+            intencao: 'recuperacao_indeciso',
+            etapaRecuperacaoIndeciso: 'seguimento',
+            ultimaPerguntaBot: respostaSeguimento
+          }
+        });
+      }
+
+      const perguntaRecuperacao = 'Quer que eu já gere pra você?';
+      return res.status(200).json({
+        resposta: perguntaRecuperacao,
+        contexto: {
+          ...contexto,
+          intencao: 'recuperacao_indeciso',
+          etapaRecuperacaoIndeciso: 'pergunta_final',
+          ultimaPerguntaBot: perguntaRecuperacao
+        }
+      });
+    }
+
     if (contexto.intencao === 'aguardando_interesse') {
+      if (detectarHesitacaoIndeciso(pergunta)) {
+        const respostaRecuperacao = 'Perfeito 😊\n\nSe quiser, posso já deixar sua oferta pronta pra você garantir o valor de hoje.';
+        return res.status(200).json({
+          resposta: respostaRecuperacao,
+          contexto: {
+            ...contexto,
+            intencao: 'recuperacao_indeciso',
+            etapaRecuperacaoIndeciso: 'inicial',
+            ultimaPerguntaBot: respostaRecuperacao
+          }
+        });
+      }
+
       if (detectarEscolhaOfertaDireta(pergunta)) {
         return res.status(200).json({
           resposta: RESPOSTA_OPCOES_COMPRA,
