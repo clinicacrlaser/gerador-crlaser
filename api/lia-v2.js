@@ -1003,9 +1003,7 @@ function processarMensagemLia(mensagemUsuario = '') {
 
 function detectarConsultaAparelho(texto = '') {
   const t = normalizeText(texto);
-  const termoAparelho = ['aparelho', 'equipamento', 'marca', 'original', 'mpt original'].some(termo => t.includes(termo));
-  const termoUltra = ['ultraformer', 'ultrafomer', 'ultrformer', 'ultrfomer', 'ultra', 'mpt'].some(termo => t.includes(termo));
-  return termoAparelho && termoUltra;
+  return ['aparelho', 'equipamento', 'marca', 'original', 'mpt original'].some(termo => t.includes(termo));
 }
 
 function labelCategoriaProvavel(categoria = 'fallback') {
