@@ -1594,10 +1594,12 @@ function detectarEscolhaSistema(texto = '') {
 }
 
 // ════ DETECÇÃO DE FORMA DE PAGAMENTO ════
+// NOTA: '1' e '2' NÃO são interpretados aqui. Apenas palavras explícitas (pix/cartão).
+// '1' e '2' só viram pagamento dentro de estados explícitos via interpretarFormaPagamentoPorRespostaCurta.
 function detectarFormaPagamento(texto = '') {
   const t = normalizeText(texto);
-  if (t.includes('pix') || t === '1' || t === 'pix') return 'pix';
-  if (t.includes('cartao') || t.includes('cartão') || t === '2' || t === 'cartao' || t === 'cartão') return 'cartao';
+  if (t.includes('pix') || t === 'pix') return 'pix';
+  if (t.includes('cartao') || t.includes('cartão') || t === 'cartao' || t === 'cartão') return 'cartao';
   return null;
 }
 
@@ -2647,7 +2649,9 @@ export default async function handler(req, res) {
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
     const procedimentoDetectadoMensagem = detectarProcedimento(pergunta);
-    const pagamentoDetectado = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
+    // pagamentoDetectado usa APENAS palavras explícitas (pix/cartão). '1'/'2' ficam reservados
+    // para estados de pagamento via interpretarFormaPagamentoPorRespostaCurta.
+    const pagamentoDetectado = detectarFormaPagamento(pergunta);
     const contextoSemIntencao = { ...contexto };
     delete contextoSemIntencao.intencao;
     const intencaoAtual = classificarIntencaoPrincipal(pergunta, contextoSemIntencao);
