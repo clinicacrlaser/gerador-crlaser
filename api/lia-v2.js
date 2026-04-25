@@ -68,12 +68,22 @@ const PROCEDURE_ALIASES = {
     'ultra former',
     'ultrafomer',
     'ultrformer',
+    'ultrfomer',
     'ultra',
     'mpt',
     'mpt rosto',
     'mpt face',
+    'mpt facial',
     'ultra rosto',
     'ultra face',
+    'ultra facial',
+    'ultrafomer rosto',
+    'ultrafomer face',
+    'ultrformer rosto',
+    'ultrformer face',
+    'ultrfomer rosto',
+    'ultrfomer face',
+    'ultrfomer facial',
     'lifting sem cirurgia',
     'lifting rosto',
     'flacidez rosto',
@@ -134,7 +144,8 @@ const PROCEDURE_LINK_KEYS = {
 };
 
 const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor axilar? 😊';
-const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer o Ultraformer MPT?\n\nRosto? Pescoço? Ou alguma outra região?';
+const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer?\n\nRosto, pescoço ou outra região?';
+const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting sem cirurgia.\n\nVocê quer ver a condição da campanha atual ou já deseja finalizar a compra?';
 const RESPOSTA_ULTRAFORMER_OPCOES = 'Temos algumas opções de Ultraformer MPT 😊\n\n1️⃣ Full Face\n2️⃣ Terço Inferior\n3️⃣ Papada\n4️⃣ Pescoço\n5️⃣ Colo\n6️⃣ Pálpebras\n7️⃣ Abdome\n8️⃣ Flancos\n9️⃣ Braços\n🔟 Interno de coxa\n\nQual dessas regiões você quer?';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
 const RESPOSTA_LAVIEEN_OPCOES = 'Temos algumas opções de Lavieen 😊\n\n1️⃣ Facial completo\n2️⃣ Face + Pescoço\n3️⃣ Pescoço + Colo\n4️⃣ Face + Pescoço + Colo\n5️⃣ BB Laser Facial\n6️⃣ Melasma\n7️⃣ Olheiras\n8️⃣ Capilar\n9️⃣ Mãos\n\nQual dessas opções você quer?';
@@ -832,6 +843,26 @@ function detectarTemaBioPreenchimento(texto = '', contexto = {}) {
   ].some((gatilho) => t.includes(normalizeText(gatilho)));
 }
 
+function detectarTermoUltraAproximado(texto = '') {
+  const t = normalizeText(texto);
+  const termosUltra = ['ultra', 'ultraformer', 'ultra former', 'ultrafomer', 'ultrformer', 'ultrfomer', 'mpt'];
+  return termosUltra.some((termo) => t.includes(termo));
+}
+
+function detectarRegiaoRosto(texto = '') {
+  const t = normalizeText(texto);
+  return ['rosto', 'face', 'facial'].some((termo) => t.includes(termo));
+}
+
+function detectarUltraformerFullFaceAproximado(texto = '') {
+  return detectarTermoUltraAproximado(texto) && detectarRegiaoRosto(texto);
+}
+
+function detectarUltraSemRegiaoDireta(texto = '') {
+  const t = normalizeText(texto);
+  return ['ultra', 'ultraformer', 'ultra former', 'ultrafomer', 'ultrformer', 'ultrfomer', 'mpt'].includes(t);
+}
+
 function labelCategoriaProvavel(categoria = 'fallback') {
   const labels = {
     humano: 'atendimento humano',
@@ -861,7 +892,7 @@ function normalizarProcedimentoBase(valor = '') {
 
   if (!t) return null;
   if (t.includes('botox')) return 'botox';
-  if (t.includes('ultraformer') || t === 'ultra') return 'ultraformer';
+  if (t.includes('ultraformer') || t.includes('ultrafomer') || t.includes('ultrformer') || t.includes('ultrfomer') || t === 'ultra' || t === 'mpt') return 'ultraformer';
   if (t.includes('lavieen') || t.includes('bb laser')) return 'lavieen';
   if (t.includes('bioestimulador') || t.includes('diamond') || t.includes('sculptra') || t.includes('scultra')) return 'bioestimulador';
   if (t.includes('preenchedor') || t.includes('preenchimento')) return 'preenchedor';
@@ -1419,9 +1450,13 @@ function detectarProcedimentoDetalhado(texto = '') {
     'Ultraformer MPT Flancos'
   ]);
 
-  const ultraSemRegiao = ['ultra', 'ultraformer', 'ultra former'];
+  const ultraSemRegiao = ['ultra', 'ultraformer', 'ultra former', 'ultrafomer', 'ultrformer', 'ultrfomer', 'mpt'];
   if (ultraSemRegiao.includes(textoNorm)) {
     return { procedimento: null, precisaConfirmarRegiao: true };
+  }
+
+  if (detectarUltraformerFullFaceAproximado(textoNorm)) {
+    return { procedimento: 'Ultraformer MPT Full Face', precisaConfirmarRegiao: false };
   }
 
   // 1) Alias/sinônimos primeiro (cartão e variações simples)
@@ -1504,7 +1539,7 @@ function detectarBaseProcedimentoAmbiguo(texto = '') {
     return 'botox';
   }
 
-  const termosUltra = ['ultraformer', 'ultra former', 'ultrafomer', 'ultrformer', 'ultra', 'mpt'];
+  const termosUltra = ['ultraformer', 'ultra former', 'ultrafomer', 'ultrformer', 'ultrfomer', 'ultra', 'mpt'];
   const temUltra = termosUltra.some((k) => t.includes(k)) || t === 'quero ultraformer';
   const ultraEspecificos = [
     'rosto', 'face', 'full face', 'terco inferior', 'papada', 'pescoco', 'colo', 'palpebra',
@@ -1554,7 +1589,7 @@ function resolverProcedimentoPorBase(base = '', texto = '') {
   }
 
   if (base === 'ultraformer') {
-    if (['rosto', 'face', 'full face'].some((k) => t.includes(k))) return 'Ultraformer MPT Full Face';
+    if (['rosto', 'face', 'facial', 'full face'].some((k) => t.includes(k))) return 'Ultraformer MPT Full Face';
     if (t.includes('terco inferior')) return 'Ultraformer MPT Terço Inferior';
     if (t.includes('papada')) return 'Ultraformer MPT Papada';
     if (t.includes('pescoco')) return 'Ultraformer MPT Pescoço (Pega Papada com Foco em Flacidez)';
@@ -2635,6 +2670,21 @@ export default async function handler(req, res) {
 
     // ════ FLUXO DE COMPRA - SISTEMA AGUARDANDO FORMA DE PAGAMENTO ════
     if (contexto.intencao === 'fluxo_compra_aguardando_pagamento') {
+      if (detectarUltraformerFullFaceAproximado(pergunta)) {
+        return res.status(200).json({
+          resposta: RESPOSTA_FORMA_PAGAMENTO,
+          contexto: {
+            ...contexto,
+            intencao: 'fluxo_compra_aguardando_pagamento',
+            procedimento: 'Ultraformer MPT Full Face',
+            procedimentoAtual: 'Ultraformer MPT Full Face',
+            procedimento_selecionado: 'Ultraformer MPT Full Face',
+            procedimentoBase: 'ultraformer',
+            status_compra: 'em andamento'
+          }
+        });
+      }
+
       const formaPagamento = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
       const cidadeCompra = contexto.cidadeCompra || cidadeDetectada;
 
@@ -3287,6 +3337,55 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: RESPOSTA_ULTRAFORMER_PALPEBRAS,
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: CONTEXTO_ULTRAFORMER_PALPEBRAS }
+      });
+    }
+
+    const ultraFullFaceAproximado = detectarUltraformerFullFaceAproximado(pergunta);
+    const intencoesFluxoCompra = [
+      'fluxo_compra_opcoes',
+      'fluxo_compra_aguardando_cidade_sistema',
+      'fluxo_compra_aguardando_pagamento',
+      'fluxo_pagamento_aguardando_procedimento_cartao'
+    ];
+    const emFluxoCompra = intencoesFluxoCompra.includes(contexto.intencao);
+
+    if (ultraFullFaceAproximado && emFluxoCompra) {
+      return res.status(200).json({
+        resposta: RESPOSTA_FORMA_PAGAMENTO,
+        contexto: {
+          ...contexto,
+          intencao: 'fluxo_compra_aguardando_pagamento',
+          procedimento: 'Ultraformer MPT Full Face',
+          procedimentoAtual: 'Ultraformer MPT Full Face',
+          procedimento_selecionado: 'Ultraformer MPT Full Face',
+          procedimentoBase: 'ultraformer',
+          status_compra: 'em andamento'
+        }
+      });
+    }
+
+    if (ultraFullFaceAproximado) {
+      return res.status(200).json({
+        resposta: RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimento: 'Ultraformer MPT Full Face',
+          procedimentoAtual: 'Ultraformer MPT Full Face',
+          procedimento_selecionado: 'Ultraformer MPT Full Face',
+          procedimentoBase: 'ultraformer'
+        }
+      });
+    }
+
+    if (detectarUltraSemRegiaoDireta(pergunta)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_ULTRAFORMER_SEM_REGIAO,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: 'ultraformer'
+        }
       });
     }
 
