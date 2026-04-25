@@ -172,9 +172,12 @@ const RESPOSTA_ESCOLHA_DIRETA_BOTOX = 'Você quer:\n1️⃣ Ver a oferta\n2️�
 const RESPOSTA_INDECISO_ESCOLHA = 'Você prefere:\n1️⃣ Ver a oferta\n2️⃣ Entender melhor antes?';
 const RESPOSTA_TRAVA_ESCOLHA = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar dúvida?';
 const RESPOSTA_AJUDA_POS_PRECO = 'Perfeito 😊\n\nTe ajudo agora.\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
+const RESPOSTA_URGENCIA_OFERTA_1 = 'Essa condição depende da campanha ativa 😊';
+const RESPOSTA_URGENCIA_OFERTA_2 = 'Os valores podem mudar conforme a campanha.';
+const RESPOSTA_URGENCIA_DEMORA = 'Se quiser, posso já deixar sua oferta pronta pra garantir o valor.';
 
 // ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
-const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nComo você prefere seguir?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
+const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nPara seguir com a oferta, como você prefere?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
 
 const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_CONFIRMAR_CIDADE_OFERTA = 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
@@ -724,6 +727,18 @@ function detectarHesitacaoIndeciso(texto = '') {
     'ok',
     'entendi',
     'beleza'
+  ].includes(t);
+}
+
+function detectarDemoraCliente(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'vou ver',
+    'depois',
+    'vou pensar',
+    'mais tarde',
+    'agora nao',
+    'agora não'
   ].includes(t);
 }
 
@@ -1696,6 +1711,28 @@ function anexarReforcoPosLink(resposta = '') {
   }
 
   return `${resposta}\n\n${RESPOSTA_REFORCO_POS_LINK}`;
+}
+
+function anexarUrgenciaOfertaLeve(resposta = '') {
+  if (!resposta || typeof resposta !== 'string') return resposta;
+
+  const respostaNorm = normalizeText(resposta);
+  const jaTemUrgencia =
+    respostaNorm.includes(normalizeText(RESPOSTA_URGENCIA_OFERTA_1)) ||
+    respostaNorm.includes(normalizeText(RESPOSTA_URGENCIA_OFERTA_2));
+  if (jaTemUrgencia) return resposta;
+
+  const falaOferta =
+    respostaNorm.includes('oferta') ||
+    respostaNorm.includes('oferta da semana') ||
+    respostaNorm.includes('finalizar sua compra');
+  if (!falaOferta) return resposta;
+
+  const fraseUrgencia = respostaNorm.includes('valor') || respostaNorm.includes('valores')
+    ? RESPOSTA_URGENCIA_OFERTA_2
+    : RESPOSTA_URGENCIA_OFERTA_1;
+
+  return `${resposta}\n\n${fraseUrgencia}`;
 }
 
 function gerarRespostaComprovanteUnidade(cidade = '') {
@@ -2679,6 +2716,7 @@ export default async function handler(req, res) {
       statusResponse.json = (payload) => {
         if (payload && typeof payload === 'object' && typeof payload.resposta === 'string') {
           payload.resposta = anexarReforcoPosLink(payload.resposta);
+          payload.resposta = anexarUrgenciaOfertaLeve(payload.resposta);
         }
         if (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, 'contexto')) {
           const contextoResposta = payload.contexto || {};
@@ -4280,9 +4318,12 @@ export default async function handler(req, res) {
         });
       }
 
-      const respostaRecuperacao = detectarTravouDecisao(pergunta)
+      const respostaRecuperacaoBase = detectarTravouDecisao(pergunta)
         ? RESPOSTA_TRAVA_ESCOLHA
         : RESPOSTA_INDECISO_ESCOLHA;
+      const respostaRecuperacao = detectarDemoraCliente(pergunta)
+        ? `${respostaRecuperacaoBase}\n\n${RESPOSTA_URGENCIA_DEMORA}`
+        : respostaRecuperacaoBase;
       return res.status(200).json({
         resposta: respostaRecuperacao,
         contexto: {
@@ -4296,9 +4337,12 @@ export default async function handler(req, res) {
 
     if (contexto.intencao === 'aguardando_interesse') {
       if (detectarHesitacaoIndeciso(pergunta)) {
-        const respostaRecuperacao = detectarTravouDecisao(pergunta)
+        const respostaRecuperacaoBase = detectarTravouDecisao(pergunta)
           ? RESPOSTA_TRAVA_ESCOLHA
           : RESPOSTA_INDECISO_ESCOLHA;
+        const respostaRecuperacao = detectarDemoraCliente(pergunta)
+          ? `${respostaRecuperacaoBase}\n\n${RESPOSTA_URGENCIA_DEMORA}`
+          : respostaRecuperacaoBase;
         return res.status(200).json({
           resposta: respostaRecuperacao,
           contexto: {
