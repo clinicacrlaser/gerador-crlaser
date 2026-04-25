@@ -175,6 +175,7 @@ const RESPOSTA_AJUDA_POS_PRECO = 'Perfeito 😊\n\nTe ajudo agora.\n\nVocê quer
 const RESPOSTA_URGENCIA_OFERTA_1 = 'Essa condição depende da campanha ativa 😊';
 const RESPOSTA_URGENCIA_OFERTA_2 = 'Os valores podem mudar conforme a campanha.';
 const RESPOSTA_URGENCIA_DEMORA = 'Se quiser, posso já deixar sua oferta pronta pra garantir o valor.';
+const RESPOSTA_DIRECIONAR_EQUIPE_PREVENTIVO = 'Para evitar te passar informação errada, vou te direcionar para a equipe da unidade 😊';
 
 // ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
 const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nPara seguir com a oferta, como você prefere?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
@@ -1294,6 +1295,33 @@ function extrairFormaPagamentoContexto(contexto = {}) {
   );
 }
 
+function detectarTrocaExplicitaContexto(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'trocar',
+    'mudar',
+    'outra cidade',
+    'quero outro',
+    'ao inves',
+    'em vez'
+  ].some((g) => t.includes(g));
+}
+
+function dadosCompletosParaLink(cidade = null, procedimentoFinal = null, formaPagamento = null) {
+  return !!(cidade && procedimentoFinal && formaPagamento);
+}
+
+function proximaPerguntaCompraPorDados(cidade = null, procedimentoFinal = null, formaPagamento = null) {
+  if (!cidade) return 'cidade';
+  if (!formaPagamento) return 'pagamento';
+  if (formaPagamento === 'cartao' && !procedimentoFinal) return 'procedimento';
+  return 'link';
+}
+
+function falhasInterpretacaoAtualizadas(contexto = {}) {
+  return Number(contexto.falhasInterpretacao || 0) + 1;
+}
+
 function mensagemDefineProcedimentoEspecifico(texto = '', base = '', procedimentoFinal = '') {
   const t = normalizeText(texto);
   if (!procedimentoFinal) return false;
@@ -1334,7 +1362,7 @@ function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
     procedimentoBase = procedimentoBase || baseDoFinal;
   }
 
-  if (baseMensagem && !finalMensagem) {
+  if (baseMensagem && !finalMensagem && detectarTrocaExplicitaContexto(texto)) {
     const baseAtualFinal = normalizarProcedimentoBase(procedimentoFinal || '');
     if (baseAtualFinal && baseAtualFinal !== baseMensagem) {
       procedimentoFinal = null;
@@ -2764,6 +2792,21 @@ export default async function handler(req, res) {
     console.log('CIDADE DETECTADA:', cidadeDetectada);
     console.log('PROCEDIMENTO DETECTADO:', procedimentoDetectadoMensagem);
     console.log('PAGAMENTO DETECTADO:', pagamentoDetectado);
+    console.log('ETAPA CONTEXTO:', contexto.etapa || contexto?.liaContext?.etapa || contexto.intencao || null);
+    console.log('ULTIMA PERGUNTA LIA:', contexto.ultimaPerguntaBot || null);
+
+    const cidadeSnapshot = extrairCidadeContexto(contexto);
+    const procedimentoSnapshot = extrairProcedimentoFinalContexto(contexto) || resolverProcedimentoCompraPorContexto(contexto);
+    const pagamentoSnapshot = extrairFormaPagamentoContexto(contexto);
+    const proximaEtapaCompra = proximaPerguntaCompraPorDados(cidadeSnapshot, procedimentoSnapshot, pagamentoSnapshot);
+    console.log('PREVENTIVO SNAPSHOT:', {
+      intencao: intencaoPrincipal,
+      ultimaPergunta: contexto.ultimaPerguntaBot || null,
+      cidade: cidadeSnapshot,
+      procedimento: procedimentoSnapshot,
+      pagamento: pagamentoSnapshot,
+      etapa: proximaEtapaCompra
+    });
 
     // Early return para aparelho/equipamento ANTES de qualquer outra lógica
     const procedimentoAtualNorm = normalizeText(contexto.procedimentoAtual || '');
@@ -3302,15 +3345,27 @@ export default async function handler(req, res) {
       }
 
       // Se não entendeu a opção, repetir
+      const falhasOpcao = falhasInterpretacaoAtualizadas(contexto);
+      const cidadeEscaladaOpcao = contexto.cidade || contexto.cidadeAtual || contexto.cidadeCompra || null;
+      if (falhasOpcao >= 2 && cidadeEscaladaOpcao) {
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeEscaladaOpcao);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: `${RESPOSTA_DIRECIONAR_EQUIPE_PREVENTIVO}\n\n${respostaWhatsapp}`,
+            contexto: { ...contexto, falhasInterpretacao: 0, intencao: 'compra_finalizada_equipe', cidadeCompra: cidadeEscaladaOpcao, intencaoCompra: 'equipe' }
+          });
+        }
+      }
+
       return res.status(200).json({
         resposta: 'Desculpa, não entendi 😊\n\nVocê prefere:\n\n1️⃣ Comprar aqui pelo sistema\n2️⃣ Falar com a equipe da unidade',
-        contexto: contexto
+        contexto: { ...contexto, falhasInterpretacao: falhasOpcao }
       });
     }
 
     // ════ FLUXO DE COMPRA - EQUIPE AGUARDANDO CIDADE ════
     if (contexto.intencao === 'fluxo_compra_aguardando_cidade_equipe') {
-      const cidadeAtual = cidadeDetectada;
+      const cidadeAtual = cidadeDetectada || contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || null;
       if (cidadeAtual) {
         const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
         if (respostaWhatsapp) {
@@ -3323,7 +3378,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         resposta: RESPOSTA_QUAL_UNIDADE,
-        contexto: contexto
+        contexto: { ...contexto, falhasInterpretacao: falhasInterpretacaoAtualizadas(contexto) }
       });
     }
 
@@ -3392,39 +3447,9 @@ export default async function handler(req, res) {
         const nomesCidade = unidadeDetectada ? unidadeDetectada.nomes.map((n) => normalizeText(n)) : [];
         const mensagemApenasCidade = perguntaNorm === cidadeAtual || nomesCidade.includes(perguntaNorm);
         const procedimentoDetectado = mensagemApenasCidade ? null : detectarProcedimento(pergunta);
-        
-        // Verificar se a cidade tem links de campanha (Brasília, Campinas, Goiânia, Palmas ou São Paulo)
-        const cidadesComLinks = ['brasilia', 'campinas', 'goiania', 'palmas', 'saopaulo'];
-        if (procedimentoDetectado && cidadesComLinks.includes(cidadeAtual)) {
-          // Tentar buscar link da campanha
-          const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeAtual);
-          if (respostaOferta) {
-            return res.status(200).json({
-              resposta: respostaOferta,
-              contexto: {
-                ...contexto,
-                intencao: 'fluxo_pagamento_aguardando_confirmacao',
-                cidadeCompra: cidadeAtual,
-                cidadeAtual: cidadeAtual,
-                intencaoCompra: 'sistema',
-                procedimento: procedimentoDetectado,
-                procedimentoAtual: procedimentoDetectado,
-                aguardandoComprovante: true,
-                aguardando_comprovante: true,
-                status_compra: 'em andamento'
-              }
-            });
-          } else {
-            // Link não encontrado, redirecionar para WhatsApp
-            const respostaWhatsapp = respostaWhatsappPorCidade(cidadeAtual);
-            if (respostaWhatsapp) {
-              return res.status(200).json({
-                resposta: `Ainda não temos o link direto dessa oferta 😊\n\nVou te direcionar para a equipe da unidade 👇\n\n${respostaWhatsapp}`,
-                contexto: { ...contexto, intencao: 'compra_finalizada_equipe', cidadeCompra: cidadeAtual, intencaoCompra: 'equipe' }
-              });
-            }
-          }
-        }
+
+        // REGRA PREVENTIVA: nunca enviar link de compra sem pagamento definido.
+        // Nesta etapa, mesmo com cidade/procedimento, seguimos para forma de pagamento.
         
         // Se não mencionar procedimento ou cidade não tem links, continuar com forma de pagamento
         return res.status(200).json({
@@ -3440,9 +3465,21 @@ export default async function handler(req, res) {
         });
       }
 
+      const falhas = falhasInterpretacaoAtualizadas(contexto);
+      const cidadeEscalada = extrairCidadeContexto(contexto) || cidadeDetectada;
+      if (falhas >= 2 && cidadeEscalada) {
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeEscalada);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: `${RESPOSTA_DIRECIONAR_EQUIPE_PREVENTIVO}\n\n${respostaWhatsapp}`,
+            contexto: { ...contexto, falhasInterpretacao: 0, intencao: 'compra_finalizada_equipe', cidadeCompra: cidadeEscalada, intencaoCompra: 'equipe' }
+          });
+        }
+      }
+
       return res.status(200).json({
         resposta: RESPOSTA_QUAL_UNIDADE,
-        contexto: contexto
+        contexto: { ...contexto, falhasInterpretacao: falhas }
       });
     }
 
@@ -3632,9 +3669,20 @@ export default async function handler(req, res) {
       }
 
       // Se não entendeu a forma de pagamento, repetir
+      const falhas = falhasInterpretacaoAtualizadas(contexto);
+      if (falhas >= 2 && cidadeCompra) {
+        const respostaWhatsapp = respostaWhatsappPorCidade(cidadeCompra);
+        if (respostaWhatsapp) {
+          return res.status(200).json({
+            resposta: `${RESPOSTA_DIRECIONAR_EQUIPE_PREVENTIVO}\n\n${respostaWhatsapp}`,
+            contexto: { ...contexto, falhasInterpretacao: 0, intencao: 'compra_finalizada_equipe', cidadeCompra, intencaoCompra: 'equipe', status_compra: 'em andamento' }
+          });
+        }
+      }
+
       return res.status(200).json({
         resposta: `Desculpa, não entendi 😊\n\n${RESPOSTA_FORMA_PAGAMENTO}`,
-        contexto: contexto
+        contexto: { ...contexto, falhasInterpretacao: falhas }
       });
     }
 
@@ -3903,7 +3951,7 @@ export default async function handler(req, res) {
         });
       }
 
-      if (procedimentoDetectado && contexto.cidadeCompra) {
+      if (procedimentoDetectado && contexto.cidadeCompra && dadosCompletosParaLink(contexto.cidadeCompra, procedimentoDetectado, extrairFormaPagamentoContexto(contexto))) {
         const cidadesComLinks = ['brasilia', 'campinas', 'goiania', 'palmas', 'saopaulo'];
         if (cidadesComLinks.includes(normalizeText(contexto.cidadeCompra).replace(/\s+/g, ''))) {
           const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, contexto.cidadeCompra);
@@ -4328,6 +4376,7 @@ export default async function handler(req, res) {
         resposta: respostaRecuperacao,
         contexto: {
           ...contexto,
+          falhasInterpretacao: 0,
           intencao: 'recuperacao_indeciso',
           etapaRecuperacaoIndeciso: 'inicial',
           ultimaPerguntaBot: respostaRecuperacao
@@ -4359,6 +4408,7 @@ export default async function handler(req, res) {
           resposta: RESPOSTA_OPCOES_COMPRA,
           contexto: {
             ...contexto,
+            falhasInterpretacao: 0,
             intencao: 'fluxo_compra_opcoes',
             intencaoCompra: 'sistema',
             status_compra: 'em andamento',
@@ -4769,6 +4819,13 @@ export default async function handler(req, res) {
       });
     }
 
+    if (intencaoPrincipal === 'PRECO' && !detectarIntencaoCompra(pergunta)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_PRECO_SISTEMA,
+        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
+      });
+    }
+
     if (intencaoPrincipal === 'PRECO' && detectarPreco(pergunta)) {
       return res.status(200).json({
         resposta: RESPOSTA_PRECO_SISTEMA,
@@ -4960,7 +5017,7 @@ export default async function handler(req, res) {
 
     if (detectarIntencaoPositiva(pergunta)) {
       return res.status(200).json({
-        resposta: 'Perfeito 😊\n\nMe fala qual procedimento você tem interesse que eu te envio os valores da oferta da semana 😉'
+        resposta: `Perfeito 😊\n\nMe fala qual procedimento você tem interesse que eu te envio os valores da oferta da semana 😉\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`
       });
     }
 
@@ -4972,19 +5029,19 @@ export default async function handler(req, res) {
 
     if (intencaoInterpretada.categoria !== 'fallback') {
       return res.status(200).json({
-        resposta: respostaGenericaPorCategoria(intencaoInterpretada.categoria),
+        resposta: `${respostaGenericaPorCategoria(intencaoInterpretada.categoria)}\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`,
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: intencaoInterpretada.categoria }
       });
     }
 
     console.log('CAIU NO FALLBACK');
     return res.status(200).json({
-      resposta: 'Consigo te ajudar sim 😊\n\nSe quiser, me conta um pouco melhor o que está te incomodando que eu te explico direitinho.'
+      resposta: `Consigo te ajudar sim 😊\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`
     });
   } catch {
     console.log('CAIU NO FALLBACK');
     return res.status(200).json({
-      resposta: 'Consigo te ajudar sim 😊\n\nSe quiser, me conta um pouco melhor o que está te incomodando que eu te explico direitinho.'
+      resposta: `Consigo te ajudar sim 😊\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`
     });
   }
 }
