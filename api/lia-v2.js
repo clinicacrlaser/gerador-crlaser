@@ -856,63 +856,84 @@ function respostaGenericaPorCategoria(categoria = 'fallback') {
   return RESPOSTA_INTENCAO_GENERICA.replace('{categoria}', labelCategoriaProvavel(categoria));
 }
 
-function classificarIntencaoMensagem(texto = '', contexto = {}) {
+function classificarIntencaoPrincipal(texto = '', contexto = {}) {
   const t = normalizeText(texto);
   const temProcedimento = !!detectarProcedimento(texto) || !!detectarBaseProcedimentoAmbiguo(texto);
 
-  if (!t) {
-    return { categoria: 'fallback' };
+  if (!t) return 'FALLBACK';
+
+  // 1) HUMANO
+  if (detectarIntencaoHumano(texto)) return 'HUMANO';
+
+  // 2) CONTATO
+  if (
+    identificarIntencaoOperacional(texto) ||
+    (!!identificarCidade(texto) && ['onde', 'endereco', 'telefone', 'unidade', 'mapa', 'fica', 'contato'].some((termo) => t.includes(termo)))
+  ) {
+    return 'CONTATO';
   }
 
-  if (detectarIntencaoHumano(texto)) {
-    return { categoria: 'humano' };
+  // 3) PAGAMENTO
+  if (detectarConfirmacaoPagamento(texto) || contextoComprovanteAtivo(contexto)) return 'PAGAMENTO';
+
+  // 4) COMPRA
+  if (detectarIntencaoCompra(texto) || detectarFormaPagamento(texto) || detectarInteresseFechamento(texto)) return 'COMPRA';
+
+  // 5) PRECO
+  if (detectarPreco(texto)) return 'PRECO';
+
+  // 6) PROCEDIMENTO
+  if (
+    temProcedimento ||
+    detectarTemaBotoxFacial(texto) ||
+    detectarTemaFlacidez(texto, contexto) ||
+    detectarTemaGordura(texto, contexto) ||
+    detectarTemaBioPreenchimento(texto, contexto)
+  ) {
+    return 'PROCEDIMENTO';
   }
 
-  // Localização/Contato/Telefone SEMPRE tem prioridade sobre pós-pagamento
-  if (identificarIntencaoOperacional(texto) || (!!identificarCidade(texto) && ['onde', 'endereco', 'telefone', 'unidade', 'mapa', 'fica', 'contato'].some((termo) => t.includes(termo)))) {
-    return { categoria: 'localizacao' };
+  // 7) DUVIDA_TECNICA
+  if (
+    encontrarCorrecao(texto) ||
+    encontrarFaq(texto) ||
+    encontrarSugestao(texto) ||
+    encontrarBlocoUltraformer(texto, contexto) ||
+    encontrarBlocoBioestimulador(texto, contexto) ||
+    encontrarBlocoPreenchedor(texto, contexto) ||
+    encontrarBlocoLavieen(texto, contexto) ||
+    encontrarBlocoEndymed(texto, contexto) ||
+    encontrarBlocoScizer(texto, contexto)
+  ) {
+    return 'DUVIDA_TECNICA';
   }
 
-  if (detectarConfirmacaoPagamento(texto)) {
-    return { categoria: 'pos_pagamento' };
-  }
+  // 8) FALLBACK
+  return 'FALLBACK';
+}
 
-  // Pedido de preco + procedimento deve vir antes de duvida tecnica.
-  if (detectarPrecoProcedimento(texto)) {
-    return { categoria: 'preco_procedimento' };
-  }
+function classificarIntencaoMensagem(texto = '', contexto = {}) {
+  const principal = classificarIntencaoPrincipal(texto, contexto);
 
-  if (detectarPreco(texto)) {
+  if (principal === 'HUMANO') return { categoria: 'humano' };
+  if (principal === 'CONTATO') return { categoria: 'localizacao' };
+  if (principal === 'PAGAMENTO') return { categoria: 'pos_pagamento' };
+  if (principal === 'COMPRA') return { categoria: 'compra' };
+
+  if (principal === 'PRECO') {
+    if (detectarPrecoProcedimento(texto)) return { categoria: 'preco_procedimento' };
     return { categoria: 'oferta_preco' };
   }
 
-  if (detectarIntencaoCompra(texto) || detectarFormaPagamento(texto) || detectarPreco(texto) || detectarInteresseFechamento(texto)) {
-    return { categoria: 'compra' };
-  }
-
-  if (temProcedimento) {
+  if (principal === 'PROCEDIMENTO') {
+    if (detectarTemaBotoxFacial(texto)) return { categoria: 'botox_rugas' };
+    if (detectarTemaFlacidez(texto, contexto)) return { categoria: 'flacidez' };
+    if (detectarTemaGordura(texto, contexto)) return { categoria: 'gordura' };
+    if (detectarTemaBioPreenchimento(texto, contexto)) return { categoria: 'bio_preenchimento' };
     return { categoria: 'procedimento' };
   }
 
-  if (detectarTemaBotoxFacial(texto)) {
-    return { categoria: 'botox_rugas' };
-  }
-
-  if (detectarTemaFlacidez(texto, contexto)) {
-    return { categoria: 'flacidez' };
-  }
-
-  if (detectarTemaGordura(texto, contexto)) {
-    return { categoria: 'gordura' };
-  }
-
-  if (detectarTemaBioPreenchimento(texto, contexto)) {
-    return { categoria: 'bio_preenchimento' };
-  }
-
-  if (encontrarCorrecao(texto) || encontrarFaq(texto) || encontrarSugestao(texto) || encontrarBlocoUltraformer(texto, contexto) || encontrarBlocoBioestimulador(texto, contexto) || encontrarBlocoPreenchedor(texto, contexto) || encontrarBlocoLavieen(texto, contexto) || encontrarBlocoEndymed(texto, contexto) || encontrarBlocoScizer(texto, contexto)) {
-    return { categoria: 'duvidas_gerais' };
-  }
+  if (principal === 'DUVIDA_TECNICA') return { categoria: 'duvidas_gerais' };
 
   return { categoria: 'fallback' };
 }
@@ -2036,6 +2057,7 @@ export default async function handler(req, res) {
     const contexto = req.body?.contexto || {};
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
+    const intencaoPrincipal = classificarIntencaoPrincipal(pergunta, contexto);
     const intencaoInterpretada = classificarIntencaoMensagem(pergunta, contexto);
     const procedimentoDetectadoMensagem = detectarProcedimento(pergunta);
     const procedimentoBaseMensagem = detectarBaseProcedimentoAmbiguo(pergunta);
@@ -2053,6 +2075,7 @@ export default async function handler(req, res) {
 
     console.log('PERGUNTA RECEBIDA:', pergunta);
     console.log('TEXTO NORMALIZADO:', msg);
+    console.log('INTENCAO PRINCIPAL:', intencaoPrincipal);
     console.log('INTENCAO CLASSIFICADA:', intencaoInterpretada.categoria);
 
     if (!msg) {
@@ -2099,8 +2122,29 @@ export default async function handler(req, res) {
       }
     }
 
-    // ════ PRIORIDADE ABSOLUTA: Localização/Contato/Telefone SEMPRE acima de pós-pagamento ════
-    if (intencaoInterpretada.categoria === 'localizacao') {
+    // ════ PRIORIDADE ABSOLUTA DA CAMADA CENTRAL ════
+    if (intencaoPrincipal === 'HUMANO') {
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
+          contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined, tentativas_pergunta: 0 }
+        });
+      }
+
+      const respostaHumano = respostaHumanoPorCidade(cidadeAtual);
+      if (respostaHumano) {
+        return res.status(200).json({
+          resposta: respostaHumano,
+          contexto: { cidade: cidadeAtual, cidadeAtual, tentativas_pergunta: 0 }
+        });
+      }
+    }
+
+    // 2) CONTATO
+    if (intencaoPrincipal === 'CONTATO') {
       const cidadeParaLocalizar = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
       
       if (!cidadeParaLocalizar) {
@@ -2123,7 +2167,37 @@ export default async function handler(req, res) {
       }
     }
 
-    if (intencaoInterpretada.categoria === 'preco_procedimento') {
+    // 3) PAGAMENTO
+    if (intencaoPrincipal === 'PAGAMENTO' && detectarConfirmacaoPagamento(pergunta)) {
+      const cidadeCompra = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || cidadeDetectada;
+
+      if (!cidadeCompra) {
+        return res.status(200).json({
+          resposta: 'Qual unidade você comprou?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: { ...contexto, aguardandoComprovante: true, aguardando_comprovante: true, intencao: 'aguardando_cidade_comprovante' }
+        });
+      }
+
+      const respostaComprovante = gerarRespostaComprovanteUnidade(cidadeCompra);
+      if (respostaComprovante) {
+        return res.status(200).json({
+          resposta: respostaComprovante,
+          contexto: {
+            ...contexto,
+            cidade: cidadeCompra,
+            cidadeAtual: cidadeCompra,
+            cidadeCompra,
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante',
+            statusPagamento: 'confirmado',
+            status_compra: 'em andamento'
+          }
+        });
+      }
+    }
+
+    if (intencaoPrincipal === 'PRECO' && detectarPrecoProcedimento(pergunta)) {
       const cidadeContexto = contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
       const procedimentoPorBase = procedimentoBaseMensagem ? resolverProcedimentoPorBase(procedimentoBaseMensagem, pergunta) : null;
@@ -2784,34 +2858,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // Prioridade máxima: pediu humano = direcionamento imediato ao WhatsApp.
-    if (intencaoInterpretada.categoria === 'humano') {
-      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
-      const cidadeAtual = cidadeDetectada || cidadeContexto;
-
-      if (!cidadeAtual) {
-        return res.status(200).json({
-          resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
-          contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined, tentativas_pergunta: 0 }
-        });
-      }
-
-      const respostaHumano = respostaHumanoPorCidade(cidadeAtual);
-      if (respostaHumano) {
-        return res.status(200).json({
-          resposta: respostaHumano,
-          contexto: { cidade: cidadeAtual, cidadeAtual, tentativas_pergunta: 0 }
-        });
-      }
-
-      return res.status(200).json({
-        resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
-        contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano', cidadeAtual: undefined, tentativas_pergunta: 0 }
-      });
-    }
-
     const itemConfianca = encontrarBlocoConfianca(pergunta, contexto);
-    if (itemConfianca && intencaoInterpretada.categoria !== 'oferta_preco') {
+    if (itemConfianca && intencaoPrincipal !== 'PRECO') {
       if (itemConfianca.tipo === 'fechamento_direto') {
         const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
         const cidadeAtual = cidadeDetectada || cidadeContexto;
@@ -2943,7 +2991,7 @@ export default async function handler(req, res) {
     }
 
     // Continuação de contexto — cliente fez follow-up após resposta sobre procedimento/oferta
-    if (intencaoInterpretada.categoria === 'localizacao') {
+    if (intencaoPrincipal === 'CONTATO') {
       const intencaoLocalizacao = identificarIntencaoOperacional(pergunta);
       const respostaOperacional = responderIntencaoOperacional(intencaoLocalizacao, unidadeDetectada);
       if (respostaOperacional) {
@@ -3070,7 +3118,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (intencaoInterpretada.categoria === 'oferta_preco' && detectarInteresseFechamento(pergunta)) {
+    if (intencaoPrincipal === 'PRECO' && detectarInteresseFechamento(pergunta)) {
       const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
       const cidadeAtual = cidadeDetectada || cidadeContexto;
 
@@ -3090,7 +3138,7 @@ export default async function handler(req, res) {
       }
     }
 
-    if (intencaoInterpretada.categoria === 'oferta_preco' && detectarPreco(pergunta)) {
+    if (intencaoPrincipal === 'PRECO' && detectarPreco(pergunta)) {
       return res.status(200).json({ resposta: RESPOSTA_PRECO });
     }
 
@@ -3133,14 +3181,14 @@ export default async function handler(req, res) {
     const intencao = identificarIntencaoOperacional(pergunta);
     const unidade = unidadeDetectada;
 
-    if (intencaoInterpretada.categoria === 'localizacao' && intencao) {
+    if (intencaoPrincipal === 'CONTATO' && intencao) {
       const respostaOperacional = responderIntencaoOperacional(intencao, unidade);
       if (respostaOperacional) {
         return res.status(200).json(respostaOperacional);
       }
     }
 
-    if (intencaoInterpretada.categoria === 'localizacao' && cidadeDetectada && unidadeDetectada) {
+    if (intencaoPrincipal === 'CONTATO' && cidadeDetectada && unidadeDetectada) {
       const nomeCidade = unidadeDetectada.nomeCompleto.replace('CR Laser® ', '');
 
       return res.status(200).json({
