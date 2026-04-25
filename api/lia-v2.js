@@ -856,6 +856,164 @@ function respostaGenericaPorCategoria(categoria = 'fallback') {
   return RESPOSTA_INTENCAO_GENERICA.replace('{categoria}', labelCategoriaProvavel(categoria));
 }
 
+function normalizarProcedimentoBase(valor = '') {
+  const t = normalizeText(valor);
+
+  if (!t) return null;
+  if (t.includes('botox')) return 'botox';
+  if (t.includes('ultraformer') || t === 'ultra') return 'ultraformer';
+  if (t.includes('lavieen') || t.includes('bb laser')) return 'lavieen';
+  if (t.includes('bioestimulador') || t.includes('diamond') || t.includes('sculptra') || t.includes('scultra')) return 'bioestimulador';
+  if (t.includes('preenchedor') || t.includes('preenchimento')) return 'preenchedor';
+  if (t.includes('endymed') || t.includes('intensif') || t.includes('shapper') || t.includes('small')) return 'endymed';
+  if (t.includes('scizer')) return 'scizer';
+
+  return null;
+}
+
+function ehProcedimentoGenerico(valor = '') {
+  const base = normalizarProcedimentoBase(valor);
+  const t = normalizeText(valor);
+  return !!base && (
+    t === base ||
+    t === 'ultraformer mpt' ||
+    t === 'botox' ||
+    t === 'lavieen' ||
+    t === 'bioestimulador' ||
+    t === 'preenchedor' ||
+    t === 'endymed' ||
+    t === 'scizer'
+  );
+}
+
+function extrairCidadeContexto(contexto = {}) {
+  return contexto?.liaContext?.cidade || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+}
+
+function extrairProcedimentoBaseContexto(contexto = {}) {
+  const candidatos = [
+    contexto?.liaContext?.procedimentoBase,
+    contexto.procedimentoBase,
+    contexto.procedimento_selecionado,
+    contexto.procedimento,
+    contexto.procedimentoAtual
+  ];
+
+  for (const candidato of candidatos) {
+    const base = normalizarProcedimentoBase(candidato || '');
+    if (base) return base;
+  }
+
+  return null;
+}
+
+function extrairProcedimentoFinalContexto(contexto = {}) {
+  const candidatos = [
+    contexto?.liaContext?.procedimentoFinal,
+    contexto.procedimentoFinal,
+    contexto.procedimento,
+    contexto.procedimentoAtual,
+    contexto.procedimento_selecionado
+  ];
+
+  for (const candidato of candidatos) {
+    if (candidato && !ehProcedimentoGenerico(candidato)) {
+      return candidato;
+    }
+  }
+
+  return null;
+}
+
+function mensagemDefineProcedimentoEspecifico(texto = '', base = '', procedimentoFinal = '') {
+  const t = normalizeText(texto);
+  if (!procedimentoFinal) return false;
+
+  const baseNorm = normalizarProcedimentoBase(base || procedimentoFinal);
+  if (!baseNorm) return true;
+
+  const gatilhosEspecificos = {
+    botox: ['facial', 'terco', 'suor', 'axila', 'axilar', 'hiperidrose'],
+    ultraformer: ['rosto', 'face', 'full face', 'terco inferior', 'papada', 'pescoco', 'colo', 'palpebra', 'abdome', 'flancos', 'bracos', 'coxa'],
+    lavieen: ['melasma', 'olheiras', 'capilar', 'maos', 'mãos', 'bb', 'pescoco', 'colo', 'facial'],
+    bioestimulador: ['diamond', 'sculptra', 'scultra'],
+    preenchedor: ['facial', 'labio', 'lábio', 'olheira', 'bigode'],
+    endymed: ['3deep', 'intensif', 'shapper', 'small'],
+    scizer: ['regiao', 'região', 'quadrante']
+  };
+
+  const lista = gatilhosEspecificos[baseNorm] || [];
+  return lista.some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
+  const contexto = { ...contextoEntrada };
+  const cidadeMensagem = identificarCidade(texto)?.cidade || null;
+  const baseMensagem = detectarBaseProcedimentoAmbiguo(texto);
+  const finalMensagemBruta = detectarProcedimento(texto);
+  const finalMensagem = mensagemDefineProcedimentoEspecifico(texto, baseMensagem, finalMensagemBruta)
+    ? finalMensagemBruta
+    : null;
+  const formaMensagem = detectarFormaPagamento(texto);
+
+  const cidade = cidadeMensagem || extrairCidadeContexto(contexto);
+  let procedimentoBase = baseMensagem || extrairProcedimentoBaseContexto(contexto);
+  let procedimentoFinal = finalMensagem || extrairProcedimentoFinalContexto(contexto);
+
+  if (procedimentoFinal) {
+    const baseDoFinal = normalizarProcedimentoBase(procedimentoFinal);
+    procedimentoBase = procedimentoBase || baseDoFinal;
+  }
+
+  if (baseMensagem && !finalMensagem) {
+    const baseAtualFinal = normalizarProcedimentoBase(procedimentoFinal || '');
+    if (baseAtualFinal && baseAtualFinal !== baseMensagem) {
+      procedimentoFinal = null;
+    }
+  }
+
+  const formaPagamento = formaMensagem || contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
+  const etapa = contexto.etapa || contexto.intencao || contexto?.liaContext?.etapa || null;
+  const aguardandoComprovante = contextoComprovanteAtivo(contexto);
+
+  const liaContext = {
+    cidade: cidade || null,
+    procedimentoBase: procedimentoBase || null,
+    procedimentoFinal: procedimentoFinal || null,
+    formaPagamento: formaPagamento || null,
+    etapa: etapa || null,
+    aguardandoComprovante: !!aguardandoComprovante
+  };
+
+  const saida = {
+    ...contexto,
+    liaContext,
+    cidade: cidade || contexto.cidade || null,
+    procedimentoBase: procedimentoBase || contexto.procedimentoBase || null,
+    procedimentoFinal: procedimentoFinal || contexto.procedimentoFinal || null,
+    formaPagamento: formaPagamento || contexto.formaPagamento || null,
+    etapa: etapa || contexto.etapa || null,
+    aguardandoComprovante: !!aguardandoComprovante,
+    aguardando_comprovante: !!aguardandoComprovante
+  };
+
+  if (cidade) {
+    saida.cidadeAtual = cidade;
+    saida.cidadeCompra = saida.cidadeCompra || cidade;
+  }
+
+  if (procedimentoFinal) {
+    saida.procedimento = procedimentoFinal;
+    saida.procedimentoAtual = procedimentoFinal;
+  }
+
+  if (!saida.intencao && etapa) {
+    saida.intencao = etapa;
+  }
+
+  return saida;
+}
+
 function classificarIntencaoPrincipal(texto = '', contexto = {}) {
   const t = normalizeText(texto);
   const temProcedimento = !!detectarProcedimento(texto) || !!detectarBaseProcedimentoAmbiguo(texto);
@@ -2054,7 +2212,21 @@ export default async function handler(req, res) {
     let pergunta = (req.body?.pergunta || '').toString();
     pergunta = expandirAbreviacoes(pergunta);
     const msg = normalizeText(pergunta);
-    const contexto = req.body?.contexto || {};
+    const contextoInicial = req.body?.contexto || {};
+    const contexto = sincronizarLiaContext(contextoInicial, pergunta);
+    const statusOriginal = res.status.bind(res);
+    res.status = (code) => {
+      const statusResponse = statusOriginal(code);
+      const jsonOriginal = statusResponse.json.bind(statusResponse);
+      statusResponse.json = (payload) => {
+        if (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, 'contexto')) {
+          const contextoResposta = payload.contexto || {};
+          payload.contexto = sincronizarLiaContext({ ...contexto, ...contextoResposta }, pergunta);
+        }
+        return jsonOriginal(payload);
+      };
+      return statusResponse;
+    };
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
     const intencaoPrincipal = classificarIntencaoPrincipal(pergunta, contexto);
