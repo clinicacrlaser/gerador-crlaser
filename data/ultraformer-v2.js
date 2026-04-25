@@ -270,9 +270,25 @@ export const ultraformerFaq = [
       'ultraformer original',
       'aparelho original do ultraformer',
       'ultraformer medsystems',
-      'originalidade ultraformer'
+      'originalidade ultraformer',
+      'qual o aparelho',
+      'qual aparelho',
+      'qual equipamento',
+      'qual marca',
+      'qual marca do ultraformer',
+      'qual equipamento vocês usam',
+      'qual equipamento voces usam',
+      'que aparelho vocês usam',
+      'que aparelho voces usam',
+      'qual a marca do ultraformer',
+      'é original',
+      'aparelho de vocês',
+      'aparelho de voces',
+      'que marca vocês usam',
+      'que marca voces usam',
+      'ultraformer medsystems original'
     ],
-    resposta: 'Trabalhamos com Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos e não compartilhamos, garantindo segurança e padrão no resultado.\n\nSe quiser, posso te orientar melhor para o seu caso 😊'
+    resposta: 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.'
   },
   {
     procedimento: 'ultraformer',

@@ -1001,6 +1001,13 @@ function processarMensagemLia(mensagemUsuario = '') {
   return null;
 }
 
+function detectarConsultaAparelho(texto = '') {
+  const t = normalizeText(texto);
+  const termoAparelho = ['aparelho', 'equipamento', 'marca', 'original', 'mpt original'].some(termo => t.includes(termo));
+  const termoUltra = ['ultraformer', 'ultrafomer', 'ultrformer', 'ultrfomer', 'ultra', 'mpt'].some(termo => t.includes(termo));
+  return termoAparelho && termoUltra;
+}
+
 function labelCategoriaProvavel(categoria = 'fallback') {
   const labels = {
     humano: 'atendimento humano',
@@ -4159,6 +4166,17 @@ export default async function handler(req, res) {
     if (detectarConfirmacao(pergunta)) {
       return res.status(200).json({
         resposta: 'Perfeito 😊\nVocê quer saber sobre algum tratamento específico ou está buscando melhorar algo no rosto ou corpo?'
+      });
+    }
+
+    // Handler para consultas sobre aparelho/equipamento quando contexto é Ultraformer
+    const procedimentoAtualNorm = normalizeText(contexto.procedimentoAtual || '');
+    const eContextoUltraformer = procedimentoAtualNorm === 'ultraformer' || procedimentoAtualNorm.includes('ultraformer');
+    if ((detectarConsultaAparelho(pergunta) && eContextoUltraformer) || detectarConsultaAparelho(pergunta)) {
+      const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
+      return res.status(200).json({
+        resposta: respostaAparelho,
+        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: 'ultraformer' }
       });
     }
 
