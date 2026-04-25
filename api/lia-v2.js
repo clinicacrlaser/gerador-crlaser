@@ -1142,7 +1142,7 @@ function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
   }
 
   const formaPagamento = formaMensagem || contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
-  const etapa = contexto.etapa || contexto.intencao || contexto?.liaContext?.etapa || null;
+  const etapa = contexto.etapa || contexto?.liaContext?.etapa || null;
   const aguardandoComprovante = contextoComprovanteAtivo(contexto);
 
   const liaContext = {
@@ -1174,10 +1174,6 @@ function sincronizarLiaContext(contextoEntrada = {}, texto = '') {
   if (procedimentoFinal) {
     saida.procedimento = procedimentoFinal;
     saida.procedimentoAtual = procedimentoFinal;
-  }
-
-  if (!saida.intencao && etapa) {
-    saida.intencao = etapa;
   }
 
   return saida;
@@ -1237,6 +1233,49 @@ function classificarIntencaoPrincipal(texto = '', contexto = {}) {
 
   // 8) FALLBACK
   return 'FALLBACK';
+}
+
+function intencaoContextoCompativel(contexto = {}, intencaoPrincipal = '', texto = '', cidadeDetectada = null) {
+  const estado = contexto.intencao || '';
+  if (!estado) return true;
+
+  const t = normalizeText(texto);
+  const respostaCurta = ehRespostaCurta(texto) || ['1', '2', 'pix', 'cartao', 'cartão'].includes(t);
+  const temCidade = !!cidadeDetectada;
+
+  const estadosContato = [
+    'aguardando_cidade_contato_direto',
+    'aguardando_apenas_cidade',
+    'aguardando_cidade_whatsapp',
+    'aguardando_endereco_ou_telefone'
+  ];
+  if (estadosContato.includes(estado)) {
+    return intencaoPrincipal === 'CONTATO' || temCidade || respostaCurta;
+  }
+
+  const estadosCompra = [
+    'fluxo_compra_opcoes',
+    'fluxo_compra_aguardando_cidade_equipe',
+    'fluxo_compra_aguardando_cidade_sistema',
+    'fluxo_compra_aguardando_pagamento',
+    'fluxo_pagamento_aguardando_procedimento_cartao',
+    'fluxo_pagamento_aguardando_confirmacao',
+    'confirmacao_oferta_aguardando_pagamento',
+    'aguardando_cidade_para_confirmacao_oferta'
+  ];
+  if (estadosCompra.includes(estado)) {
+    return ['COMPRA', 'PAGAMENTO', 'PRECO'].includes(intencaoPrincipal) || temCidade || respostaCurta;
+  }
+
+  if (estado === 'aguardando_regiao_ultraformer') {
+    return intencaoPrincipal === 'PROCEDIMENTO' || respostaCurta;
+  }
+
+  if (estado === 'aguardando_aceite_oferta_semana') {
+    return ['COMPRA', 'PRECO'].includes(intencaoPrincipal) || respostaCurta;
+  }
+
+  return true;
 }
 
 function classificarIntencaoMensagem(texto = '', contexto = {}) {
@@ -2411,6 +2450,13 @@ export default async function handler(req, res) {
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
     const intencaoPrincipal = classificarIntencaoPrincipal(pergunta, contexto);
+    if (!intencaoContextoCompativel(contexto, intencaoPrincipal, pergunta, cidadeDetectada)) {
+      delete contexto.intencao;
+      delete contexto.etapa;
+      if (contexto.liaContext && typeof contexto.liaContext === 'object') {
+        contexto.liaContext = { ...contexto.liaContext, etapa: null };
+      }
+    }
     const intencaoInterpretada = classificarIntencaoMensagem(pergunta, contexto);
     const procedimentoDetectadoMensagem = detectarProcedimento(pergunta);
     const procedimentoBaseMensagem = detectarBaseProcedimentoAmbiguo(pergunta);
