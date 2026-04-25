@@ -2089,6 +2089,14 @@ function respostaWhatsappPorCidade(cidade = '') {
   return `Perfeito 😊\n\nVou te direcionar direto para a unidade de ${nomeCidade} 👇\n\n<a href="${linkWhatsapp}" target="_blank" style="display:inline-block;margin-top:8px;padding:12px 18px;background:#00c2ff;color:#ffffff;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;">Falar com a equipe no WhatsApp</a>`;
 }
 
+function respostaContatoDiretoPorCidade(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  if (!unidade) return null;
+
+  return `Perfeito 😊\n\n📍 ${unidade.nomeCompleto}\n\n📞 ${unidade.telefone}\n\nO agendamento é feito direto por esse WhatsApp.`;
+}
+
 function respostaHumanoPorCidade(cidade = '') {
   const cidadeNorm = normalizeText(cidade);
   const linkWhatsapp = LINKS_WHATSAPP_UNIDADE[cidadeNorm];
@@ -2448,6 +2456,24 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
+    if (contexto.intencao === 'aguardando_cidade_contato_direto') {
+      const cidadeContato = cidadeDetectada || contexto.cidadeAtual || contexto.cidade || null;
+      if (!cidadeContato) {
+        return res.status(200).json({
+          resposta: 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: { ...contexto, intencao: 'aguardando_cidade_contato_direto' }
+        });
+      }
+
+      const respostaContato = respostaContatoDiretoPorCidade(cidadeContato);
+      if (respostaContato) {
+        return res.status(200).json({
+          resposta: respostaContato,
+          contexto: { ...contexto, cidade: cidadeContato, cidadeAtual: cidadeContato }
+        });
+      }
+    }
+
     if (contextoComprovanteAtivo(contexto) && detectarPedidoContatoComprovante(pergunta)) {
       const cidadeCompra = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
 
@@ -2508,8 +2534,16 @@ export default async function handler(req, res) {
       
       if (!cidadeParaLocalizar) {
         return res.status(200).json({
-          resposta: RESPOSTA_CIDADE,
-          contexto: { ...contexto, tentativas_pergunta: 0 }
+          resposta: 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: { ...contexto, intencao: 'aguardando_cidade_contato_direto', tentativas_pergunta: 0 }
+        });
+      }
+
+      const respostaContatoDireto = respostaContatoDiretoPorCidade(cidadeParaLocalizar);
+      if (respostaContatoDireto) {
+        return res.status(200).json({
+          resposta: respostaContatoDireto,
+          contexto: { ...contexto, cidade: cidadeParaLocalizar, cidadeAtual: cidadeParaLocalizar, tentativas_pergunta: 0 }
         });
       }
 
