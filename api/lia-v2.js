@@ -3883,7 +3883,9 @@ export default async function handler(req, res) {
     // Handler para aparelho/equipamento ANTES de processarMensagemLia
     const procedimentoAtualNorm = normalizeText(contexto.procedimentoAtual || '');
     const eContextoUltraformer = procedimentoAtualNorm === 'ultraformer' || procedimentoAtualNorm.includes('ultraformer') || procedimentoAtualNorm === 'ultraformer mpt' || procedimentoAtualNorm.includes('ultraformer mpt');
-    if (detectarConsultaAparelho(pergunta) && eContextoUltraformer) {
+    const temAparelhoNaMensagem = detectarConsultaAparelho(pergunta);
+    
+    if (temAparelhoNaMensagem && (eContextoUltraformer || detectarTermoUltraAproximado(pergunta))) {
       const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
       return res.status(200).json({
         resposta: respostaAparelho,
