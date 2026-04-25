@@ -3105,7 +3105,7 @@ export default async function handler(req, res) {
     }
 
     const itemConfianca = encontrarBlocoConfianca(pergunta, contexto);
-    if (itemConfianca && intencaoPrincipal !== 'PRECO') {
+    if (itemConfianca && intencaoPrincipal !== 'PRECO' && contexto.intencao !== 'aguardando_aceite_oferta_semana') {
       if (itemConfianca.tipo === 'fechamento_direto') {
         const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
         const cidadeAtual = cidadeDetectada || cidadeContexto;
@@ -3259,11 +3259,52 @@ export default async function handler(req, res) {
       const quer = ['quero', 'sim', 'ok', 'claro', 'pode ser', 'manda', 'pode mandar'].includes(msg) || ambos;
       if (quer) {
         const sufixo = contexto.procedimentoAtual ? ` sobre ${contexto.procedimentoAtual}` : '';
+        const respostaInteresse = `Perfeito 😊\n\nMe fala qual é a sua principal preocupação${sufixo} que já te preparo as melhores opções da semana 😉`;
+
+        if (contexto.ultimaPerguntaBot && normalizeText(contexto.ultimaPerguntaBot) === normalizeText(respostaInteresse)) {
+          return res.status(200).json({
+            resposta: RESPOSTA_FECHAMENTO_LEVE,
+            contexto: { ...contexto, intencao: 'aguardando_aceite_oferta_semana', ultimaPerguntaBot: RESPOSTA_FECHAMENTO_LEVE }
+          });
+        }
+
         return res.status(200).json({
-          resposta: `Perfeito 😊\n\nMe fala qual é a sua principal preocupação${sufixo} que já te preparo as melhores opções da semana 😉`,
-          contexto: contexto
+          resposta: respostaInteresse,
+          contexto: { ...contexto, ultimaPerguntaBot: respostaInteresse }
         });
       }
+    }
+
+    if (contexto.intencao === 'aguardando_aceite_oferta_semana') {
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+      const aceitouOferta = detectarInteresseFechamento(pergunta) || detectarConfirmacao(pergunta) || ehRespostaCurta(pergunta);
+
+      if (aceitouOferta) {
+        if (!cidadeAtual) {
+          return res.status(200).json({
+            resposta: RESPOSTA_OFERTA_SEMANA_SEM_CIDADE,
+            contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'oferta_semana', cidadeAtual: cidadeAtual || undefined }
+          });
+        }
+
+        const respostaOferta = respostaOfertaSemanaPorCidade(cidadeAtual);
+        if (respostaOferta) {
+          return res.status(200).json({
+            resposta: respostaOferta,
+            contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual, intencao: 'aguardando_interesse' }
+          });
+        }
+      }
+
+      const respostaSemLoop = contexto.ultimaPerguntaBot === RESPOSTA_FECHAMENTO_LEVE
+        ? 'Perfeito 😊\n\nSe você quiser seguir com a oferta da semana, me responde "quero" que eu te envio agora.'
+        : RESPOSTA_FECHAMENTO_LEVE;
+
+      return res.status(200).json({
+        resposta: respostaSemLoop,
+        contexto: { ...contexto, intencao: 'aguardando_aceite_oferta_semana', ultimaPerguntaBot: respostaSemLoop }
+      });
     }
 
     if (contexto.intencao === 'conduzindo_indicacao') {
@@ -3333,14 +3374,43 @@ export default async function handler(req, res) {
       if (passos >= 2) {
         return res.status(200).json({
           resposta: RESPOSTA_FECHAMENTO_LEVE,
-          contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined, cidadeAtual: cidadeAtual || undefined }
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_aceite_oferta_semana',
+            passosConducao: passos,
+            cidade: cidadeAtual || undefined,
+            cidadeAtual: cidadeAtual || undefined,
+            ultimaPerguntaBot: RESPOSTA_FECHAMENTO_LEVE
+          }
         });
       }
 
       const perguntaConducao = perguntaContinuidadePorProblema(contexto.procedimentoAtual || '');
+      const respostaConducao = perguntaConducao || 'O que mais te incomoda hoje?';
+
+      if (contexto.ultimaPerguntaBot && normalizeText(contexto.ultimaPerguntaBot) === normalizeText(respostaConducao)) {
+        return res.status(200).json({
+          resposta: RESPOSTA_FECHAMENTO_LEVE,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_aceite_oferta_semana',
+            passosConducao: passos,
+            cidade: cidadeAtual || undefined,
+            cidadeAtual: cidadeAtual || undefined,
+            ultimaPerguntaBot: RESPOSTA_FECHAMENTO_LEVE
+          }
+        });
+      }
+
       return res.status(200).json({
-        resposta: perguntaConducao || 'O que mais te incomoda hoje?',
-        contexto: { ...contexto, passosConducao: passos, cidade: cidadeAtual || undefined, cidadeAtual: cidadeAtual || undefined }
+        resposta: respostaConducao,
+        contexto: {
+          ...contexto,
+          passosConducao: passos,
+          cidade: cidadeAtual || undefined,
+          cidadeAtual: cidadeAtual || undefined,
+          ultimaPerguntaBot: respostaConducao
+        }
       });
     }
 
