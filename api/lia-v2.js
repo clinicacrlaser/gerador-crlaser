@@ -1404,6 +1404,14 @@ function responderIntencaoOperacional(intencao, unidade) {
   }
 
   if (!unidade) {
+    if (intencao === 'telefone') {
+      const linhasUnidades = unidades.map((u) => `📍 ${u.nomeCompleto}\n📞 ${u.telefone}`).join('\n\n');
+      return {
+        resposta: `Perfeito 😊\n\n${linhasUnidades}\n\nO agendamento é feito direto por esse WhatsApp.`,
+        contexto: { intencao: 'aguardando_interesse' }
+      };
+    }
+
     return {
       resposta: RESPOSTA_CIDADE,
       contexto: { intencao: 'aguardando_apenas_cidade' }
@@ -1417,11 +1425,11 @@ function responderIntencaoOperacional(intencao, unidade) {
   }
 
   if (intencao === 'telefone') {
-    const respostaWhatsapp = respostaWhatsappPorCidade(unidade.cidade);
-    if (respostaWhatsapp) {
+    const respostaContato = respostaContatoDiretoPorCidade(unidade.cidade);
+    if (respostaContato) {
       return {
-        resposta: respostaWhatsapp,
-        contexto: { cidade: unidade.cidade }
+        resposta: respostaContato,
+        contexto: { cidade: unidade.cidade, cidadeAtual: unidade.cidade }
       };
     }
 
@@ -2761,7 +2769,18 @@ export default async function handler(req, res) {
 
     // 2) CONTATO
     if (intencaoPrincipal === 'CONTATO') {
+      const intencaoLocalizacaoAtual = identificarIntencaoOperacional(pergunta);
       const cidadeParaLocalizar = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade;
+
+      if (!cidadeParaLocalizar && intencaoLocalizacaoAtual === 'telefone') {
+        const respostaTelefoneSemCidade = responderIntencaoOperacional('telefone', null);
+        if (respostaTelefoneSemCidade) {
+          return res.status(200).json({
+            resposta: respostaTelefoneSemCidade.resposta,
+            contexto: { ...contexto, ...respostaTelefoneSemCidade.contexto, tentativas_pergunta: 0 }
+          });
+        }
+      }
       
       if (!cidadeParaLocalizar) {
         return res.status(200).json({
@@ -2779,7 +2798,7 @@ export default async function handler(req, res) {
       }
 
       const respostaLocalizacao = responderIntencaoOperacional(
-        identificarIntencaoOperacional(pergunta) || 'endereco',
+        intencaoLocalizacaoAtual || 'endereco',
         unidades.find((u) => u.cidade === cidadeParaLocalizar)
       );
 
@@ -3775,7 +3794,10 @@ export default async function handler(req, res) {
     // Continuação de contexto — cliente fez follow-up após resposta sobre procedimento/oferta
     if (intencaoPrincipal === 'CONTATO') {
       const intencaoLocalizacao = identificarIntencaoOperacional(pergunta);
-      const respostaOperacional = responderIntencaoOperacional(intencaoLocalizacao, unidadeDetectada);
+      const cidadeContextoContato = contexto.cidadeAtual || contexto.cidade || null;
+      const unidadeContextoContato = cidadeContextoContato ? unidades.find((u) => u.cidade === cidadeContextoContato) : null;
+      const unidadeContato = unidadeDetectada || unidadeContextoContato;
+      const respostaOperacional = responderIntencaoOperacional(intencaoLocalizacao, unidadeContato);
       if (respostaOperacional) {
         return res.status(200).json(respostaOperacional);
       }
