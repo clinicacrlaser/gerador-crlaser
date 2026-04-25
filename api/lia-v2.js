@@ -2489,6 +2489,30 @@ export default async function handler(req, res) {
     console.log('PROCEDIMENTO DETECTADO:', procedimentoDetectadoMensagem);
     console.log('PAGAMENTO DETECTADO:', pagamentoDetectado);
 
+    // Early return para aparelho/equipamento ANTES de qualquer outra lógica
+    const procedimentoAtualNorm = normalizeText(contexto.procedimentoAtual || '');
+    const eContextoUltraformer = procedimentoAtualNorm === 'ultraformer' || procedimentoAtualNorm.includes('ultraformer') || procedimentoAtualNorm === 'ultraformer mpt' || procedimentoAtualNorm.includes('ultraformer mpt');
+    const temAparelhoNaMensagem = detectarConsultaAparelho(pergunta);
+    
+    if (temAparelhoNaMensagem && (eContextoUltraformer || detectarTermoUltraAproximado(pergunta))) {
+      const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
+      const procedimentoMantido = contexto.procedimentoAtual && (contexto.procedimentoAtual === 'Ultraformer MPT Full Face' || contexto.procedimentoAtual.includes('Ultraformer')) ? contexto.procedimentoAtual : 'ultraformer';
+      return res.status(200).json({
+        resposta: respostaAparelho,
+        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: procedimentoMantido }
+      });
+    }
+    
+    // Se mencionou aparelho e o contexto é ultraformer, mas a mensagem não menciona ultraformer explicitamente
+    if (temAparelhoNaMensagem && eContextoUltraformer && !detectarTermoUltraAproximado(pergunta)) {
+      const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
+      const procedimentoMantido = contexto.procedimentoAtual || 'ultraformer';
+      return res.status(200).json({
+        resposta: respostaAparelho,
+        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: procedimentoMantido }
+      });
+    }
+
     if (!msg) {
       console.log('CAIU NO FALLBACK');
       return res.status(200).json({
@@ -3878,29 +3902,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Handler para aparelho/equipamento ANTES de processarMensagemLia
-    const procedimentoAtualNorm = normalizeText(contexto.procedimentoAtual || '');
-    const eContextoUltraformer = procedimentoAtualNorm === 'ultraformer' || procedimentoAtualNorm.includes('ultraformer') || procedimentoAtualNorm === 'ultraformer mpt' || procedimentoAtualNorm.includes('ultraformer mpt');
-    const temAparelhoNaMensagem = detectarConsultaAparelho(pergunta);
-    
-    if (temAparelhoNaMensagem && (eContextoUltraformer || detectarTermoUltraAproximado(pergunta))) {
-      const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
-      const procedimentoMantido = contexto.procedimentoAtual && (contexto.procedimentoAtual === 'Ultraformer MPT Full Face' || contexto.procedimentoAtual.includes('Ultraformer')) ? contexto.procedimentoAtual : 'ultraformer';
-      return res.status(200).json({
-        resposta: respostaAparelho,
-        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: procedimentoMantido }
-      });
-    }
-    
-    // Se mencionou aparelho e o contexto é ultraformer, mas a mensagem não menciona ultraformer explicitamente
-    if (temAparelhoNaMensagem && eContextoUltraformer && !detectarTermoUltraAproximado(pergunta)) {
-      const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
-      const procedimentoMantido = contexto.procedimentoAtual || 'ultraformer';
-      return res.status(200).json({
-        resposta: respostaAparelho,
-        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: procedimentoMantido }
-      });
-    }
+
 
     const aguardandoRegiaoUltraformer =
       contexto.intencao === 'aguardando_regiao_ultraformer' ||
