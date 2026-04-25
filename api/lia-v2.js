@@ -143,6 +143,7 @@ const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado �
 // ════ BLOQUEIO OBRIGATÓRIO DE PREÇOS ════
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
+const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
@@ -612,7 +613,6 @@ function detectarInteresseFechamento(texto = '') {
     t.includes('oferta') ||
     t.includes('oferta da semana') ||
     t.includes('me passa os valores') ||
-    t.includes('quanto custa') ||
     t.includes('tenho interesse')
   );
 }
@@ -3311,7 +3311,26 @@ export default async function handler(req, res) {
     }
 
     if (intencaoPrincipal === 'PRECO' && detectarPreco(pergunta)) {
-      return res.status(200).json({ resposta: RESPOSTA_PRECO });
+      const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
+      const cidadeAtual = cidadeDetectada || cidadeContexto;
+      
+      // REGRA CRÍTICA: PRECO ≠ COMPRA
+      // Se não tiver cidade, NUNCA enviar link. Sempre perguntar cidade primeiro.
+      if (!cidadeAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_PRECO_SEM_CIDADE,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_cidade_para_preco'
+          }
+        });
+      }
+      
+      // Se tiver cidade, retorna resposta genérica de preço
+      return res.status(200).json({
+        resposta: RESPOSTA_PRECO,
+        contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual }
+      });
     }
 
     if (detectarIntencaoAgendamento(pergunta)) {
