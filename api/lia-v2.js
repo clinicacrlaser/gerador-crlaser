@@ -566,6 +566,11 @@ function detectarConfirmacaoCurtaPosPrecoSistema(texto = '') {
   return ['ok', 'entendi', 'certo', 'beleza', 'obrigado', 'obrigada', 'ta', 'tá'].includes(t);
 }
 
+function detectarInteresseCompraPosPrecoSistema(texto = '') {
+  const t = normalizeText(texto);
+  return ['quero', 'quero sim', 'pode', 'manda'].includes(t);
+}
+
 function interpretarFormaPagamentoPorRespostaCurta(texto = '') {
   const t = normalizeText(texto);
   if (['1', 'pix'].includes(t)) return 'pix';
@@ -3662,7 +3667,15 @@ export default async function handler(req, res) {
     }
 
     const itemConfianca = encontrarBlocoConfianca(pergunta, contexto);
-    if (itemConfianca && intencaoPrincipal !== 'PRECO' && contexto.intencao !== 'aguardando_aceite_oferta_semana') {
+    if (
+      itemConfianca &&
+      intencaoPrincipal !== 'PRECO' &&
+      contexto.intencao !== 'aguardando_aceite_oferta_semana' &&
+      !(
+        normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
+        detectarInteresseCompraPosPrecoSistema(pergunta)
+      )
+    ) {
       if (itemConfianca.tipo === 'fechamento_direto') {
         const cidadeContexto = contexto.cidadeAtual || contexto.cidade || null;
         const cidadeAtual = cidadeDetectada || cidadeContexto;
@@ -3798,6 +3811,22 @@ export default async function handler(req, res) {
           });
         }
       }
+    }
+
+    if (
+      normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
+      detectarInteresseCompraPosPrecoSistema(pergunta)
+    ) {
+      return res.status(200).json({
+        resposta: RESPOSTA_QUAL_UNIDADE,
+        contexto: {
+          ...contexto,
+          intencao: 'fluxo_compra_aguardando_cidade_sistema',
+          intencaoCompra: 'sistema',
+          status_compra: 'em andamento',
+          ultimaPerguntaBot: RESPOSTA_QUAL_UNIDADE
+        }
+      });
     }
 
     if (
