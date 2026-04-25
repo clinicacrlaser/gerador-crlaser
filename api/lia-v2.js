@@ -863,6 +863,29 @@ function detectarUltraSemRegiaoDireta(texto = '') {
   return ['ultra', 'ultraformer', 'ultra former', 'ultrafomer', 'ultrformer', 'ultrfomer', 'mpt'].includes(t);
 }
 
+function processarMensagemLia(mensagemUsuario = '') {
+  const texto = normalizeText(mensagemUsuario).trim();
+
+  const padraoUltra = /\b(ultra|ultrafomer|ultrformer|ultrfomer|ultraformer|mpt)\b/i;
+  const padraoRosto = /\b(rosto|face|facial)\b/i;
+
+  if (padraoUltra.test(texto)) {
+    if (padraoRosto.test(texto)) {
+      return {
+        intent: 'ULTRAFORMER_FULL_FACE',
+        resposta: RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA
+      };
+    }
+
+    return {
+      intent: 'ULTRAFORMER_GENERICO',
+      resposta: RESPOSTA_ULTRAFORMER_SEM_REGIAO
+    };
+  }
+
+  return null;
+}
+
 function labelCategoriaProvavel(categoria = 'fallback') {
   const labels = {
     humano: 'atendimento humano',
@@ -2670,7 +2693,8 @@ export default async function handler(req, res) {
 
     // ════ FLUXO DE COMPRA - SISTEMA AGUARDANDO FORMA DE PAGAMENTO ════
     if (contexto.intencao === 'fluxo_compra_aguardando_pagamento') {
-      if (detectarUltraformerFullFaceAproximado(pergunta)) {
+      const reconhecimentoLiaCompra = processarMensagemLia(pergunta);
+      if (reconhecimentoLiaCompra && reconhecimentoLiaCompra.intent === 'ULTRAFORMER_FULL_FACE') {
         return res.status(200).json({
           resposta: RESPOSTA_FORMA_PAGAMENTO,
           contexto: {
@@ -3340,7 +3364,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const ultraFullFaceAproximado = detectarUltraformerFullFaceAproximado(pergunta);
+    const reconhecimentoLia = processarMensagemLia(pergunta);
+    const ultraFullFaceAproximado = reconhecimentoLia && reconhecimentoLia.intent === 'ULTRAFORMER_FULL_FACE';
+    const ultraSemRegiao = reconhecimentoLia && reconhecimentoLia.intent === 'ULTRAFORMER_GENERICO';
     const intencoesFluxoCompra = [
       'fluxo_compra_opcoes',
       'fluxo_compra_aguardando_cidade_sistema',
@@ -3366,7 +3392,7 @@ export default async function handler(req, res) {
 
     if (ultraFullFaceAproximado) {
       return res.status(200).json({
-        resposta: RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA,
+        resposta: reconhecimentoLia.resposta,
         contexto: {
           ...contexto,
           intencao: 'aguardando_interesse',
@@ -3378,9 +3404,9 @@ export default async function handler(req, res) {
       });
     }
 
-    if (detectarUltraSemRegiaoDireta(pergunta)) {
+    if (ultraSemRegiao) {
       return res.status(200).json({
-        resposta: RESPOSTA_ULTRAFORMER_SEM_REGIAO,
+        resposta: reconhecimentoLia.resposta,
         contexto: {
           ...contexto,
           intencao: 'aguardando_interesse',
