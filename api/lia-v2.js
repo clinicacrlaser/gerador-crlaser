@@ -157,6 +157,7 @@ const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado �
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
+const RESPOSTA_ORIENTAR_OFERTAS_SISTEMA = 'Claro 😊\n\nPara ver as ofertas, é só usar o sistema aqui na tela:\n\n1️⃣ Escolha o procedimento\n2️⃣ Selecione a faixa da oferta\n3️⃣ Clique em Gerar Oferta\n\nAssim você vê a condição atual certinha.';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
@@ -606,6 +607,7 @@ function detectarPreco(texto = '') {
     t.includes('quanto custa') ||
     t.includes('custa quanto') ||
     t.includes('orcamento') ||
+    t.includes('promoc') ||
     t.includes('promocao') ||
     t.includes('oferta') ||
     t.includes('quanto e') ||
@@ -617,6 +619,22 @@ function detectarPrecoProcedimento(texto = '') {
   const temPreco = detectarPreco(texto);
   const temProcedimento = !!detectarProcedimento(texto) || !!detectarBaseProcedimentoAmbiguo(texto);
   return temPreco && temProcedimento;
+}
+
+function detectarPedidoOfertasSistema(texto = '') {
+  const t = normalizeText(texto);
+  return (
+    t.includes('ofertas') ||
+    t === 'oferta' ||
+    t.includes('oferta da semana') ||
+    t.includes('promocao') ||
+    t.includes('promocoes') ||
+    t.includes('valores') ||
+    t.includes('quero saber das ofertas') ||
+    t.includes('quais ofertas tem') ||
+    t.includes('quais promocoes tem') ||
+    t.includes('quero ver valores')
+  );
 }
 
 function detectarInteresseFechamento(texto = '') {
@@ -3978,6 +3996,16 @@ export default async function handler(req, res) {
           procedimentoAtual: 'Ultraformer MPT',
           ultimaPerguntaBot: RESPOSTA_ULTRAFORMER_SEM_REGIAO
         }
+      });
+    }
+
+    if (detectarPedidoOfertasSistema(pergunta)) {
+      const contextoAtualizado = { ...contexto, intencao: 'aguardando_interesse' };
+      delete contextoAtualizado.tipoLink;
+
+      return res.status(200).json({
+        resposta: RESPOSTA_ORIENTAR_OFERTAS_SISTEMA,
+        contexto: contextoAtualizado
       });
     }
 
