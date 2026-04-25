@@ -1146,6 +1146,36 @@ function detectarConsultaAparelho(texto = '') {
   return ['aparelho', 'equipamento', 'marca', 'original', 'mpt original'].some(termo => t.includes(termo));
 }
 
+function detectarPerguntaAparelhoDireta(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'qual o aparelho',
+    'qual aparelho',
+    'que aparelho',
+    'aparelho?'
+  ].some((g) => t.includes(normalizeText(g)));
+}
+
+function detectarPerguntaTemBotoxDireta(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'tem botox',
+    'voces tem botox',
+    'vocês tem botox'
+  ].some((g) => t.includes(normalizeText(g)));
+}
+
+function detectarPerguntaOndeFicaDireta(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'onde fica',
+    'onde voces ficam',
+    'onde vocês ficam',
+    'qual endereco',
+    'qual endereço'
+  ].some((g) => t.includes(normalizeText(g)));
+}
+
 function labelCategoriaProvavel(categoria = 'fallback') {
   const labels = {
     humano: 'atendimento humano',
@@ -2725,6 +2755,52 @@ export default async function handler(req, res) {
       console.log('CAIU NO FALLBACK');
       return res.status(200).json({
         resposta: 'Desculpe, ainda estou aprendendo 😊\nMas posso te ajudar com nossos tratamentos. O que você gostaria de melhorar?'
+      });
+    }
+
+    // Respostas diretas para perguntas objetivas (sem desviar para diagnóstico)
+    if (detectarPerguntaAparelhoDireta(pergunta)) {
+      const respostaAparelhoDireta = 'Usamos Ultraformer MPT original 😊\n\nQuer ver a oferta ou tirar dúvida?';
+      return res.status(200).json({
+        resposta: respostaAparelhoDireta,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: 'ultraformer',
+          ultimaPerguntaBot: respostaAparelhoDireta
+        }
+      });
+    }
+
+    if (detectarPerguntaTemBotoxDireta(pergunta)) {
+      const respostaBotoxDireta = 'Temos sim 😊\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar dúvida?';
+      return res.status(200).json({
+        resposta: respostaBotoxDireta,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: 'botox',
+          procedimentoAtual: contexto.procedimentoAtual || 'botox',
+          ultimaPerguntaBot: respostaBotoxDireta
+        }
+      });
+    }
+
+    if (detectarPerguntaOndeFicaDireta(pergunta)) {
+      const cidadeContatoDireto = cidadeDetectada || contexto.cidadeAtual || contexto.cidade || null;
+      if (cidadeContatoDireto) {
+        const respostaContato = respostaContatoDiretoPorCidade(cidadeContatoDireto);
+        if (respostaContato) {
+          return res.status(200).json({
+            resposta: respostaContato,
+            contexto: { ...contexto, cidade: cidadeContatoDireto, cidadeAtual: cidadeContatoDireto }
+          });
+        }
+      }
+
+      return res.status(200).json({
+        resposta: RESPOSTA_CIDADE,
+        contexto: { ...contexto, intencao: 'aguardando_apenas_cidade', ultimaPerguntaBot: RESPOSTA_CIDADE }
       });
     }
 
