@@ -3887,9 +3887,20 @@ export default async function handler(req, res) {
     
     if (temAparelhoNaMensagem && (eContextoUltraformer || detectarTermoUltraAproximado(pergunta))) {
       const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
+      const procedimentoMantido = contexto.procedimentoAtual && (contexto.procedimentoAtual === 'Ultraformer MPT Full Face' || contexto.procedimentoAtual.includes('Ultraformer')) ? contexto.procedimentoAtual : 'ultraformer';
       return res.status(200).json({
         resposta: respostaAparelho,
-        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: 'ultraformer' }
+        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: procedimentoMantido }
+      });
+    }
+    
+    // Se mencionou aparelho e o contexto é ultraformer, mas a mensagem não menciona ultraformer explicitamente
+    if (temAparelhoNaMensagem && eContextoUltraformer && !detectarTermoUltraAproximado(pergunta)) {
+      const respostaAparelho = 'Trabalhamos com o Ultraformer MPT original da Medsystems 😊\n\nCada unidade tem seu próprio aparelho.\n\nNão alugamos, não emprestamos e não usamos aparelhos compartilhados.\n\nSe quiser, também posso te explicar a diferença dele para versões antigas.';
+      const procedimentoMantido = contexto.procedimentoAtual || 'ultraformer';
+      return res.status(200).json({
+        resposta: respostaAparelho,
+        contexto: { ...contexto, intencao: 'aguardando_interesse', procedimentoAtual: procedimentoMantido }
       });
     }
 
