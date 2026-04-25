@@ -146,6 +146,7 @@ const PROCEDURE_LINK_KEYS = {
 const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor axilar? 😊';
 const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer?\n\nRosto, pescoço ou outra região?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting sem cirurgia.\n\nVocê quer ver a condição da campanha atual ou já deseja finalizar a compra?';
+const RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO = 'Perfeito 😊\n\nO Ultraformer MPT Full Face é indicado para flacidez do rosto e efeito lifting.\n\nVocê quer gerar a oferta ou tirar alguma dúvida antes?';
 const RESPOSTA_ULTRAFORMER_OPCOES = 'Temos algumas opções de Ultraformer MPT 😊\n\n1️⃣ Full Face\n2️⃣ Terço Inferior\n3️⃣ Papada\n4️⃣ Pescoço\n5️⃣ Colo\n6️⃣ Pálpebras\n7️⃣ Abdome\n8️⃣ Flancos\n9️⃣ Braços\n🔟 Interno de coxa\n\nQual dessas regiões você quer?';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
 const RESPOSTA_LAVIEEN_OPCOES = 'Temos algumas opções de Lavieen 😊\n\n1️⃣ Facial completo\n2️⃣ Face + Pescoço\n3️⃣ Pescoço + Colo\n4️⃣ Face + Pescoço + Colo\n5️⃣ BB Laser Facial\n6️⃣ Melasma\n7️⃣ Olheiras\n8️⃣ Capilar\n9️⃣ Mãos\n\nQual dessas opções você quer?';
@@ -858,6 +859,11 @@ function detectarTermoUltraAproximado(texto = '') {
 function detectarRegiaoRosto(texto = '') {
   const t = normalizeText(texto);
   return ['rosto', 'face', 'facial'].some((termo) => t.includes(termo));
+}
+
+function detectarRespostaRegiaoUltraformerRosto(texto = '') {
+  const t = normalizeText(texto);
+  return ['rosto', 'face', 'facial'].includes(t);
 }
 
 function detectarUltraformerFullFaceAproximado(texto = '') {
@@ -3550,6 +3556,29 @@ export default async function handler(req, res) {
       });
     }
 
+    const aguardandoRegiaoUltraformer =
+      contexto.intencao === 'aguardando_regiao_ultraformer' ||
+      (
+        contexto.procedimentoBase === 'ultraformer' &&
+        normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_ULTRAFORMER_SEM_REGIAO)
+      );
+
+    if (aguardandoRegiaoUltraformer && detectarRespostaRegiaoUltraformerRosto(pergunta)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: 'ultraformer',
+          procedimentoFinal: 'Ultraformer MPT Full Face',
+          procedimento: 'Ultraformer MPT Full Face',
+          procedimentoAtual: 'Ultraformer MPT Full Face',
+          procedimento_selecionado: 'Ultraformer MPT Full Face',
+          ultimaPerguntaBot: RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO
+        }
+      });
+    }
+
     const reconhecimentoLia = processarMensagemLia(pergunta);
     const ultraFullFaceAproximado = reconhecimentoLia && reconhecimentoLia.intent === 'ULTRAFORMER_FULL_FACE';
     const ultraSemRegiao = reconhecimentoLia && reconhecimentoLia.intent === 'ULTRAFORMER_GENERICO';
@@ -3595,8 +3624,11 @@ export default async function handler(req, res) {
         resposta: reconhecimentoLia.resposta,
         contexto: {
           ...contexto,
-          intencao: 'aguardando_interesse',
-          procedimentoBase: 'ultraformer'
+          intencao: 'aguardando_regiao_ultraformer',
+          procedimentoBase: 'ultraformer',
+          procedimento: 'Ultraformer MPT',
+          procedimentoAtual: 'Ultraformer MPT',
+          ultimaPerguntaBot: RESPOSTA_ULTRAFORMER_SEM_REGIAO
         }
       });
     }
