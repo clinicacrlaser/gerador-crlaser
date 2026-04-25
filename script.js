@@ -84,7 +84,7 @@ function fmt(value) {
 
 /* ── CONTAGEM REGRESSIVA DA OFERTA ── */
 
-const OFFER_END_DATE = new Date(2026, 3, 24, 18, 0, 0);
+const OFFER_END_DATE = new Date(new Date().setHours(12, 0, 0, 0));
 
 function padCountdown(value) {
   return String(value).padStart(2, '0');
