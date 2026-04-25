@@ -834,6 +834,39 @@ function detectarFollowUpUltraformerPalpebras(texto = '', contexto = {}) {
   ].some((gatilho) => t.includes(normalizeText(gatilho)));
 }
 
+function detectarPedidoMaisInformacaoTratamento(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'quero saber mais',
+    'me explica melhor',
+    'como funciona',
+    'e bom',
+    'é bom',
+    'vale a pena'
+  ].some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function baseProcedimentoContexto(contexto = {}) {
+  const baseContexto = normalizarProcedimentoBase(contexto.procedimentoBase || '');
+  if (baseContexto) return baseContexto;
+
+  const candidatos = [
+    contexto.procedimentoAtual,
+    contexto.procedimento,
+    contexto.procedimentoFinal,
+    contexto.procedimento_selecionado,
+    contexto?.liaContext?.procedimentoFinal,
+    contexto?.liaContext?.procedimentoBase
+  ];
+
+  for (const candidato of candidatos) {
+    const base = normalizarProcedimentoBase(candidato || '');
+    if (base) return base;
+  }
+
+  return null;
+}
+
 function detectarPerfilFlacidezFacial(texto = '', contexto = {}) {
   const t = normalizeText(texto);
   const procedimentoAtual = normalizeText(contexto.procedimentoAtual || '');
@@ -4013,6 +4046,32 @@ export default async function handler(req, res) {
         resposta: RESPOSTA_ULTRAFORMER_PALPEBRAS,
         contexto: { intencao: 'aguardando_interesse', procedimentoAtual: CONTEXTO_ULTRAFORMER_PALPEBRAS }
       });
+    }
+
+    if (detectarPedidoMaisInformacaoTratamento(pergunta)) {
+      const baseContexto = baseProcedimentoContexto(contexto);
+      let respostaExplicacao = null;
+
+      if (baseContexto === 'ultraformer') {
+        respostaExplicacao = 'O Ultraformer MPT é um tratamento de ultrassom microfocado 😊\n\nEle ajuda a melhorar a flacidez e dar efeito lifting sem cirurgia.\n\nO resultado é progressivo, estimulando colágeno ao longo dos meses.\n\nSe quiser, posso te indicar a melhor opção para o seu caso.';
+      } else if (baseContexto === 'botox') {
+        respostaExplicacao = 'O Botox ajuda a suavizar rugas e linhas de expressão 😊\n\nÉ uma aplicação rápida, com efeito natural e sem necessidade de repouso.\n\nSe quiser, posso te orientar melhor para o seu caso.';
+      } else if (baseContexto === 'bioestimulador') {
+        respostaExplicacao = 'O bioestimulador estimula o colágeno natural da pele 😊\n\nEle melhora a firmeza e ajuda a recuperar estrutura ao longo do tempo.';
+      }
+
+      if (respostaExplicacao) {
+        const respostaFinal = `${respostaExplicacao}\n\nQuer ver a oferta ou prefere tirar mais dúvidas?`;
+        return res.status(200).json({
+          resposta: respostaFinal,
+          contexto: {
+            ...contexto,
+            intencao: 'aguardando_interesse',
+            procedimentoBase: baseContexto,
+            ultimaPerguntaBot: respostaFinal
+          }
+        });
+      }
     }
 
 
