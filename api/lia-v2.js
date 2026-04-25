@@ -1196,16 +1196,13 @@ function classificarIntencaoPrincipal(texto = '', contexto = {}) {
     return 'CONTATO';
   }
 
-  // 3) PAGAMENTO
-  if (detectarConfirmacaoPagamento(texto) || contextoComprovanteAtivo(contexto)) return 'PAGAMENTO';
+  // 3) PRECO
+  if (detectarPreco(texto)) return 'PRECO';
 
   // 4) COMPRA
   if (detectarIntencaoCompra(texto) || detectarFormaPagamento(texto) || detectarInteresseFechamento(texto)) return 'COMPRA';
 
-  // 5) PRECO
-  if (detectarPreco(texto)) return 'PRECO';
-
-  // 6) PROCEDIMENTO
+  // 5) PROCEDIMENTO
   if (
     temProcedimento ||
     detectarTemaBotoxFacial(texto) ||
@@ -1215,6 +1212,9 @@ function classificarIntencaoPrincipal(texto = '', contexto = {}) {
   ) {
     return 'PROCEDIMENTO';
   }
+
+  // 6) PAGAMENTO
+  if (detectarConfirmacaoPagamento(texto) || contextoComprovanteAtivo(contexto)) return 'PAGAMENTO';
 
   // 7) DUVIDA_TECNICA
   if (
@@ -2449,16 +2449,20 @@ export default async function handler(req, res) {
     };
     const unidadeDetectada = identificarCidade(pergunta);
     const cidadeDetectada = unidadeDetectada ? unidadeDetectada.cidade : null;
-    const intencaoPrincipal = classificarIntencaoPrincipal(pergunta, contexto);
-    if (!intencaoContextoCompativel(contexto, intencaoPrincipal, pergunta, cidadeDetectada)) {
+    const procedimentoDetectadoMensagem = detectarProcedimento(pergunta);
+    const pagamentoDetectado = interpretarFormaPagamentoPorRespostaCurta(pergunta) || detectarFormaPagamento(pergunta);
+    const contextoSemIntencao = { ...contexto };
+    delete contextoSemIntencao.intencao;
+    const intencaoAtual = classificarIntencaoPrincipal(pergunta, contextoSemIntencao);
+    if (!intencaoContextoCompativel(contexto, intencaoAtual, pergunta, cidadeDetectada)) {
       delete contexto.intencao;
       delete contexto.etapa;
       if (contexto.liaContext && typeof contexto.liaContext === 'object') {
         contexto.liaContext = { ...contexto.liaContext, etapa: null };
       }
     }
+    const intencaoPrincipal = intencaoAtual;
     const intencaoInterpretada = classificarIntencaoMensagem(pergunta, contexto);
-    const procedimentoDetectadoMensagem = detectarProcedimento(pergunta);
     const procedimentoBaseMensagem = detectarBaseProcedimentoAmbiguo(pergunta);
     const procedimentoResolvidoPorBase = procedimentoBaseMensagem ? resolverProcedimentoPorBase(procedimentoBaseMensagem, pergunta) : null;
     const procedimentoSelecionadoMensagem = procedimentoResolvidoPorBase || (
@@ -2474,8 +2478,11 @@ export default async function handler(req, res) {
 
     console.log('PERGUNTA RECEBIDA:', pergunta);
     console.log('TEXTO NORMALIZADO:', msg);
-    console.log('INTENCAO PRINCIPAL:', intencaoPrincipal);
+    console.log('INTENCAO PRINCIPAL:', intencaoAtual);
     console.log('INTENCAO CLASSIFICADA:', intencaoInterpretada.categoria);
+    console.log('CIDADE DETECTADA:', cidadeDetectada);
+    console.log('PROCEDIMENTO DETECTADO:', procedimentoDetectadoMensagem);
+    console.log('PAGAMENTO DETECTADO:', pagamentoDetectado);
 
     if (!msg) {
       console.log('CAIU NO FALLBACK');
@@ -2502,7 +2509,10 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
-    if (contexto.intencao === 'aguardando_cidade_contato_direto') {
+    if (
+      contexto.intencao === 'aguardando_cidade_contato_direto' &&
+      (intencaoAtual === 'CONTATO' || !!cidadeDetectada || ehRespostaCurta(pergunta))
+    ) {
       const cidadeContato = cidadeDetectada || contexto.cidadeAtual || contexto.cidade || null;
       if (!cidadeContato) {
         return res.status(200).json({
@@ -2759,7 +2769,10 @@ export default async function handler(req, res) {
     }
 
     // ════ FLUXO DE COMPRA - CONTEXTO AGUARDANDO ESCOLHA (EQUIPE OU SISTEMA) ════
-    if (contexto.intencao === 'fluxo_compra_opcoes') {
+    if (
+      contexto.intencao === 'fluxo_compra_opcoes' &&
+      (intencaoAtual === 'COMPRA' || detectarEscolhaEquipe(pergunta) || detectarEscolhaSistema(pergunta) || ['1', '2'].includes(msg))
+    ) {
       if (detectarEscolhaEquipe(pergunta)) {
         // Usuário escolheu falar com equipe
         const cidadeContexto = contexto.cidade || null;
@@ -3609,13 +3622,6 @@ export default async function handler(req, res) {
         const sufixo = contexto.procedimentoAtual ? ` sobre ${contexto.procedimentoAtual}` : '';
         const respostaInteresse = `Perfeito 😊\n\nMe fala qual é a sua principal preocupação${sufixo} que já te preparo as melhores opções da semana 😉`;
 
-        if (contexto.ultimaPerguntaBot && normalizeText(contexto.ultimaPerguntaBot) === normalizeText(respostaInteresse)) {
-          return res.status(200).json({
-            resposta: RESPOSTA_FECHAMENTO_LEVE,
-            contexto: { ...contexto, intencao: 'aguardando_aceite_oferta_semana', ultimaPerguntaBot: RESPOSTA_FECHAMENTO_LEVE }
-          });
-        }
-
         return res.status(200).json({
           resposta: respostaInteresse,
           contexto: { ...contexto, ultimaPerguntaBot: respostaInteresse }
@@ -3748,13 +3754,9 @@ export default async function handler(req, res) {
         }
       }
 
-      const respostaSemLoop = contexto.ultimaPerguntaBot === RESPOSTA_FECHAMENTO_LEVE
-        ? 'Perfeito 😊\n\nSe você quiser seguir com a oferta da semana, me responde "quero" que eu te envio agora.'
-        : RESPOSTA_FECHAMENTO_LEVE;
-
       return res.status(200).json({
-        resposta: respostaSemLoop,
-        contexto: { ...contexto, intencao: 'aguardando_aceite_oferta_semana', ultimaPerguntaBot: respostaSemLoop }
+        resposta: 'Perfeito 😊\n\nSe você quiser seguir com a oferta da semana, me responde "quero" que eu te envio agora.',
+        contexto: { ...contexto, intencao: 'aguardando_aceite_oferta_semana', ultimaPerguntaBot: 'Perfeito 😊\n\nSe você quiser seguir com a oferta da semana, me responde "quero" que eu te envio agora.' }
       });
     }
 
@@ -3838,20 +3840,6 @@ export default async function handler(req, res) {
 
       const perguntaConducao = perguntaContinuidadePorProblema(contexto.procedimentoAtual || '');
       const respostaConducao = perguntaConducao || 'O que mais te incomoda hoje?';
-
-      if (contexto.ultimaPerguntaBot && normalizeText(contexto.ultimaPerguntaBot) === normalizeText(respostaConducao)) {
-        return res.status(200).json({
-          resposta: RESPOSTA_FECHAMENTO_LEVE,
-          contexto: {
-            ...contexto,
-            intencao: 'aguardando_aceite_oferta_semana',
-            passosConducao: passos,
-            cidade: cidadeAtual || undefined,
-            cidadeAtual: cidadeAtual || undefined,
-            ultimaPerguntaBot: RESPOSTA_FECHAMENTO_LEVE
-          }
-        });
-      }
 
       return res.status(200).json({
         resposta: respostaConducao,
