@@ -574,6 +574,34 @@ function respostaCurtaAposLink(texto = '') {
   return ['ok', 'certo', 'entendi', 'beleza', 'sim', 'pode'].includes(t);
 }
 
+function respostaCurtaFluxoCompra(texto = '') {
+  const t = normalizeText(texto);
+  return ['ok', 'certo', 'pode', 'beleza'].includes(t);
+}
+
+function resolverProcedimentoCompraPorContexto(contexto = {}) {
+  const procedimentoContexto =
+    contexto.procedimento ||
+    contexto.procedimentoAtual ||
+    contexto.procedimento_selecionado ||
+    contexto.procedimentoFinal ||
+    null;
+
+  const base = contexto.procedimentoBase || normalizarProcedimentoBase(procedimentoContexto || '');
+
+  if (procedimentoContexto && !['Botox', 'Ultraformer MPT', 'Lavieen'].includes(procedimentoContexto)) {
+    return procedimentoContexto;
+  }
+
+  if (base === 'botox') return 'Botox Facial Terço Superior Com Retorno';
+  if (base === 'ultraformer') return 'Ultraformer MPT Full Face';
+  if (base === 'lavieen') return 'Lavieen Facial Completo - 3 sessões';
+  if (base === 'preenchedor') return 'Preenchedor Facial';
+  if (base === 'bioestimulador') return 'Bioestimulador Diamond';
+
+  return procedimentoContexto;
+}
+
 function detectarPedidoContatoComprovante(texto = '') {
   const t = normalizeText(texto);
   return [
@@ -2560,6 +2588,67 @@ export default async function handler(req, res) {
 
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    const contextoCompraAtivo = [
+      'fluxo_compra_opcoes',
+      'fluxo_compra_aguardando_cidade_sistema',
+      'fluxo_compra_aguardando_pagamento',
+      'fluxo_pagamento_aguardando_procedimento_cartao',
+      'fluxo_pagamento_aguardando_confirmacao'
+    ].includes(contexto.intencao) || contexto.status_compra === 'em andamento';
+
+    if (contextoCompraAtivo && respostaCurtaFluxoCompra(pergunta)) {
+      const cidadeCompraAtual = contexto.cidadeCompra || contexto.cidadeAtual || contexto.cidade || null;
+      const formaPagamentoAtual = contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
+      const procedimentoCompra = resolverProcedimentoCompraPorContexto(contexto);
+
+      if (cidadeCompraAtual && formaPagamentoAtual) {
+        const linkProcedimento = gerarRespostaOfertaCampanha(procedimentoCompra, cidadeCompraAtual, 'texto');
+        if (linkProcedimento) {
+          return res.status(200).json({
+            resposta: `${linkProcedimento}\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade para agendar.`,
+            contexto: {
+              ...contexto,
+              cidade: cidadeCompraAtual,
+              cidadeAtual: cidadeCompraAtual,
+              cidadeCompra: cidadeCompraAtual,
+              procedimento: procedimentoCompra || contexto.procedimento,
+              procedimentoAtual: procedimentoCompra || contexto.procedimentoAtual,
+              intencao: 'fluxo_pagamento_aguardando_confirmacao',
+              status_compra: 'em andamento'
+            }
+          });
+        }
+      }
+
+      if (cidadeCompraAtual && !formaPagamentoAtual) {
+        return res.status(200).json({
+          resposta: RESPOSTA_FORMA_PAGAMENTO,
+          contexto: {
+            ...contexto,
+            cidade: cidadeCompraAtual,
+            cidadeAtual: cidadeCompraAtual,
+            cidadeCompra: cidadeCompraAtual,
+            intencao: 'fluxo_compra_aguardando_pagamento',
+            status_compra: 'em andamento'
+          }
+        });
+      }
+
+      if (!cidadeCompraAtual && procedimentoCompra) {
+        return res.status(200).json({
+          resposta: RESPOSTA_QUAL_UNIDADE,
+          contexto: {
+            ...contexto,
+            procedimento: procedimentoCompra,
+            procedimentoAtual: procedimentoCompra,
+            procedimento_selecionado: procedimentoCompra,
+            intencao: 'fluxo_compra_aguardando_cidade_sistema',
+            status_compra: 'em andamento'
+          }
+        });
+      }
     }
 
     if (
