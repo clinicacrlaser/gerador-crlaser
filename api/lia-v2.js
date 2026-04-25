@@ -147,7 +147,7 @@ const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor
 const RESPOSTA_ULTRAFORMER_SEM_REGIAO = 'Em qual região pretende fazer?\n\nRosto, pescoço ou outra região?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_DIRETA = 'O Ultraformer melhora a flacidez e dá efeito lifting 😊\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_ULTRAFORMER_FULL_FACE_CONTEXTO_REGIAO = 'O Ultraformer melhora a flacidez e dá efeito lifting 😊\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
-const RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO = 'Perfeito 😊\n\nQuer ver a oferta ou tirar dúvida?';
+const RESPOSTA_PROCEDIMENTO_CURTO_CONTEXTO = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
 const RESPOSTA_ULTRAFORMER_OPCOES = 'Perfeito 😊\n\nQual região você quer tratar no Ultraformer?\nEx.: rosto, papada, pescoço, abdome.';
 const RESPOSTA_LAVIEEN_SEM_REGIAO = 'O Lavieen pode ser feito em diferentes protocolos 😊\n\nEm qual região pretende fazer?\n\nRosto? Pescoço? Ou alguma outra região?';
 const RESPOSTA_LAVIEEN_OPCOES = 'Perfeito 😊\n\nQual opção do Lavieen você quer?\nEx.: facial, melasma, olheiras, capilar.';
@@ -157,7 +157,7 @@ const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado �
 // A Lia NUNCA informa valores. Sempre direciona para o sistema.
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
-const RESPOSTA_PRECO_SISTEMA = 'Claro 😊\n\nÉ só gerar no sistema aqui na tela.\nQuer ajuda?';
+const RESPOSTA_PRECO_SISTEMA = 'Você quer:\n1️⃣ Gerar a oferta agora\n2️⃣ Que eu te ajude?';
 const RESPOSTA_CONTINUIDADE_PRECO_SISTEMA = 'Perfeito 😊\n\nQualquer dúvida na hora de gerar a oferta, me chama por aqui.';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
@@ -166,9 +166,12 @@ const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
 const RESPOSTA_REFORCO_POS_LINK = 'Se quiser, me avisa aqui que eu te acompanho no agendamento 😊';
-const RESPOSTA_ESCOLHA_DIRETA_PADRAO = 'Você prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
-const RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER = 'Você prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
-const RESPOSTA_ESCOLHA_DIRETA_BOTOX = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida antes?';
+const RESPOSTA_ESCOLHA_DIRETA_PADRAO = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
+const RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
+const RESPOSTA_ESCOLHA_DIRETA_BOTOX = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
+const RESPOSTA_INDECISO_ESCOLHA = 'Você prefere:\n1️⃣ Ver a oferta\n2️⃣ Entender melhor antes?';
+const RESPOSTA_TRAVA_ESCOLHA = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar dúvida?';
+const RESPOSTA_AJUDA_POS_PRECO = 'Perfeito 😊\n\nTe ajudo agora.\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
 
 // ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
 const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nComo você prefere seguir?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
@@ -176,7 +179,7 @@ const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nComo você prefere seguir?\n1�
 const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_CONFIRMAR_CIDADE_OFERTA = 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 
-const RESPOSTA_FORMA_PAGAMENTO = 'Perfeito 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão';
+const RESPOSTA_FORMA_PAGAMENTO = 'Você prefere:\n1️⃣ Pix\n2️⃣ Cartão?';
 
 // ════ CHAVES DE PIX REAIS - CR LASER® ════
 const PIX_BRASILIA = 'Pix CR Laser® Brasília:\n\n🔽🔽\n\n43.713.316/0001-33';
@@ -214,7 +217,7 @@ const RESPOSTA_ULTRAFORMER_PALPEBRAS = 'Pode valer a pena sim 😊\n\nO Ultrafor
 const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve a moderada 😊\n\nO Ultraformer estimula colágeno e melhora firmeza da pele.\n\nAqui na CR Laser®:\n- Equipamentos próprios\n- Ponteiras originais\n- ANVISA aprovado\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, o Bioestimulador faz mais sentido 😊\n\nEle estimula colágeno natural, ajudando a restaurar estrutura e volume.\n\nAqui na CR Laser®:\n- Bioestimulador original (Diamond)\n- Aplicação por especialistas certificados\n- ANVISA aprovado\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, o Ultraformer MPT faz mais sentido 😊\n\nÉ uma ótima opção quando existe flacidez em rosto com mais volume, oferecendo lifting sem cirurgia.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Ponteiras originais e ANVISA aprovadas\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
-const RESPOSTA_BOTOX_FACIAL_RUGAS = 'O Botox suaviza rugas e tem efeito natural 😊\n\nFazemos aplicação completa no terço superior com retorno, buscando resultado natural e equilibrado.\n\nAqui na CR Laser®:\n- Toxina Botulínica original importada\n- Aplicação por especialistas certificados\n- Resultado natural garantido\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida antes?';
+const RESPOSTA_BOTOX_FACIAL_RUGAS = 'O Botox suaviza rugas e tem efeito natural 😊\n\nFazemos aplicação completa no terço superior com retorno, buscando resultado natural e equilibrado.\n\nAqui na CR Laser®:\n- Toxina Botulínica original importada\n- Aplicação por especialistas certificados\n- Resultado natural garantido\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
 const RESPOSTA_INTENCAO_GENERICA = 'Consigo te ajudar sim 😊\n\nIsso costuma estar relacionado a {categoria}.\n\nSe quiser, me conta um pouco melhor que te explico direitinho.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -722,6 +725,11 @@ function detectarHesitacaoIndeciso(texto = '') {
     'entendi',
     'beleza'
   ].includes(t);
+}
+
+function detectarTravouDecisao(texto = '') {
+  const t = normalizeText(texto);
+  return ['ok', 'entendi'].includes(t);
 }
 
 function montarFechamentoEscolhaDireta(base = '') {
@@ -3379,7 +3387,7 @@ export default async function handler(req, res) {
 
       // Se não entendeu a forma de pagamento, repetir
       return res.status(200).json({
-        resposta: 'Desculpa, não entendi 😊\n\nQual será a forma de pagamento?\n\n1️⃣ Pix\n2️⃣ Cartão',
+        resposta: `Desculpa, não entendi 😊\n\n${RESPOSTA_FORMA_PAGAMENTO}`,
         contexto: contexto
       });
     }
@@ -3815,7 +3823,7 @@ export default async function handler(req, res) {
 
     if (
       normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
-      detectarInteresseCompraPosPrecoSistema(pergunta)
+      (detectarInteresseCompraPosPrecoSistema(pergunta) || detectarEscolhaOfertaDireta(pergunta))
     ) {
       return res.status(200).json({
         resposta: RESPOSTA_QUAL_UNIDADE,
@@ -3831,16 +3839,29 @@ export default async function handler(req, res) {
 
     if (
       normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
+      detectarEscolhaDuvidaDireta(pergunta)
+    ) {
+      return res.status(200).json({
+        resposta: RESPOSTA_AJUDA_POS_PRECO,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          ultimaPerguntaBot: RESPOSTA_AJUDA_POS_PRECO
+        }
+      });
+    }
+
+    if (
+      normalizeText(contexto.ultimaPerguntaBot || '') === normalizeText(RESPOSTA_PRECO_SISTEMA) &&
       detectarConfirmacaoCurtaPosPrecoSistema(pergunta)
     ) {
-      const respostaRecuperacao = 'Perfeito 😊\n\nSe quiser, posso já deixar sua oferta pronta pra você garantir o valor de hoje.';
       return res.status(200).json({
-        resposta: respostaRecuperacao,
+        resposta: RESPOSTA_TRAVA_ESCOLHA,
         contexto: {
           ...contexto,
           intencao: 'recuperacao_indeciso',
           etapaRecuperacaoIndeciso: 'inicial',
-          ultimaPerguntaBot: respostaRecuperacao
+          ultimaPerguntaBot: RESPOSTA_TRAVA_ESCOLHA
         }
       });
     }
@@ -4001,17 +4022,19 @@ export default async function handler(req, res) {
     if (contexto.intencao === 'recuperacao_indeciso') {
       if (detectarEscolhaOfertaDireta(pergunta) || detectarInteresseFechamento(pergunta) || detectarIntencaoCompra(pergunta)) {
         return res.status(200).json({
-          resposta: RESPOSTA_PRECO_SISTEMA,
+          resposta: RESPOSTA_QUAL_UNIDADE,
           contexto: {
             ...contexto,
-            intencao: 'aguardando_interesse',
-            ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA
+            intencao: 'fluxo_compra_aguardando_cidade_sistema',
+            intencaoCompra: 'sistema',
+            status_compra: 'em andamento',
+            ultimaPerguntaBot: RESPOSTA_QUAL_UNIDADE
           }
         });
       }
 
       if (detectarEscolhaDuvidaDireta(pergunta)) {
-        const respostaDuvida = 'Perfeito 😊\n\nMe fala sua dúvida e eu te explico de forma direta.';
+        const respostaDuvida = `Perfeito 😊\n\nTe explico rapidinho.\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`;
         return res.status(200).json({
           resposta: respostaDuvida,
           contexto: {
@@ -4022,34 +4045,25 @@ export default async function handler(req, res) {
         });
       }
 
-      if (contexto.etapaRecuperacaoIndeciso === 'pergunta_final') {
-        const respostaSeguimento = 'Perfeito 😊\n\nPosso gerar agora e te acompanhar passo a passo.';
-        return res.status(200).json({
-          resposta: respostaSeguimento,
-          contexto: {
-            ...contexto,
-            intencao: 'recuperacao_indeciso',
-            etapaRecuperacaoIndeciso: 'seguimento',
-            ultimaPerguntaBot: respostaSeguimento
-          }
-        });
-      }
-
-      const perguntaRecuperacao = 'Quer que eu já gere pra você?';
+      const respostaRecuperacao = detectarTravouDecisao(pergunta)
+        ? RESPOSTA_TRAVA_ESCOLHA
+        : RESPOSTA_INDECISO_ESCOLHA;
       return res.status(200).json({
-        resposta: perguntaRecuperacao,
+        resposta: respostaRecuperacao,
         contexto: {
           ...contexto,
           intencao: 'recuperacao_indeciso',
-          etapaRecuperacaoIndeciso: 'pergunta_final',
-          ultimaPerguntaBot: perguntaRecuperacao
+          etapaRecuperacaoIndeciso: 'inicial',
+          ultimaPerguntaBot: respostaRecuperacao
         }
       });
     }
 
     if (contexto.intencao === 'aguardando_interesse') {
       if (detectarHesitacaoIndeciso(pergunta)) {
-        const respostaRecuperacao = 'Perfeito 😊\n\nSe quiser, posso já deixar sua oferta pronta pra você garantir o valor de hoje.';
+        const respostaRecuperacao = detectarTravouDecisao(pergunta)
+          ? RESPOSTA_TRAVA_ESCOLHA
+          : RESPOSTA_INDECISO_ESCOLHA;
         return res.status(200).json({
           resposta: respostaRecuperacao,
           contexto: {
