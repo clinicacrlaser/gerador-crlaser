@@ -91,10 +91,10 @@ function getNextLaunchDate() {
 
   for (let offset = 0; offset < 18; offset += 1) {
     const base = new Date(year, month + offset, 1);
-    const candidate = new Date(base.getFullYear(), base.getMonth(), 31, 0, 0, 0, 0);
+    const candidate = new Date(base.getFullYear(), base.getMonth(), 30, 23, 59, 0, 0);
 
-    // Meses sem dia 31 viram o proximo mes automaticamente; ignora nesses casos.
-    if (candidate.getDate() !== 31) {
+    // Meses sem dia 30 viram o proximo mes automaticamente; ignora nesses casos.
+    if (candidate.getDate() !== 30) {
       continue;
     }
 
@@ -103,7 +103,7 @@ function getNextLaunchDate() {
     }
   }
 
-  return new Date(year, month + 1, 31, 0, 0, 0, 0);
+  return new Date(year, month + 1, 30, 23, 59, 0, 0);
 }
 
 const OFFER_END_DATE = getNextLaunchDate();
