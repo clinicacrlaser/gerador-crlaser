@@ -84,7 +84,29 @@ function fmt(value) {
 
 /* ── CONTAGEM REGRESSIVA DA OFERTA ── */
 
-const OFFER_END_DATE = new Date(new Date().setHours(12, 0, 0, 0));
+function getNextLaunchDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  for (let offset = 0; offset < 18; offset += 1) {
+    const base = new Date(year, month + offset, 1);
+    const candidate = new Date(base.getFullYear(), base.getMonth(), 31, 0, 0, 0, 0);
+
+    // Meses sem dia 31 viram o proximo mes automaticamente; ignora nesses casos.
+    if (candidate.getDate() !== 31) {
+      continue;
+    }
+
+    if (candidate.getTime() > now.getTime()) {
+      return candidate;
+    }
+  }
+
+  return new Date(year, month + 1, 31, 0, 0, 0, 0);
+}
+
+const OFFER_END_DATE = getNextLaunchDate();
 
 function padCountdown(value) {
   return String(value).padStart(2, '0');
@@ -95,9 +117,8 @@ function formatCountdown(diffMs) {
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
 
-  return `${padCountdown(days)} : ${padCountdown(hours)} : ${padCountdown(minutes)} : ${padCountdown(seconds)}`;
+  return `[${days} dias] [${hours} horas] [${minutes} minutos]`;
 }
 
 function initOfferCountdown() {
@@ -113,7 +134,7 @@ function initOfferCountdown() {
     const diff = OFFER_END_DATE.getTime() - Date.now();
 
     if (diff <= 0) {
-      valueEl.textContent = 'Oferta encerrada';
+      valueEl.textContent = '[0 dias] [0 horas] [0 minutos]';
       barEl.classList.add('is-ended');
       return true;
     }

@@ -66,11 +66,11 @@ body {
 .offer-countdown-bar {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 16px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
   margin-bottom: 14px;
   background: linear-gradient(100deg, rgba(7, 11, 20, 0.96) 0%, rgba(10, 16, 32, 0.96) 100%);
   border: 1px solid rgba(24, 199, 209, 0.26);
@@ -78,25 +78,74 @@ body {
   box-shadow: 0 0 0 1px rgba(30, 95, 175, 0.14), 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
-.offer-countdown-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 1.2px;
+.offer-special-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #ffffff;
+}
+
+.offer-special-icon {
+  color: var(--teal);
+}
+
+.offer-special-copy {
+  margin: 0;
+  color: #f5f7fa;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.offer-special-copy strong {
+  color: #18c7d1;
+  font-size: 1.02rem;
+}
+
+.offer-special-launch {
+  margin: 0;
+  color: #8fd8ff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.offer-special-copy-muted {
+  color: #b8c2d1;
+}
+
+.offer-countdown-label {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #ffffff;
 }
 
 .offer-countdown-value {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 1.8px;
-  color: var(--teal);
+  letter-spacing: 0.6px;
+  color: #18c7d1;
   font-variant-numeric: tabular-nums;
+}
+
+.offer-special-footnote {
+  margin: 2px 0 0;
+  color: #dff4ff;
+  font-size: 0.86rem;
+}
+
+.offer-countdown-bar .install-app-btn {
+  margin-top: 6px;
+  align-self: flex-start;
 }
 
 .offer-countdown-bar.is-ended .offer-countdown-value {
   color: #8ce8ee;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.6px;
 }
 
 .day-highlight {
