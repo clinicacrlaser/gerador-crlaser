@@ -19,30 +19,31 @@ const {
 let isBotoxHighlightActive = false;
 
 // Tabela de descontos automáticos por procedimento (índice → desconto em %)
-const WEEK_OFFER_DISCOUNTS = {
-  // Botox: 25%
-  '0': 25, '1': 25,
-  // Preenchedor: 25%
-  '2': 25,
-  // Bioestimulador Diamond: 30%
-  '3': 30,
-  // Ultraformer MPT: 40%
-  '4': 40, '5': 40, '6': 40, '7': 40, '8': 40, '9': 40, '10': 40,
-  '11': 40, '12': 40, '13': 40, '14': 40, '15': 40, '16': 40,
-  '17': 40, '18': 40, '19': 40, '20': 40, '21': 40, '22': 40,
-  // Scizer: 40%
-  '23': 40,
-  // Laser Lavieen: 40%
-  '24': 40, '25': 40, '26': 40, '27': 40, '28': 40, '29': 40, '30': 40, '31': 40, '32': 40,
-  // Microagulhamento Robótico: 5%
-  '33': 5,
-  // Endymed: 45%
-  '34': 45,
-  // Luz Pulsada & Laser: 35%
-  '35': 35, '36': 35, '37': 35, '38': 35, '39': 35, '40': 35, '41': 35, '42': 35, '43': 35,
-  // Depilação: 45%
-  '44': 45, '45': 45, '46': 45, '47': 45, '48': 45, '49': 45, '50': 45,
-  '51': 45, '52': 45, '53': 45, '54': 45, '55': 45, '56': 45, '57': 45, '58': 45, '59': 45
+// Mapeia cada procedimento ao offerIdx que produz o desconto desejado
+const WEEK_OFFER_DISCOUNT_MAPPING = {
+  // Botox: 25% (offerIdx=0)
+  '0': '0', '1': '0',
+  // Preenchedor: 25% (offerIdx=0)
+  '2': '0',
+  // Bioestimulador Diamond: 30% (offerIdx=0)
+  '3': '0',
+  // Ultraformer MPT: 40% (offerIdx=2)
+  '4': '2', '5': '2', '6': '2', '7': '2', '8': '2', '9': '2', '10': '2',
+  '11': '2', '12': '2', '13': '2', '14': '2', '15': '2', '16': '2',
+  '17': '2', '18': '2', '19': '2', '20': '2', '21': '2', '22': '2',
+  // Scizer: 40% (offerIdx=0)
+  '23': '0',
+  // Laser Lavieen: 45% (offerIdx=0)
+  '24': '0', '25': '0', '26': '0', '27': '0', '28': '0', '29': '0', '30': '0', '31': '0', '32': '0',
+  // Microagulhamento Robótico: 5% (offerIdx=0)
+  '33': '0',
+  // Endymed: 45% (offerIdx=0)
+  '34': '0',
+  // Luz Pulsada & Laser: 35% (offerIdx=0)
+  '35': '0', '36': '0', '37': '0', '38': '0', '39': '0', '40': '0', '41': '0', '42': '0', '43': '0',
+  // Depilação: 50% (offerIdx=1)
+  '44': '1', '45': '1', '46': '1', '47': '1', '48': '1', '49': '1', '50': '1',
+  '51': '1', '52': '1', '53': '1', '54': '1', '55': '1', '56': '1', '57': '1', '58': '1', '59': '1'
 };
 
 const SUGGESTION_MAP = {
@@ -276,8 +277,8 @@ function generateOffer() {
     return;
   }
 
-  // Desconto automático por procedimento (Oferta da Semana)
-  const offerIdx = '2'; // Sempre usa "Oferta da Semana"
+  // Mapeia o procedimento ao offerIdx correto para a "Oferta da Semana"
+  const offerIdx = WEEK_OFFER_DISCOUNT_MAPPING[procIdx] || '0';
 
   const offerData = calculateProcedureOffer(procIdx, offerIdx);
   if (!offerData) {
