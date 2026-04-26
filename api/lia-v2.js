@@ -222,6 +222,7 @@ const RESPOSTA_ULTRAFORMER_PALPEBRAS_CONTEXTO = 'Funciona bem para flacidez leve
 const RESPOSTA_FLACIDEZ_ROSTO_MAGRO = 'Pelo que você descreveu, o Bioestimulador faz mais sentido 😊\n\nEle estimula colágeno natural, ajudando a restaurar estrutura e volume.\n\nAqui na CR Laser®:\n- Bioestimulador original (Diamond)\n- Aplicação por especialistas certificados\n- ANVISA aprovado\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_FLACIDEZ_ROSTO_CHEIO = 'Pelo que você descreveu, o Ultraformer MPT faz mais sentido 😊\n\nÉ uma ótima opção quando existe flacidez em rosto com mais volume, oferecendo lifting sem cirurgia.\n\nAqui na CR Laser®:\n- Utilizamos equipamentos próprios\n- Nada é alugado\n- Ponteiras originais e ANVISA aprovadas\n\nVocê prefere:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar mais dúvidas?';
 const RESPOSTA_BOTOX_FACIAL_RUGAS = 'O Botox suaviza rugas e tem efeito natural 😊\n\nFazemos aplicação completa no terço superior com retorno, buscando resultado natural e equilibrado.\n\nAqui na CR Laser®:\n- Toxina Botulínica original importada\n- Aplicação por especialistas certificados\n- Resultado natural garantido\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
+const RESPOSTA_BOTOX_EXPLICACAO_DIRETA = 'O Botox suaviza rugas e linhas de expressão 😊\n\nNa CR Laser® fazemos aplicação facial com direito a retorno no terço superior completo, buscando resultado natural.\n\nVocê quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
 const RESPOSTA_INTENCAO_GENERICA = 'Consigo te ajudar sim 😊\n\nIsso costuma estar relacionado a {categoria}.\n\nSe quiser, me conta um pouco melhor que te explico direitinho.';
 const LINKS_WHATSAPP_UNIDADE = {
   campinas: 'https://wa.me/5519991818366?text=Estou%20vindo%20da%20Lia%20e%20quero%20mais%20informa%C3%A7%C3%B5es',
@@ -1051,6 +1052,17 @@ function detectarTemaBotoxFacial(texto = '') {
   }
 
   return gatilhosBotoxFacial.some((gatilho) => t.includes(normalizeText(gatilho)));
+}
+
+function detectarConsultaInformativaBotox(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'quero saber do botox',
+    'me fala do botox',
+    'como funciona o botox',
+    'botox e bom',
+    'botox é bom'
+  ].some((g) => t.includes(normalizeText(g)));
 }
 
 function detectarTemaFlacidez(texto = '', contexto = {}) {
@@ -3031,6 +3043,20 @@ export default async function handler(req, res) {
       });
     }
 
+    // Botox informativo: explicar antes de qualquer oferta/fluxo comercial.
+    if (detectarConsultaInformativaBotox(pergunta)) {
+      return res.status(200).json({
+        resposta: RESPOSTA_BOTOX_EXPLICACAO_DIRETA,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: 'botox',
+          procedimentoAtual: 'botox',
+          ultimaPerguntaBot: RESPOSTA_BOTOX_EXPLICACAO_DIRETA
+        }
+      });
+    }
+
     const cidadeFechamento = extrairCidadeContexto(contexto);
     const formaPagamentoFechamento = pagamentoDetectado || extrairFormaPagamentoContexto(contexto);
     const procedimentoFinalFechamento =
@@ -4546,7 +4572,10 @@ export default async function handler(req, res) {
       }
 
       if (detectarEscolhaDuvidaDireta(pergunta)) {
-        const respostaDuvida = 'Perfeito 😊\n\nMe fala sua dúvida e eu te explico de forma direta.';
+        const baseContexto = baseProcedimentoContexto(contexto);
+        const respostaDuvida = baseContexto === 'botox'
+          ? 'Perfeito 😊\nQual sua dúvida sobre o Botox?'
+          : 'Perfeito 😊\n\nMe fala sua dúvida e eu te explico de forma direta.';
         return res.status(200).json({
           resposta: respostaDuvida,
           contexto: {
