@@ -1573,6 +1573,323 @@ function classificarIntencaoMensagem(texto = '', contexto = {}) {
   return { categoria: 'fallback' };
 }
 
+const INTENCOES_CENTRAIS = {
+  SAUDACAO: 'SAUDACAO',
+  INFORMACAO_PROCEDIMENTO: 'INFORMACAO_PROCEDIMENTO',
+  PRECO: 'PRECO',
+  COMPRA: 'COMPRA',
+  CONTATO: 'CONTATO',
+  POS_PAGAMENTO: 'POS_PAGAMENTO',
+  HUMANO: 'HUMANO',
+  DUVIDA: 'DUVIDA',
+  FALLBACK: 'FALLBACK'
+};
+
+function classificarIntencaoCentral(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  if (!t) return INTENCOES_CENTRAIS.FALLBACK;
+
+  if (detectarIntencaoHumano(texto)) return INTENCOES_CENTRAIS.HUMANO;
+
+  if (
+    contexto.linkEnviado &&
+    (detectarPerguntaSuportePosLink(texto) || detectarPedidoContatoComprovante(texto) || detectarConfirmacaoPagamento(texto) || t.includes('comprovante'))
+  ) {
+    return INTENCOES_CENTRAIS.POS_PAGAMENTO;
+  }
+
+  if (identificarIntencaoOperacional(texto) || detectarPerguntaOndeFicaDireta(texto) || detectarPerguntaSuportePosLink(texto)) {
+    return INTENCOES_CENTRAIS.CONTATO;
+  }
+
+  if (detectarIntencaoCompra(texto)) return INTENCOES_CENTRAIS.COMPRA;
+  if (detectarPreco(texto)) return INTENCOES_CENTRAIS.PRECO;
+  if (ehSaudacao(texto)) return INTENCOES_CENTRAIS.SAUDACAO;
+
+  if (
+    detectarConsultaInformativaBotox(texto) ||
+    detectarPedidoMaisInformacaoTratamento(texto) ||
+    detectarTemaBotoxFacial(texto) ||
+    !!detectarProcedimento(texto) ||
+    !!detectarBaseProcedimentoAmbiguo(texto)
+  ) {
+    return INTENCOES_CENTRAIS.INFORMACAO_PROCEDIMENTO;
+  }
+
+  if (encontrarFaq(texto) || encontrarSugestao(texto) || encontrarCorrecao(texto)) {
+    return INTENCOES_CENTRAIS.DUVIDA;
+  }
+
+  return INTENCOES_CENTRAIS.FALLBACK;
+}
+
+function interpretarRespostaCurtaPorUltimaPergunta(texto = '', contexto = {}) {
+  const t = normalizeText(texto);
+  if (!['quero', 'sim', '1', '2', 'ok'].includes(t)) return null;
+
+  const ultimaPergunta = normalizeText(contexto.ultimaPerguntaBot || '');
+  if (!ultimaPergunta) return null;
+
+  const perguntaComOpcao =
+    ultimaPergunta.includes('1️⃣') ||
+    ultimaPergunta.includes('2️⃣') ||
+    ultimaPergunta.includes(normalizeText('você quer')) ||
+    ultimaPergunta.includes(normalizeText('você prefere'));
+
+  if (ultimaPergunta === normalizeText(RESPOSTA_FORMA_PAGAMENTO)) {
+    if (['1', 'sim', 'quero'].includes(t)) return 'PAGAMENTO_PIX';
+    if (t === '2') return 'PAGAMENTO_CARTAO';
+    return null;
+  }
+
+  if (perguntaComOpcao || ultimaPergunta === normalizeText(RESPOSTA_PRECO_SISTEMA)) {
+    if (['1', 'sim', 'quero'].includes(t)) return 'ESCOLHA_1';
+    if (t === '2') return 'ESCOLHA_2';
+    if (t === 'ok') return 'CONFIRMA';
+  }
+
+  return null;
+}
+
+function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
+  const cidadeAtual = extras.cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+  const cidadeNorm = cidadeAtual ? normalizeText(cidadeAtual) : null;
+  const unidadeAtual = cidadeNorm ? unidades.find((u) => u.cidade === cidadeNorm) : null;
+  const baseContexto = baseProcedimentoContexto(contexto);
+  const decisaoCurta = interpretarRespostaCurtaPorUltimaPergunta(pergunta, contexto);
+
+  if (decisaoCurta === 'ESCOLHA_1') {
+    return {
+      resposta: RESPOSTA_OPCOES_COMPRA,
+      contexto: {
+        ...contexto,
+        intencao: 'fluxo_compra_opcoes',
+        intencaoCompra: 'sistema',
+        status_compra: 'em andamento',
+        ultimaPerguntaBot: RESPOSTA_OPCOES_COMPRA
+      }
+    };
+  }
+
+  if (decisaoCurta === 'ESCOLHA_2') {
+    const respostaDuvida = baseContexto === 'botox'
+      ? 'Perfeito 😊\nQual sua dúvida sobre o Botox?'
+      : 'Perfeito 😊\n\nMe fala sua dúvida e eu te explico de forma direta.';
+
+    return {
+      resposta: respostaDuvida,
+      contexto: {
+        ...contexto,
+        intencao: 'aguardando_interesse',
+        ultimaPerguntaBot: respostaDuvida
+      }
+    };
+  }
+
+  if (decisaoCurta === 'PAGAMENTO_PIX') {
+    if (!cidadeAtual) {
+      return {
+        resposta: RESPOSTA_QUAL_UNIDADE,
+        contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_cidade_sistema', status_compra: 'em andamento' }
+      };
+    }
+
+    return {
+      resposta: gerarRespostaPix(cidadeAtual),
+      contexto: {
+        ...contexto,
+        cidade: cidadeAtual,
+        cidadeAtual,
+        cidadeCompra: cidadeAtual,
+        formaPagamento: 'pix',
+        pagamento: 'pix',
+        intencao: 'fluxo_pagamento_aguardando_confirmacao',
+        aguardandoComprovante: true,
+        aguardando_comprovante: true,
+        status_compra: 'em andamento'
+      }
+    };
+  }
+
+  if (decisaoCurta === 'PAGAMENTO_CARTAO') {
+    if (!cidadeAtual) {
+      return {
+        resposta: RESPOSTA_QUAL_UNIDADE,
+        contexto: { ...contexto, intencao: 'fluxo_compra_aguardando_cidade_sistema', status_compra: 'em andamento' }
+      };
+    }
+
+    return {
+      resposta: 'Sem problema 😊\n\nQual procedimento você quer finalizar no cartão?',
+      contexto: {
+        ...contexto,
+        cidade: cidadeAtual,
+        cidadeAtual,
+        cidadeCompra: cidadeAtual,
+        formaPagamento: 'cartao',
+        pagamento: 'cartao',
+        intencao: 'fluxo_pagamento_aguardando_procedimento_cartao',
+        status_compra: 'em andamento'
+      }
+    };
+  }
+
+  const intencaoCentral = classificarIntencaoCentral(pergunta, contexto);
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.SAUDACAO) {
+    return { resposta: respostaSaudacao(pergunta), contexto };
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.HUMANO) {
+    if (!cidadeAtual) {
+      return {
+        resposta: 'Perfeito 😊\n\nVou te direcionar direto para a equipe 👇\n\nMe fala sua cidade que te envio o contato da unidade mais próxima.',
+        contexto: { ...contexto, intencao: 'aguardando_cidade_whatsapp', tipoLink: 'humano' }
+      };
+    }
+
+    const respostaHumano = respostaHumanoPorCidade(cidadeAtual);
+    if (respostaHumano) return { resposta: respostaHumano, contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual } };
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.POS_PAGAMENTO) {
+    if (!cidadeAtual) {
+      return {
+        resposta: 'Perfeito 😊\n\nMe confirma a unidade para eu te passar o WhatsApp correto:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+        contexto: { ...contexto, intencao: 'aguardando_cidade_comprovante', linkEnviado: true, aguardandoComprovante: true, aguardando_comprovante: true }
+      };
+    }
+
+    if (detectarConfirmacaoPagamento(pergunta) && unidadeAtual) {
+      return {
+        resposta: `Perfeito 😊\n\nAgora é só enviar o comprovante no WhatsApp da unidade para agendar:\n\n📞 ${unidadeAtual.telefone}`,
+        contexto: {
+          ...contexto,
+          cidade: cidadeAtual,
+          cidadeAtual,
+          cidadeCompra: cidadeAtual,
+          linkEnviado: true,
+          aguardandoComprovante: true,
+          aguardando_comprovante: true,
+          intencao: 'aguardando_cidade_comprovante'
+        }
+      };
+    }
+
+    const respostaSuporte = gerarRespostaSuportePosLink(cidadeAtual) || gerarRespostaComprovanteUnidade(cidadeAtual);
+    if (respostaSuporte) {
+      return {
+        resposta: respostaSuporte,
+        contexto: {
+          ...contexto,
+          cidade: cidadeAtual,
+          cidadeAtual,
+          cidadeCompra: cidadeAtual,
+          linkEnviado: true,
+          aguardandoComprovante: true,
+          aguardando_comprovante: true,
+          intencao: 'aguardando_cidade_comprovante'
+        }
+      };
+    }
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.CONTATO) {
+    const intencaoOperacional = identificarIntencaoOperacional(pergunta) || 'telefone';
+    if (cidadeAtual) {
+      const respostaOperacional = responderIntencaoOperacional(intencaoOperacional, unidades.find((u) => u.cidade === cidadeNorm));
+      if (respostaOperacional) return { resposta: respostaOperacional.resposta, contexto: { ...contexto, ...respostaOperacional.contexto, cidade: cidadeAtual, cidadeAtual } };
+
+      const respostaContato = respostaContatoDiretoPorCidade(cidadeAtual);
+      if (respostaContato) return { resposta: respostaContato, contexto: { ...contexto, cidade: cidadeAtual, cidadeAtual } };
+    }
+
+    return { resposta: RESPOSTA_CIDADE, contexto: { ...contexto, intencao: 'aguardando_apenas_cidade', ultimaPerguntaBot: RESPOSTA_CIDADE } };
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.PRECO) {
+    return {
+      resposta: RESPOSTA_PRECO_SISTEMA,
+      contexto: {
+        ...contexto,
+        intencao: 'aguardando_interesse',
+        ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA
+      }
+    };
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.COMPRA) {
+    if (!cidadeAtual) {
+      return {
+        resposta: RESPOSTA_QUAL_UNIDADE,
+        contexto: {
+          ...contexto,
+          intencao: 'fluxo_compra_aguardando_cidade_sistema',
+          procedimento_selecionado: extras.procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+          procedimentoBase: extras.procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
+          status_compra: 'em andamento'
+        }
+      };
+    }
+
+    return {
+      resposta: RESPOSTA_OPCOES_COMPRA,
+      contexto: {
+        ...contexto,
+        cidade: cidadeAtual,
+        cidadeAtual,
+        cidadeCompra: cidadeAtual,
+        intencao: 'fluxo_compra_opcoes',
+        intencaoCompra: 'sistema',
+        procedimento_selecionado: extras.procedimentoSelecionadoMensagem || contexto.procedimento_selecionado || undefined,
+        procedimentoBase: extras.procedimentoBaseMensagem || contexto.procedimentoBase || undefined,
+        status_compra: 'em andamento',
+        ultimaPerguntaBot: RESPOSTA_OPCOES_COMPRA
+      }
+    };
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.INFORMACAO_PROCEDIMENTO) {
+    if (detectarConsultaInformativaBotox(pergunta) || baseContexto === 'botox' || detectarTemaBotoxFacial(pergunta)) {
+      return {
+        resposta: RESPOSTA_BOTOX_EXPLICACAO_DIRETA,
+        contexto: {
+          ...contexto,
+          intencao: 'aguardando_interesse',
+          procedimentoBase: 'botox',
+          procedimentoAtual: 'botox',
+          ultimaPerguntaBot: RESPOSTA_BOTOX_EXPLICACAO_DIRETA
+        }
+      };
+    }
+
+    const respostaInfo = `Perfeito 😊\n\nTe explico rapidinho.\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`;
+    return {
+      resposta: respostaInfo,
+      contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: respostaInfo }
+    };
+  }
+
+  if (intencaoCentral === INTENCOES_CENTRAIS.DUVIDA) {
+    const itemFaq = encontrarFaq(pergunta);
+    if (itemFaq) {
+      const respostaFaq = respostaCurtaComConducao(itemFaq.resposta);
+      return {
+        resposta: respostaFaq,
+        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: respostaFaq }
+      };
+    }
+
+    const respostaDuvida = `Perfeito 😊\n\n${RESPOSTA_ESCOLHA_DIRETA_PADRAO}`;
+    return {
+      resposta: respostaDuvida,
+      contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: respostaDuvida }
+    };
+  }
+
+  return null;
+}
+
 function responderIntencaoOperacional(intencao, unidade) {
   if (intencao === 'horario') {
     return { resposta: RESPOSTA_HORARIO };
@@ -2968,93 +3285,13 @@ export default async function handler(req, res) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
     }
 
-    // Modo pós-link: após enviar link, a Lia entra em suporte (não repete venda/link).
-    if (contexto.linkEnviado) {
-      const cidadePosLink = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
-
-      if (!cidadePosLink) {
-        return res.status(200).json({
-          resposta: 'Perfeito 😊\n\nMe confirma a unidade para eu te passar o WhatsApp correto:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
-          contexto: {
-            ...contexto,
-            linkEnviado: true,
-            aguardandoComprovante: true,
-            aguardando_comprovante: true,
-            intencao: 'aguardando_cidade_comprovante'
-          }
-        });
-      }
-
-      if (detectarConfirmacaoPagamento(pergunta)) {
-        const unidade = unidades.find((u) => u.cidade === normalizeText(cidadePosLink));
-        if (unidade) {
-          return res.status(200).json({
-            resposta: `Perfeito 😊\n\nAgora é só enviar o comprovante no WhatsApp da unidade para agendar:\n\n📞 ${unidade.telefone}`,
-            contexto: {
-              ...contexto,
-              cidade: cidadePosLink,
-              cidadeAtual: cidadePosLink,
-              cidadeCompra: cidadePosLink,
-              linkEnviado: true,
-              aguardandoComprovante: true,
-              aguardando_comprovante: true,
-              intencao: 'aguardando_cidade_comprovante',
-              statusPagamento: 'confirmado',
-              status_compra: 'em andamento'
-            }
-          });
-        }
-      }
-
-      if (detectarPerguntaSuportePosLink(pergunta) || detectarPedidoContatoComprovante(pergunta)) {
-        const respostaSuporte = gerarRespostaSuportePosLink(cidadePosLink);
-        if (respostaSuporte) {
-          return res.status(200).json({
-            resposta: respostaSuporte,
-            contexto: {
-              ...contexto,
-              cidade: cidadePosLink,
-              cidadeAtual: cidadePosLink,
-              cidadeCompra: cidadePosLink,
-              linkEnviado: true,
-              aguardandoComprovante: true,
-              aguardando_comprovante: true,
-              intencao: 'aguardando_cidade_comprovante',
-              status_compra: 'em andamento'
-            }
-          });
-        }
-      }
-
-      const respostaPadraoPosLink = gerarRespostaSuportePosLink(cidadePosLink) || 'Perfeito 😊\n\nEnvie o comprovante no WhatsApp da unidade para seguir com o agendamento.';
-      return res.status(200).json({
-        resposta: respostaPadraoPosLink,
-        contexto: {
-          ...contexto,
-          cidade: cidadePosLink,
-          cidadeAtual: cidadePosLink,
-          cidadeCompra: cidadePosLink,
-          linkEnviado: true,
-          aguardandoComprovante: true,
-          aguardando_comprovante: true,
-          intencao: 'aguardando_cidade_comprovante',
-          status_compra: 'em andamento'
-        }
-      });
-    }
-
-    // Botox informativo: explicar antes de qualquer oferta/fluxo comercial.
-    if (detectarConsultaInformativaBotox(pergunta)) {
-      return res.status(200).json({
-        resposta: RESPOSTA_BOTOX_EXPLICACAO_DIRETA,
-        contexto: {
-          ...contexto,
-          intencao: 'aguardando_interesse',
-          procedimentoBase: 'botox',
-          procedimentoAtual: 'botox',
-          ultimaPerguntaBot: RESPOSTA_BOTOX_EXPLICACAO_DIRETA
-        }
-      });
+    const respostaFluxoCentral = resolverFluxoCentral(pergunta, contexto, {
+      cidadeDetectada,
+      procedimentoSelecionadoMensagem,
+      procedimentoBaseMensagem
+    });
+    if (respostaFluxoCentral) {
+      return res.status(200).json(respostaFluxoCentral);
     }
 
     const cidadeFechamento = extrairCidadeContexto(contexto);
@@ -3301,17 +3538,6 @@ export default async function handler(req, res) {
           }
         });
       }
-    }
-
-    if (intencaoPrincipal === 'PRECO' && detectarPrecoProcedimento(pergunta)) {
-      return res.status(200).json({
-        resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: {
-          ...contexto,
-          intencao: 'aguardando_interesse',
-          ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA
-        }
-      });
     }
 
     if (contextoComprovanteAtivo(contexto) && detectarConfirmacaoPagamento(pergunta)) {
@@ -4966,27 +5192,6 @@ export default async function handler(req, res) {
       return res.status(200).json({
         resposta: RESPOSTA_PRECO_SISTEMA,
         contexto: { ...contextoAtualizado, ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
-      });
-    }
-
-    if (intencaoPrincipal === 'PRECO' && detectarInteresseFechamento(pergunta)) {
-      return res.status(200).json({
-        resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
-      });
-    }
-
-    if (intencaoPrincipal === 'PRECO' && !detectarIntencaoCompra(pergunta)) {
-      return res.status(200).json({
-        resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
-      });
-    }
-
-    if (intencaoPrincipal === 'PRECO' && detectarPreco(pergunta)) {
-      return res.status(200).json({
-        resposta: RESPOSTA_PRECO_SISTEMA,
-        contexto: { ...contexto, intencao: 'aguardando_interesse', ultimaPerguntaBot: RESPOSTA_PRECO_SISTEMA }
       });
     }
 
