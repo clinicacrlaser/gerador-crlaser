@@ -18,6 +18,33 @@ const {
 
 let isBotoxHighlightActive = false;
 
+// Tabela de descontos automáticos por procedimento (índice → desconto em %)
+const WEEK_OFFER_DISCOUNTS = {
+  // Botox: 25%
+  '0': 25, '1': 25,
+  // Preenchedor: 25%
+  '2': 25,
+  // Bioestimulador Diamond: 30%
+  '3': 30,
+  // Ultraformer MPT: 40%
+  '4': 40, '5': 40, '6': 40, '7': 40, '8': 40, '9': 40, '10': 40,
+  '11': 40, '12': 40, '13': 40, '14': 40, '15': 40, '16': 40,
+  '17': 40, '18': 40, '19': 40, '20': 40, '21': 40, '22': 40,
+  // Scizer: 40%
+  '23': 40,
+  // Laser Lavieen: 40%
+  '24': 40, '25': 40, '26': 40, '27': 40, '28': 40, '29': 40, '30': 40, '31': 40, '32': 40,
+  // Microagulhamento Robótico: 5%
+  '33': 5,
+  // Endymed: 45%
+  '34': 45,
+  // Luz Pulsada & Laser: 35%
+  '35': 35, '36': 35, '37': 35, '38': 35, '39': 35, '40': 35, '41': 35, '42': 35, '43': 35,
+  // Depilação: 45%
+  '44': 45, '45': 45, '46': 45, '47': 45, '48': 45, '49': 45, '50': 45,
+  '51': 45, '52': 45, '53': 45, '54': 45, '55': 45, '56': 45, '57': 45, '58': 45, '59': 45
+};
+
 const SUGGESTION_MAP = {
   '0': { idx: 2, name: 'Preenchedor Facial' },
   '2': { idx: 0, name: 'Botox Facial Terço Superior Com Retorno' },
@@ -30,42 +57,6 @@ let currentMainProcIdx = null;
 let secondProcedureAdded = false;
 let originalOfferText = '';
 let originalDiscountPct = 0;
-
-const DEFAULT_RANGE_OPTIONS = [
-  { value: '2', label: 'Sextouu CR Laser®' }
-];
-
-function getRangeOptionsByProcedure(procIdx) {
-  return DEFAULT_RANGE_OPTIONS;
-}
-
-function updateOfferRangeOptions(procIdx) {
-  const rangeSelect = document.getElementById('faixaOferta');
-  if (!rangeSelect) return;
-
-  const prevValue = rangeSelect.value;
-  const options = getRangeOptionsByProcedure(procIdx);
-
-  rangeSelect.innerHTML = '';
-
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.disabled = true;
-  placeholder.selected = true;
-  placeholder.textContent = 'Selecione a faixa';
-  rangeSelect.appendChild(placeholder);
-
-  options.forEach((item) => {
-    const option = document.createElement('option');
-    option.value = item.value;
-    option.textContent = item.label;
-    if (item.value === prevValue) {
-      placeholder.selected = false;
-      option.selected = true;
-    }
-    rangeSelect.appendChild(option);
-  });
-}
 
 const ULTRAFORMER_UPSELL_MESSAGES = {
   FACIAL: 'Você também pode considerar adicionar o Ultraformer MPT Pescoço para um resultado mais completo 😊',
@@ -206,13 +197,6 @@ function ensureOfferRangeSelected() {
   }
 }
 
-function updateOfferRangeHighlight() {
-  const rangeSelect = document.getElementById('faixaOferta');
-  const hint = document.getElementById('faixaDestaque');
-  if (!rangeSelect || !hint) return;
-
-  hint.hidden = rangeSelect.value !== '2';
-}
 
 function updateUltraformerUpsellHint() {
   const procedureSelect = document.getElementById('procedimento');
@@ -258,7 +242,6 @@ function handleProcedureChangeForHighlight() {
     return;
   }
 
-  updateOfferRangeOptions(procedureSelect.value);
   clearOfferResult();
 
   if (isBotoxHighlightActive && procedureSelect.value !== HIGHLIGHT_BOTOX_PROC_IDX) {
@@ -271,19 +254,12 @@ function handleProcedureChangeForHighlight() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const procedureSelect = document.getElementById('procedimento');
-  const rangeSelect = document.getElementById('faixaOferta');
 
   if (procedureSelect) {
-    updateOfferRangeOptions(procedureSelect.value);
     procedureSelect.addEventListener('change', handleProcedureChangeForHighlight);
   }
 
-  if (rangeSelect) {
-    rangeSelect.addEventListener('change', updateOfferRangeHighlight);
-  }
-
   renderBotoxHighlightState();
-  updateOfferRangeHighlight();
   updateUltraformerUpsellHint();
 });
 
@@ -292,26 +268,24 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── GERAÇÃO DA OFERTA ── */
 
 function generateOffer() {
-  const procIdx  = document.getElementById('procedimento').value;
-  const offerIdx = document.getElementById('faixaOferta').value;
+  const procIdx = document.getElementById('procedimento').value;
 
   /* Validação */
   if (procIdx === '') {
     showError('Selecione o procedimento.');
     return;
   }
-  if (offerIdx === '') {
-    showError('Selecione a faixa de oferta.');
+
+  // Desconto automático por procedimento (Oferta da Semana)
+  const offerIdx = '2'; // Sempre usa "Oferta da Semana"
+
+  const offerData = calculateProcedureOffer(procIdx, offerIdx);
+  if (!offerData) {
+    showError('Não foi possível calcular a oferta para esse procedimento.');
     return;
   }
 
-    const offerData = calculateProcedureOffer(procIdx, offerIdx);
-    if (!offerData) {
-     showError('Não foi possível calcular a oferta para esse procedimento.');
-     return;
-    }
-
-    const { procedure, discountPct, originalPix, originalCard, discountedPix, discountedCard } = offerData;
+  const { procedure, discountPct, originalPix, originalCard, discountedPix, discountedCard } = offerData;
 
   /* Montagem do texto da oferta */
   let offerText =
