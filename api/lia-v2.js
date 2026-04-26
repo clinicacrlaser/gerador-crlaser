@@ -623,13 +623,31 @@ function detectarPedidoContatoComprovante(texto = '') {
   return [
     'qual',
     'onde',
+    'mando onde',
+    'onde envio',
+    'onde envio comprovante',
+    'mando o comprovante onde',
     'qual whatsapp',
+    'qual telefone',
     'qual contato',
     'quero sim',
     'manda',
     'pode mandar',
     'me envia'
   ].includes(t);
+}
+
+function detectarPerguntaSuportePosLink(texto = '') {
+  const t = normalizeText(texto);
+  return [
+    'mando onde',
+    'onde envio',
+    'onde envio comprovante',
+    'mando o comprovante onde',
+    'qual whatsapp',
+    'qual telefone',
+    'qual contato'
+  ].some((g) => t.includes(g));
 }
 
 function contextoComprovanteAtivo(contexto = {}) {
@@ -1778,6 +1796,24 @@ Envie o comprovante no WhatsApp da unidade para agendar:
 📞 ${unidade.telefone}`;
 }
 
+function gerarRespostaSuportePosLink(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+
+  if (!unidade) {
+    return null;
+  }
+
+  return `Perfeito 😊
+
+Envie o comprovante no WhatsApp da unidade:
+
+📍 ${unidade.nomeCompleto}
+📞 ${unidade.telefone}
+
+O agendamento é feito direto por lá.`;
+}
+
 // ════ DETECÇÃO DE MUDANÇA DE FORMA DE PAGAMENTO ════
 function detectarMudancaFormaPagamento(texto = '') {
   const t = normalizeText(texto);
@@ -2745,6 +2781,23 @@ export default async function handler(req, res) {
         if (payload && typeof payload === 'object' && typeof payload.resposta === 'string') {
           payload.resposta = anexarReforcoPosLink(payload.resposta);
           payload.resposta = anexarUrgenciaOfertaLeve(payload.resposta);
+
+          const respostaNorm = normalizeText(payload.resposta);
+          const temLinkPagamento =
+            payload.resposta.includes('<a href=') ||
+            /https?:\/\//i.test(payload.resposta) ||
+            respostaNorm.includes('finalizar sua compra') ||
+            respostaNorm.includes('voce pode finalizar sua compra aqui');
+
+          if (temLinkPagamento) {
+            const contextoAtual = payload.contexto && typeof payload.contexto === 'object' ? payload.contexto : {};
+            payload.contexto = {
+              ...contextoAtual,
+              linkEnviado: true,
+              aguardandoComprovante: true,
+              aguardando_comprovante: true
+            };
+          }
         }
         if (payload && typeof payload === 'object' && Object.prototype.hasOwnProperty.call(payload, 'contexto')) {
           const contextoResposta = payload.contexto || {};
@@ -2901,6 +2954,81 @@ export default async function handler(req, res) {
 
     if (msg.startsWith('midia0505')) {
       return res.status(200).json({ resposta: 'Correção registrada.' });
+    }
+
+    // Modo pós-link: após enviar link, a Lia entra em suporte (não repete venda/link).
+    if (contexto.linkEnviado) {
+      const cidadePosLink = cidadeDetectada || contexto.cidadeAtual || contexto.cidadeCompra || contexto.cidade || null;
+
+      if (!cidadePosLink) {
+        return res.status(200).json({
+          resposta: 'Perfeito 😊\n\nMe confirma a unidade para eu te passar o WhatsApp correto:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?',
+          contexto: {
+            ...contexto,
+            linkEnviado: true,
+            aguardandoComprovante: true,
+            aguardando_comprovante: true,
+            intencao: 'aguardando_cidade_comprovante'
+          }
+        });
+      }
+
+      if (detectarConfirmacaoPagamento(pergunta)) {
+        const unidade = unidades.find((u) => u.cidade === normalizeText(cidadePosLink));
+        if (unidade) {
+          return res.status(200).json({
+            resposta: `Perfeito 😊\n\nAgora é só enviar o comprovante no WhatsApp da unidade para agendar:\n\n📞 ${unidade.telefone}`,
+            contexto: {
+              ...contexto,
+              cidade: cidadePosLink,
+              cidadeAtual: cidadePosLink,
+              cidadeCompra: cidadePosLink,
+              linkEnviado: true,
+              aguardandoComprovante: true,
+              aguardando_comprovante: true,
+              intencao: 'aguardando_cidade_comprovante',
+              statusPagamento: 'confirmado',
+              status_compra: 'em andamento'
+            }
+          });
+        }
+      }
+
+      if (detectarPerguntaSuportePosLink(pergunta) || detectarPedidoContatoComprovante(pergunta)) {
+        const respostaSuporte = gerarRespostaSuportePosLink(cidadePosLink);
+        if (respostaSuporte) {
+          return res.status(200).json({
+            resposta: respostaSuporte,
+            contexto: {
+              ...contexto,
+              cidade: cidadePosLink,
+              cidadeAtual: cidadePosLink,
+              cidadeCompra: cidadePosLink,
+              linkEnviado: true,
+              aguardandoComprovante: true,
+              aguardando_comprovante: true,
+              intencao: 'aguardando_cidade_comprovante',
+              status_compra: 'em andamento'
+            }
+          });
+        }
+      }
+
+      const respostaPadraoPosLink = gerarRespostaSuportePosLink(cidadePosLink) || 'Perfeito 😊\n\nEnvie o comprovante no WhatsApp da unidade para seguir com o agendamento.';
+      return res.status(200).json({
+        resposta: respostaPadraoPosLink,
+        contexto: {
+          ...contexto,
+          cidade: cidadePosLink,
+          cidadeAtual: cidadePosLink,
+          cidadeCompra: cidadePosLink,
+          linkEnviado: true,
+          aguardandoComprovante: true,
+          aguardando_comprovante: true,
+          intencao: 'aguardando_cidade_comprovante',
+          status_compra: 'em andamento'
+        }
+      });
     }
 
     const cidadeFechamento = extrairCidadeContexto(contexto);
