@@ -66,11 +66,12 @@ body {
 .offer-countdown-bar {
   width: 100%;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 6px;
-  padding: 14px 16px;
+  text-align: center;
+  gap: 4px;
+  padding: 10px 14px;
   margin-bottom: 14px;
   background: linear-gradient(100deg, rgba(7, 11, 20, 0.96) 0%, rgba(10, 16, 32, 0.96) 100%);
   border: 1px solid rgba(24, 199, 209, 0.26);
@@ -80,9 +81,9 @@ body {
 
 .offer-special-title {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: #ffffff;
 }
@@ -94,8 +95,8 @@ body {
 .offer-special-copy {
   margin: 0;
   color: #f5f7fa;
-  font-size: 0.92rem;
-  line-height: 1.45;
+  font-size: 0.9rem;
+  line-height: 1.3;
 }
 
 .offer-special-copy strong {
@@ -106,9 +107,9 @@ body {
 .offer-special-launch {
   margin: 0;
   color: #8fd8ff;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 1.25;
 }
 
 .offer-special-copy-muted {
@@ -116,10 +117,10 @@ body {
 }
 
 .offer-countdown-label {
-  margin-top: 4px;
-  font-size: 0.8rem;
+  margin-top: 2px;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.7px;
   text-transform: uppercase;
   color: #ffffff;
 }
@@ -133,14 +134,14 @@ body {
 }
 
 .offer-special-footnote {
-  margin: 2px 0 0;
+  margin: 1px 0 0;
   color: #dff4ff;
-  font-size: 0.86rem;
+  font-size: 0.84rem;
 }
 
 .offer-countdown-bar .install-app-btn {
-  margin-top: 6px;
-  align-self: flex-start;
+  margin-top: 4px;
+  align-self: center;
 }
 
 .offer-countdown-bar.is-ended .offer-countdown-value {
@@ -148,45 +149,6 @@ body {
   letter-spacing: 0.6px;
 }
 
-.day-highlight {
-  width: 100%;
-  margin-bottom: 14px;
-  padding: 12px 14px;
-  border: 1px solid rgba(24, 199, 209, 0.24);
-  border-radius: 14px;
-  background: linear-gradient(110deg, rgba(7, 11, 20, 0.94) 0%, rgba(10, 16, 32, 0.94) 100%);
-  box-shadow: 0 0 0 1px rgba(30, 95, 175, 0.10), 0 6px 20px rgba(0, 0, 0, 0.24);
-}
-
-.day-highlight-title {
-  margin: 0 0 10px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.day-highlight-card {
-  width: 100%;
-  border: 1px solid rgba(24, 199, 209, 0.34);
-  border-radius: 12px;
-  background: linear-gradient(100deg, rgba(30, 95, 175, 0.20) 0%, rgba(24, 199, 209, 0.12) 100%);
-  padding: 12px 14px;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color var(--t), box-shadow var(--t), transform var(--t), background var(--t);
-}
-
-.day-highlight-card:hover {
-  border-color: rgba(24, 199, 209, 0.56);
-  box-shadow: 0 0 18px rgba(24, 199, 209, 0.12);
-  transform: translateY(-1px);
-}
-
-.day-highlight-card:active {
-  transform: translateY(0);
-}
 
 .day-highlight-card.is-active {
   border-color: rgba(24, 199, 209, 0.72);
