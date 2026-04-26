@@ -9,28 +9,31 @@ if (!offersData) {
 
 const {
   PROCEDURES,
-  DISCOUNT_RATES,
   HIGHLIGHT_BOTOX_PROC_IDX,
   HIGHLIGHT_BONUS_TEXT,
-  calculateProcedureOffer,
   formatBRL,
 } = offersData;
 
 let isBotoxHighlightActive = false;
 
-// Mapeamento de descontos corretos para "Oferta da Semana" por grupo de procedimento
-// Usa os valores exatos da tabela atual, não os índices de DISCOUNT_RATES
-const WEEK_OFFER_DISCOUNT_BY_GROUP = {
-  'ultraformer': 0.30,           // Ultraformer MPT: 30%
-  'lavieen': 0.40,               // Laser Lavieen: 40%
-  'botox': 0.25,                 // Botox: 25%
-  'preenchedor': 0.25,           // Preenchedor: 25%
-  'diamond': 0.30,               // Bioestimulador Diamond: 30%
-  'scizer': 0.40,                // Scizer Gordura Localizada: 40%
-  'endymed': 0.45,               // Endymed Radiofrequência 3DEEP: 45%
-  'microagulhamento': 0.05,      // Microagulhamento Robótico: 5%
-  'luzpulsada': 0.35,            // Luz Intensa Pulsada: 35%
-  'depilacao': 0.45              // Depilação a Laser: 45%
+const WEEK_OFFER_DISCOUNT_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR02Znii4ezb6EZLHcqzi_83oQh0jW7RbVMlAdJtmHEv5DrrsrsE6i-hBUshHk1SMar0snqUcLuGw0i/pub?output=csv';
+const DISCOUNT_CACHE_TTL_MS = 60 * 1000;
+
+let weekOfferDiscountsMap = {};
+let weekOfferDiscountsLastLoadedAt = 0;
+let weekOfferDiscountsLoadPromise = null;
+
+const PROCEDURE_BASE_ALIASES = {
+  'ultraformer mpt': ['ultraformer mpt', 'ultraformer'],
+  'lavieen': ['lavieen', 'laser lavieen'],
+  'botox': ['botox', 'botox facial'],
+  'preenchedor': ['preenchedor', 'preenchedor facial'],
+  'bioestimulador': ['bioestimulador', 'bioestimulador diamond', 'diamond'],
+  'scizer': ['scizer', 'scizer corporal por regiao', 'scizer gordura localizada'],
+  'endymed': ['endymed', 'endymed radiofrequencia 3deep'],
+  'microagulhamento': ['microagulhamento', 'microagulhamento robotico'],
+  'luz pulsada': ['luz pulsada', 'hollywood peel', 'despigmentacao a laser', 'laser fracionado'],
+  'depilacao a laser': ['depilacao a laser', 'depilacao']
 };
 
 const SUGGESTION_MAP = {
@@ -59,6 +62,217 @@ const ULTRAFORMER_UPSELL_MESSAGES = {
  */
 function fmt(value) {
   return formatBRL(value);
+}
+
+function normalizeDiscountKey(value) {
+  return String(value || '')
+    .replace(/^\uFEFF/, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function parseCsvLine(line) {
+  const values = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      values.push(current);
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  values.push(current);
+  return values;
+}
+
+function parseDiscountPercent(value) {
+  const cleaned = String(value || '')
+    .replace('%', '')
+    .replace(',', '.')
+    .trim();
+
+  if (!cleaned) return null;
+
+  const parsed = parseFloat(cleaned);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+
+  return parsed;
+}
+
+function csvToDiscountMap(csvText) {
+  const lines = String(csvText || '')
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== '');
+
+  if (!lines.length) {
+    throw new Error('CSV de descontos vazio.');
+  }
+
+  const headers = parseCsvLine(lines[0]);
+  const idxProcedimento = headers.findIndex((h) => normalizeDiscountKey(h) === 'procedimento');
+  const idxOfertaSemana = headers.findIndex((h) => normalizeDiscountKey(h) === 'oferta da semana');
+
+  if (idxProcedimento < 0 || idxOfertaSemana < 0) {
+    throw new Error('CSV deve conter as colunas: Procedimento, Oferta da Semana.');
+  }
+
+  const discountMap = {};
+
+  for (let i = 1; i < lines.length; i += 1) {
+    const row = parseCsvLine(lines[i]);
+    const procedimento = (row[idxProcedimento] || '').trim();
+    const desconto = parseDiscountPercent(row[idxOfertaSemana]);
+
+    if (!procedimento || desconto === null) {
+      continue;
+    }
+
+    discountMap[normalizeDiscountKey(procedimento)] = desconto;
+  }
+
+  return discountMap;
+}
+
+function getProcedureBaseName(procedureName = '') {
+  const name = String(procedureName || '').trim();
+  const normalized = normalizeDiscountKey(name);
+
+  if (!normalized) return '';
+  if (normalized.startsWith('ultraformer mpt')) return 'Ultraformer MPT';
+  if (normalized.startsWith('lavieen')) return 'Lavieen';
+  if (normalized.startsWith('botox')) return 'Botox';
+  if (normalized.startsWith('preenchedor')) return 'Preenchedor';
+  if (normalized.startsWith('bioestimulador') || normalized.includes('diamond')) return 'Bioestimulador';
+  if (normalized.startsWith('scizer')) return 'Scizer';
+  if (normalized.startsWith('endymed')) return 'Endymed';
+  if (normalized.startsWith('microagulhamento')) return 'Microagulhamento';
+  if (normalized.startsWith('depilacao')) return 'Depilação a Laser';
+  if (normalized.startsWith('luz pulsada') || normalized.startsWith('laser fracionado') || normalized.startsWith('hollywood peel') || normalized.startsWith('despigmentacao a laser')) return 'Luz Pulsada';
+
+  return name;
+}
+
+function expandDiscountCandidates(name = '') {
+  const normalized = normalizeDiscountKey(name);
+  if (!normalized) return [];
+
+  const aliasEntries = Object.entries(PROCEDURE_BASE_ALIASES);
+  for (let i = 0; i < aliasEntries.length; i += 1) {
+    const [baseKey, aliases] = aliasEntries[i];
+    if (baseKey === normalized || aliases.includes(normalized)) {
+      return aliases;
+    }
+  }
+
+  return [normalized];
+}
+
+async function ensureWeekOfferDiscounts(forceRefresh = false) {
+  const hasDiscounts = Object.keys(weekOfferDiscountsMap).length > 0;
+  const shouldUseCache =
+    !forceRefresh &&
+    hasDiscounts &&
+    (Date.now() - weekOfferDiscountsLastLoadedAt) < DISCOUNT_CACHE_TTL_MS;
+
+  if (shouldUseCache) {
+    return weekOfferDiscountsMap;
+  }
+
+  if (weekOfferDiscountsLoadPromise) {
+    return weekOfferDiscountsLoadPromise;
+  }
+
+  weekOfferDiscountsLoadPromise = fetch(WEEK_OFFER_DISCOUNT_CSV_URL, { cache: 'no-store' })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Falha ao baixar CSV de descontos (HTTP ${response.status}).`);
+      }
+      return response.text();
+    })
+    .then((csvText) => {
+      const parsedMap = csvToDiscountMap(csvText);
+      weekOfferDiscountsMap = parsedMap;
+      weekOfferDiscountsLastLoadedAt = Date.now();
+      console.log('Descontos carregados da planilha:', Object.keys(weekOfferDiscountsMap).length);
+      return weekOfferDiscountsMap;
+    })
+    .catch((error) => {
+      console.error('Erro ao carregar descontos da planilha:', error);
+      return weekOfferDiscountsMap;
+    })
+    .finally(() => {
+      weekOfferDiscountsLoadPromise = null;
+    });
+
+  return weekOfferDiscountsLoadPromise;
+}
+
+function getDiscountPercentByProcedure(procedureName = '') {
+  const baseName = getProcedureBaseName(procedureName);
+  const normalizedBase = normalizeDiscountKey(baseName);
+  const normalizedProcedure = normalizeDiscountKey(procedureName);
+
+  // Prioridade: nome base oficial da planilha (ex.: Ultraformer MPT), depois nome completo.
+  const directCandidates = [normalizedBase, normalizedProcedure].filter(Boolean);
+
+  for (let i = 0; i < directCandidates.length; i += 1) {
+    const key = directCandidates[i];
+    if (Object.prototype.hasOwnProperty.call(weekOfferDiscountsMap, key)) {
+      return {
+        discountPct: weekOfferDiscountsMap[key],
+        found: true,
+        matchedKey: key,
+        baseName
+      };
+    }
+  }
+
+  const candidates = [baseName, procedureName];
+
+  for (let i = 0; i < candidates.length; i += 1) {
+    const candidate = candidates[i];
+    const expanded = expandDiscountCandidates(candidate);
+
+    for (let j = 0; j < expanded.length; j += 1) {
+      const key = expanded[j];
+      if (Object.prototype.hasOwnProperty.call(weekOfferDiscountsMap, key)) {
+        const discountPct = weekOfferDiscountsMap[key];
+        return {
+          discountPct,
+          found: true,
+          matchedKey: key,
+          baseName
+        };
+      }
+    }
+  }
+
+  return {
+    discountPct: 0,
+    found: false,
+    matchedKey: null,
+    baseName
+  };
 }
 
 /* ── CONTAGEM REGRESSIVA DA OFERTA ── */
@@ -135,6 +349,9 @@ function initOfferCountdown() {
 }
 
 document.addEventListener('DOMContentLoaded', initOfferCountdown);
+document.addEventListener('DOMContentLoaded', () => {
+  ensureWeekOfferDiscounts();
+});
 
 function renderBotoxHighlightState() {
   const highlightBtn = document.getElementById('botoxHighlightBtn');
@@ -255,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ── GERAÇÃO DA OFERTA ── */
 
-function generateOffer() {
+async function generateOffer() {
   const procIdx = document.getElementById('procedimento').value;
 
   /* Validação */
@@ -271,9 +488,16 @@ function generateOffer() {
     return;
   }
 
-  // Busca o desconto correto por grupo de procedimento (tabela atual)
-  const discountRate = WEEK_OFFER_DISCOUNT_BY_GROUP[procedure.group] || 0.25;
-  const discountPct = Math.round(discountRate * 100);
+  await ensureWeekOfferDiscounts(true);
+  const discountInfo = getDiscountPercentByProcedure(procedure.name);
+  const discountPct = discountInfo.discountPct;
+  const discountRate = discountPct / 100;
+
+  console.log('Desconto aplicado:', procedure.name, discountPct);
+
+  if (!discountInfo.found) {
+    console.warn(`Desconto não encontrado na planilha para procedimento "${procedure.name}" (base: "${discountInfo.baseName}"). Aplicando fallback 0%.`);
+  }
 
   // Calcula valores com desconto
   const originalPix = procedure.pix;
@@ -304,7 +528,9 @@ function generateOffer() {
 
   /* Exibição */
   document.getElementById('offerText').textContent   = offerText;
-  document.getElementById('discountBadge').textContent = `Desconto aplicado: ${discountPct}%`;
+  document.getElementById('discountBadge').textContent = discountInfo.found
+    ? `Desconto aplicado: ${discountPct}%`
+    : 'Desconto aplicado: 0% (não encontrado na planilha)';
 
   const resultSection = document.getElementById('resultSection');
   resultSection.style.display = 'flex';
@@ -335,7 +561,7 @@ function renderSuggestion() {
   suggestionContainer.style.display = 'block';
 }
 
-function addSecondProcedure() {
+async function addSecondProcedure() {
   if (!currentMainProcIdx || secondProcedureAdded) {
     return;
   }
@@ -348,9 +574,23 @@ function addSecondProcedure() {
   const mainProc = PROCEDURES[parseInt(currentMainProcIdx, 10)];
   const secondProc = PROCEDURES[suggestion.idx];
 
-  // Aplica desconto correto para cada procedimento baseado no grupo
-  const mainDiscountRate = WEEK_OFFER_DISCOUNT_BY_GROUP[mainProc.group] || 0.25;
-  const secondDiscountRate = WEEK_OFFER_DISCOUNT_BY_GROUP[secondProc.group] || 0.25;
+  await ensureWeekOfferDiscounts(true);
+
+  const mainDiscountInfo = getDiscountPercentByProcedure(mainProc.name);
+  const secondDiscountInfo = getDiscountPercentByProcedure(secondProc.name);
+  const mainDiscountRate = mainDiscountInfo.discountPct / 100;
+  const secondDiscountRate = secondDiscountInfo.discountPct / 100;
+
+  console.log('Desconto aplicado:', mainProc.name, mainDiscountInfo.discountPct);
+  console.log('Desconto aplicado:', secondProc.name, secondDiscountInfo.discountPct);
+
+  if (!mainDiscountInfo.found) {
+    console.warn(`Desconto não encontrado na planilha para "${mainProc.name}". Aplicando fallback 0%.`);
+  }
+
+  if (!secondDiscountInfo.found) {
+    console.warn(`Desconto não encontrado na planilha para "${secondProc.name}". Aplicando fallback 0%.`);
+  }
 
   const mainOriginalCard = mainProc.pix / 10;
   const secondOriginalCard = secondProc.pix / 10;
