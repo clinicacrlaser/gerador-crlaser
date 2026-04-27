@@ -468,7 +468,9 @@ function normalizeUnidadeKey(unidade = '') {
 
 function normalizeLinkValue(value) {
   const cleaned = String(value ?? '').trim();
-  if (!cleaned || cleaned === '-' || cleaned.toLowerCase() === 'null') {
+  const lowered = cleaned.toLowerCase();
+
+  if (!cleaned || cleaned === '-' || lowered === 'null' || lowered === 'undefined') {
     return null;
   }
   return cleaned;
