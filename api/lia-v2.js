@@ -184,6 +184,14 @@ const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília,
 const RESPOSTA_CONFIRMAR_CIDADE_OFERTA = 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 
 const RESPOSTA_FORMA_PAGAMENTO = 'Você prefere:\n1️⃣ Pix\n2️⃣ Cartão?';
+const RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE = 'Esse procedimento não está disponível nessa unidade';
+
+const PAYMENT_LINKS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQlCShO44WEMJ1D_3hMS7VGbQoxCeZT2EP3HfPaBMEWGmVAziZauarBkfsAdLPZ8NW7qe8FFaPfoX2E/pub?output=csv';
+const PAYMENT_LINKS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+let paymentLinksRows = [];
+let paymentLinksLoadedAt = 0;
+let paymentLinksLoadPromise = null;
 
 // ════ CHAVES DE PIX REAIS - CR LASER® ════
 const PIX_BRASILIA = 'Pix CR Laser® Brasília:\n\n🔽🔽\n\n43.713.316/0001-33';
@@ -421,6 +429,289 @@ function normalizeText(texto = '') {
     .replace(/[^\w\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function parseCsvLine(line = '') {
+  const values = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i += 1) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      values.push(current);
+      current = '';
+      continue;
+    }
+
+    current += char;
+  }
+
+  values.push(current);
+  return values;
+}
+
+function normalizeUnidadeKey(unidade = '') {
+  return normalizeText(unidade).replace(/\s+/g, '');
+}
+
+function normalizeLinkValue(value) {
+  const cleaned = String(value ?? '').trim();
+  if (!cleaned || cleaned === '-' || cleaned.toLowerCase() === 'null') {
+    return null;
+  }
+  return cleaned;
+}
+
+function normalizeRegiaoForMatch(value = '') {
+  const cleaned = String(value || '')
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\(\s*\d+\s*sess(?:ao|oes)?\s*\)/gi, ' ')
+    .replace(/[—-]\s*\d+\s*sess(?:ao|oes)?/gi, ' ')
+    .replace(/^\s*[—-]\s*/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return normalizeText(cleaned);
+}
+
+function findCsvHeaderIndex(headers, candidates = []) {
+  for (let i = 0; i < headers.length; i += 1) {
+    const headerNorm = normalizeText(headers[i]);
+    if (candidates.some((candidate) => headerNorm === candidate || headerNorm.includes(candidate))) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function csvToPaymentLinksRows(csvText = '') {
+  const lines = String(csvText || '')
+    .split(/\r?\n/)
+    .filter((line) => line.trim() !== '');
+
+  if (!lines.length) {
+    throw new Error('CSV de links vazio.');
+  }
+
+  const headers = parseCsvLine(lines[0]);
+  const idxBase = findCsvHeaderIndex(headers, ['procedimento base', 'base']);
+  const idxRegiao = findCsvHeaderIndex(headers, ['regiao', 'regiao procedimento']);
+  const idxBrasilia = findCsvHeaderIndex(headers, ['brasilia']);
+  const idxCampinas = findCsvHeaderIndex(headers, ['campinas']);
+  const idxGoiania = findCsvHeaderIndex(headers, ['goiania']);
+  const idxPalmas = findCsvHeaderIndex(headers, ['palmas']);
+  const idxSaoPaulo = findCsvHeaderIndex(headers, ['sao paulo', 'saopaulo']);
+
+  if ([idxBase, idxRegiao, idxBrasilia, idxCampinas, idxGoiania, idxPalmas, idxSaoPaulo].some((idx) => idx < 0)) {
+    throw new Error('CSV deve conter as colunas: Procedimento Base, Região, Brasília, Campinas, Goiânia, Palmas e São Paulo.');
+  }
+
+  const rows = [];
+
+  for (let i = 1; i < lines.length; i += 1) {
+    const row = parseCsvLine(lines[i]);
+    const base = String(row[idxBase] || '').trim();
+    const regiao = String(row[idxRegiao] || '').trim();
+
+    if (!base && !regiao) {
+      continue;
+    }
+
+    rows.push({
+      base,
+      regiao,
+      brasilia: normalizeLinkValue(row[idxBrasilia]),
+      campinas: normalizeLinkValue(row[idxCampinas]),
+      goiania: normalizeLinkValue(row[idxGoiania]),
+      palmas: normalizeLinkValue(row[idxPalmas]),
+      saopaulo: normalizeLinkValue(row[idxSaoPaulo])
+    });
+  }
+
+  return rows;
+}
+
+async function ensurePaymentLinksRowsLoaded(forceRefresh = false) {
+  const hasRows = paymentLinksRows.length > 0;
+  const shouldUseCache = !forceRefresh && hasRows && (Date.now() - paymentLinksLoadedAt) < PAYMENT_LINKS_CACHE_TTL_MS;
+
+  if (shouldUseCache) {
+    return paymentLinksRows;
+  }
+
+  if (paymentLinksLoadPromise) {
+    return paymentLinksLoadPromise;
+  }
+
+  paymentLinksLoadPromise = fetch(PAYMENT_LINKS_CSV_URL, { cache: 'no-store' })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Falha ao baixar CSV de links (HTTP ${response.status}).`);
+      }
+      return response.text();
+    })
+    .then((csvText) => {
+      paymentLinksRows = csvToPaymentLinksRows(csvText);
+      paymentLinksLoadedAt = Date.now();
+      console.log('Links por unidade carregados:', paymentLinksRows.length);
+      return paymentLinksRows;
+    })
+    .catch((error) => {
+      console.error('Erro ao carregar links por unidade:', error);
+      return paymentLinksRows;
+    })
+    .finally(() => {
+      paymentLinksLoadPromise = null;
+    });
+
+  return paymentLinksLoadPromise;
+}
+
+function separarBaseRegiao(procedimentoSelecionado = '') {
+  const procedimento = String(procedimentoSelecionado || '').trim().replace(/\s+/g, ' ');
+  if (!procedimento) {
+    return { base: '', regiao: '' };
+  }
+
+  const alias = PROCEDURE_LINK_KEYS[procedimento] || procedimento;
+  const bases = [...new Set(paymentLinksRows.map((row) => String(row.base || '').trim()).filter(Boolean))]
+    .sort((a, b) => b.length - a.length);
+
+  const aliasNorm = normalizeText(alias);
+  const aliasTokens = aliasNorm.split(' ').filter(Boolean);
+  const aliasOriginalTokens = alias.split(/\s+/).filter(Boolean);
+
+  for (let i = 0; i < bases.length; i += 1) {
+    const base = bases[i];
+    const baseNorm = normalizeText(base);
+    const baseTokens = baseNorm.split(' ').filter(Boolean);
+
+    if (aliasNorm === baseNorm) {
+      return { base, regiao: '' };
+    }
+
+    if (aliasTokens.length >= baseTokens.length && baseTokens.every((token, idx) => aliasTokens[idx] === token)) {
+      const regiao = aliasOriginalTokens.slice(baseTokens.length).join(' ').trim();
+      return { base, regiao };
+    }
+  }
+
+  const splitDash = alias.split(/\s+[—-]\s+/);
+  if (splitDash.length > 1) {
+    return {
+      base: splitDash[0].trim(),
+      regiao: splitDash.slice(1).join(' - ').trim()
+    };
+  }
+
+  return { base: alias, regiao: '' };
+}
+
+function escolherMelhorLinhaPorTokens(baseRows = [], procedimentoSelecionado = '') {
+  const procTokens = normalizeText(procedimentoSelecionado).split(' ').filter(Boolean);
+  if (!procTokens.length) {
+    return null;
+  }
+
+  let bestRow = null;
+  let bestScore = -1;
+
+  for (let i = 0; i < baseRows.length; i += 1) {
+    const row = baseRows[i];
+    const regiaoTokens = normalizeRegiaoForMatch(row.regiao).split(' ').filter(Boolean);
+    const regiaoMatches = regiaoTokens.filter((token) => procTokens.includes(token)).length;
+
+    if (regiaoTokens.length > 0 && regiaoMatches === 0) {
+      continue;
+    }
+
+    const rowTokens = normalizeText(`${row.base} ${row.regiao}`).split(' ').filter(Boolean);
+    const score = rowTokens.filter((token) => procTokens.includes(token)).length + (regiaoMatches * 2);
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestRow = row;
+    }
+  }
+
+  return bestRow;
+}
+
+function lookupLink(procedimentoSelecionado = '', unidade = '') {
+  const unidadeKey = normalizeUnidadeKey(unidade);
+  const { base, regiao } = separarBaseRegiao(procedimentoSelecionado);
+
+  if (!base || !unidadeKey) {
+    console.log('Link não encontrado:', base, regiao, unidade);
+    return { link: null, status: 'not-found', base, regiao };
+  }
+
+  const baseNorm = normalizeText(base);
+  const regiaoNorm = normalizeRegiaoForMatch(regiao);
+  const baseRows = paymentLinksRows.filter((row) => normalizeText(row.base) === baseNorm);
+
+  if (!baseRows.length) {
+    console.log('Link não encontrado:', base, regiao, unidade);
+    return { link: null, status: 'not-found', base, regiao };
+  }
+
+  let row = null;
+
+  if (regiaoNorm) {
+    row = baseRows.find((item) => normalizeRegiaoForMatch(item.regiao) === regiaoNorm) || null;
+
+    if (!row) {
+      row = baseRows.find((item) => {
+        const current = normalizeRegiaoForMatch(item.regiao);
+        return current && (current.includes(regiaoNorm) || regiaoNorm.includes(current));
+      }) || null;
+    }
+  }
+
+  if (!row) {
+    row = escolherMelhorLinhaPorTokens(baseRows, PROCEDURE_LINK_KEYS[procedimentoSelecionado] || procedimentoSelecionado);
+  }
+
+  if (!row && baseRows.length === 1) {
+    row = baseRows[0];
+  }
+
+  if (!row) {
+    console.log('Link não encontrado:', base, regiao, unidade);
+    return { link: null, status: 'not-found', base, regiao };
+  }
+
+  const link = row[unidadeKey];
+  if (!link) {
+    console.log('Link não encontrado:', base, regiao, unidade);
+    return { link: null, status: 'unavailable', base, regiao };
+  }
+
+  return { link, status: 'ok', base, regiao };
+}
+
+function getLink(procedimentoSelecionado, unidade) {
+  return lookupLink(procedimentoSelecionado, unidade).link;
+}
+
+function montarRespostaPagamentoCartao(linkResp = '') {
+  if (normalizeText(linkResp) === normalizeText(RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE)) {
+    return RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE;
+  }
+
+  return `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
 }
 
 function expandirAbreviacoes(texto = '') {
@@ -1737,7 +2028,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     if (procEsp) {
       const linkResp = gerarRespostaOfertaCampanha(procEsp, cidadeAtual, 'texto');
       if (linkResp) {
-        const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+        const r = montarRespostaPagamentoCartao(linkResp);
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, formaPagamento: 'cartao', pagamento: 'cartao', aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -1749,7 +2040,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     if (cidadeAtual && procFinalAtual && pagamentoAtual) {
       const linkResp = gerarRespostaOfertaCampanha(procFinalAtual, cidadeAtual, 'texto');
       if (linkResp) {
-        const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+        const r = montarRespostaPagamentoCartao(linkResp);
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -1778,7 +2069,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     const procResolvido = resolverProcedimentoPorBase(normalizarProcedimentoBase(procFinalAtual), procFinalAtual) || procFinalAtual;
     const linkResp = gerarRespostaOfertaCampanha(procFinalAtual, cidadeAtual, 'texto') || gerarRespostaOfertaCampanha(procResolvido, cidadeAtual, 'texto');
     if (linkResp) {
-      const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+      const r = montarRespostaPagamentoCartao(linkResp);
       return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
     }
   }
@@ -1887,7 +2178,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
       if (formaSalva === 'cartao' && procFinalAtual && !['Botox', 'Ultraformer MPT', 'Lavieen'].includes(procFinalAtual)) {
         const linkResp = gerarRespostaOfertaCampanha(procFinalAtual, cidadeAtual, 'texto');
         if (linkResp) {
-          const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+          const r = montarRespostaPagamentoCartao(linkResp);
           return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
         }
       }
@@ -1919,7 +2210,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
       if (procEspCartao) {
         const linkResp = gerarRespostaOfertaCampanha(procEspCartao, cidadeCompra, 'texto');
         if (linkResp) {
-          const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+          const r = montarRespostaPagamentoCartao(linkResp);
           return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra, formaPagamento: 'cartao', pagamento: 'cartao', aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
         }
       }
@@ -1956,7 +2247,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
         }
       }
       if (linkResp) {
-        const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+        const r = montarRespostaPagamentoCartao(linkResp);
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra, procedimentoFinal: procResolvido, procedimento: procResolvido, procedimentoAtual: procResolvido, procedimento_selecionado: procResolvido, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -2051,7 +2342,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     if (cidadeAtual && procFinalAtual && pagamentoAtual) {
       const linkResp = gerarRespostaOfertaCampanha(procFinalAtual, cidadeAtual, 'texto');
       if (linkResp) {
-        const r = `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+        const r = montarRespostaPagamentoCartao(linkResp);
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -2466,30 +2757,14 @@ function gerarRespostaCartao(cidade = '') {
 
 
 function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = 'html') {
-  const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
-  
-  // Validar cidade e escolher mapeamento correto
-  let linksMap = null;
-  if (cidadeNorm === 'brasilia') {
-    linksMap = LINKS_CAMPANHA_SEXTOUU_BRASILIA;
-  } else if (cidadeNorm === 'campinas') {
-    linksMap = LINKS_CAMPANHA_SEXTOUU_CAMPINAS;
-  } else if (cidadeNorm === 'goiania') {
-    linksMap = LINKS_CAMPANHA_SEXTOUU_GOIANIA;
-  } else if (cidadeNorm === 'palmas') {
-    linksMap = LINKS_CAMPANHA_SEXTOUU_PALMAS;
-  } else if (cidadeNorm === 'saopaulo') {
-    linksMap = LINKS_CAMPANHA_SEXTOUU_SAOPAULO;
-  } else {
-    return null;
-  }
-
-  const procedimentoLinkKey = PROCEDURE_LINK_KEYS[procedimento] || procedimento;
-
-  // Buscar o link pelo nome do procedimento
-  const link = linksMap[procedimentoLinkKey];
+  const cidadeNorm = normalizeUnidadeKey(cidade);
+  const lookup = lookupLink(procedimento, cidadeNorm);
+  const link = lookup.link;
 
   if (!link) {
+    if (lookup.status === 'unavailable') {
+      return RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE;
+    }
     return null;
   }
 
@@ -3353,6 +3628,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    await ensurePaymentLinksRowsLoaded();
+
     let pergunta = (req.body?.pergunta || '').toString();
     pergunta = expandirAbreviacoes(pergunta);
     const msg = normalizeText(pergunta);
@@ -3567,7 +3844,7 @@ export default async function handler(req, res) {
 
       if (respostaLinkFechamento) {
         return res.status(200).json({
-          resposta: `${respostaLinkFechamento}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+          resposta: montarRespostaPagamentoCartao(respostaLinkFechamento),
           contexto: {
             ...contexto,
             cidade: cidadeFechamento,
@@ -3877,7 +4154,7 @@ export default async function handler(req, res) {
         const respostaOferta = gerarRespostaOfertaCampanha(procedimentoCompra, cidadeCompra, 'texto');
         if (respostaOferta) {
           return res.status(200).json({
-            resposta: `${respostaOferta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+            resposta: montarRespostaPagamentoCartao(respostaOferta),
             contexto: {
               ...contexto,
               cidade: cidadeCompra,
@@ -4056,7 +4333,7 @@ export default async function handler(req, res) {
           const respostaOfertaSalva = gerarRespostaOfertaCampanha(procedimentoSalvo, cidadeAtual, 'texto');
           if (respostaOfertaSalva) {
             return res.status(200).json({
-              resposta: `${respostaOfertaSalva}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+              resposta: montarRespostaPagamentoCartao(respostaOfertaSalva),
               contexto: {
                 ...contexto,
                 intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4174,7 +4451,7 @@ export default async function handler(req, res) {
           const respostaOfertaDireta = gerarRespostaOfertaCampanha(procedimentoDoContextoDireto, cidadeCompra, 'texto');
           if (respostaOfertaDireta) {
             return res.status(200).json({
-              resposta: `${respostaOfertaDireta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+              resposta: montarRespostaPagamentoCartao(respostaOfertaDireta),
               contexto: {
                 ...contexto,
                 intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4336,7 +4613,7 @@ export default async function handler(req, res) {
         const respostaOfertaDireta = gerarRespostaOfertaCampanha(procedimentoDoContextoDireto, cidadeCompra, 'texto');
         if (respostaOfertaDireta) {
           return res.status(200).json({
-            resposta: `${respostaOfertaDireta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+            resposta: montarRespostaPagamentoCartao(respostaOfertaDireta),
             contexto: {
               ...contexto,
               intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4428,7 +4705,7 @@ export default async function handler(req, res) {
       const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra, 'texto');
       if (respostaOferta) {
         return res.status(200).json({
-          resposta: `${respostaOferta}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`,
+          resposta: montarRespostaPagamentoCartao(respostaOferta),
           contexto: {
             ...contexto,
             intencao: 'fluxo_pagamento_aguardando_confirmacao',
