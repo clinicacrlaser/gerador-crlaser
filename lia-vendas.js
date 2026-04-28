@@ -245,6 +245,31 @@ function analisarTextoProcedimento(texto) {
     return true;
   }
 
+  if (
+    textoNorm.includes("bioestimulador") ||
+    textoNorm.includes("diamond")
+  ) {
+    estado.procedimentoBase = "Bioestimulador Diamond";
+    estado.regiao = "Bioestimulador Diamond";
+    estado.etapa = "unidade";
+    perguntarUnidade();
+    return true;
+  }
+
+  if (
+    textoNorm.includes("preenchimento") ||
+    textoNorm.includes("preenchedor") ||
+    textoNorm.includes("acido hialuronico") ||
+    textoNorm.includes("acido hialuronico") ||
+    textoNorm.includes("hialuronico")
+  ) {
+    estado.procedimentoBase = "Preenchedor";
+    estado.regiao = "Uma Ampola";
+    estado.etapa = "unidade";
+    perguntarUnidade();
+    return true;
+  }
+
   return false;
 }
 
@@ -301,7 +326,7 @@ async function responderLia(texto) {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
 
-    if (textoNorm.includes("ultraformer") || textoNorm.includes("mpt")) {
+    if (textoNorm.includes("ultraformer") || textoNorm.includes("mpt") || textoNorm === "ultra") {
       if (
         textoNorm.includes("full face") ||
         textoNorm.includes("rosto") ||
