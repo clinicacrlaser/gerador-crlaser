@@ -223,6 +223,19 @@ function identificarUnidadePorTexto(texto) {
   return null;
 }
 
+function ehMensagemAgradecimento(texto) {
+  const chave = normalizar(texto).replace(/[.,!?;:]/g, "").trim();
+  const agradecimentos = new Set([
+    "obrigado",
+    "obrigada",
+    "valeu",
+    "obg",
+    "agradeco"
+  ]);
+
+  return agradecimentos.has(chave);
+}
+
 let estado = {
   etapa: "inicio",
   procedimentoDigitado: null,
@@ -395,6 +408,14 @@ function adicionarMensagemNoChat(texto, tipo) {
 
 async function responderLia(texto) {
   const chave = normalizar(texto);
+
+  if (ehMensagemAgradecimento(texto)) {
+    aguardandoContinuidade = false;
+    aguardandoUnidadeHumano = false;
+    resetarEstado();
+    adicionarMensagemNoChat("De nada 😊\n\nFico à disposição se precisar de algo.", "lia");
+    return;
+  }
 
   if (aguardandoUnidadeHumano) {
     const unidade = identificarUnidadePorTexto(texto);
