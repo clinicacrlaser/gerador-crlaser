@@ -46,12 +46,15 @@ const PROCEDURES = [
   { name: 'Lavieen Pescoço + Colo - 3 sessões', group: 'lavieen' },
   { name: 'Lavieen Capilar - 3 sessões', group: 'lavieen' },
   { name: 'Lavieen Mãos - 3 sessões', group: 'lavieen' }
+  ,{ name: 'Hollywood Peel', group: 'hollywood' }
 ];
 
 const PROCEDURE_ALIASES = {
   'Botox Facial': [
     'botox',
     'botox facial',
+    'aplicacao de botox',
+    'aplicação de botox',
     'botox terco superior',
     'botox facial terco superior',
     'aplicacao facial',
@@ -136,11 +139,17 @@ const PROCEDURE_ALIASES = {
     'bioestulador',
     'sculptra',
     'scultra'
+  ],
+  'Hollywood Peel': [
+    'hollywood peel',
+    'hollywood',
+    'peeling hollywood'
   ]
 };
 
 const PROCEDURE_LINK_KEYS = {
-  'Botox Facial': 'Botox Facial Terço Superior Com Retorno'
+  'Botox Facial': 'Botox Facial Terço Superior Com Retorno',
+  'Botox Facial Terço Superior Com Retorno': 'Botox Facial'
 };
 
 const RESPOSTA_BOTOX_DESAMBIGUACAO = 'Você quer Botox facial ou Botox para suor axilar? 😊';
@@ -158,14 +167,14 @@ const RESPOSTA_DIRECIONAR_LINK_ERRADO = 'Para evitar te passar o link errado �
 const RESPOSTA_PRECO = 'Os valores variam conforme a campanha do dia 😊\n\n👉 O ideal é você gerar direto no sistema para ver a condição atual';
 const RESPOSTA_PRECO_SEM_CIDADE = 'Claro 😊\n\nOs valores variam conforme a campanha ativa.\n\nPara te passar a condição correta, me fala qual unidade fica melhor pra você:\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_PRECO_SISTEMA = 'Você quer:\n1️⃣ Ver a oferta agora\n2️⃣ Tirar uma dúvida?';
-const RESPOSTA_CONTINUIDADE_PRECO_SISTEMA = 'Perfeito 😊\n\nQualquer dúvida na hora de gerar a oferta, me chama por aqui.';
+const RESPOSTA_CONTINUIDADE_PRECO_SISTEMA = 'Perfeito 😊\n\nQualquer dúvida, me chama por aqui.';
 const RESPOSTA_CIDADE = 'Temos unidades em várias cidades 😊\n\nBrasília, Campinas, Goiânia, Palmas e São Paulo.\n\nQual fica melhor pra você que já te passo o endereço certinho?';
 const RESPOSTA_HORARIO = 'Funcionamos de segunda a sexta das 08:30 às 12:00 e das 14:00 às 18:30, e sábado das 08:00 às 12:00 😊';
 const RESPOSTA_AGENDAMENTO_SEM_CIDADE = 'Perfeito 😊\n\nMe fala sua cidade que te envio o contato direto da unidade mais próxima.';
 const RESPOSTA_FECHAMENTO_LEVE = 'Se quiser, posso te passar a melhor condição da semana 😊';
 const RESPOSTA_OFERTA_SEMANA_SEM_CIDADE = 'Claro 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const CONTEXTO_ULTRAFORMER_PALPEBRAS = 'ultraformer_palpebras';
-const RESPOSTA_REFORCO_POS_LINK = 'Se quiser, me avisa aqui que eu te acompanho no agendamento 😊';
+const RESPOSTA_REFORCO_POS_LINK = '';
 const RESPOSTA_ESCOLHA_DIRETA_PADRAO = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
 const RESPOSTA_ESCOLHA_DIRETA_ULTRAFORMER = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
 const RESPOSTA_ESCOLHA_DIRETA_BOTOX = 'Você quer:\n1️⃣ Ver a oferta\n2️⃣ Tirar uma dúvida?';
@@ -178,28 +187,30 @@ const RESPOSTA_URGENCIA_DEMORA = 'Se quiser, posso já deixar sua oferta pronta 
 const RESPOSTA_DIRECIONAR_EQUIPE_PREVENTIVO = 'Para evitar te passar informação errada, vou te direcionar para a equipe da unidade 😊';
 
 // ════ FLUXO DE VENDA - OFERTAS E PAGAMENTO ════
-const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nPara seguir com a oferta, como você prefere?\n1️⃣ Comprar aqui\n2️⃣ Falar com a equipe';
+const RESPOSTA_OPCOES_COMPRA = 'Perfeito 😊\n\nVocê prefere:\n1️⃣ Pix\n2️⃣ Cartão?';
 
 const RESPOSTA_QUAL_UNIDADE = 'Qual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 const RESPOSTA_QUAL_UNIDADE_NUMERADA = 'Perfeito 😊\n\nQual unidade fica melhor pra você:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo';
 const RESPOSTA_CONFIRMAR_CIDADE_OFERTA = 'Perfeito 😊\n\nQual unidade fica melhor pra você?\n\nBrasília, Campinas, Goiânia, Palmas ou São Paulo?';
 
-const RESPOSTA_FORMA_PAGAMENTO = 'Você prefere:\n1️⃣ Pix\n2️⃣ Cartão?';
-const RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE = 'Esse procedimento não está disponível nessa unidade';
+const RESPOSTA_FORMA_PAGAMENTO = 'Você prefere pagar no:\n1️⃣ Pix\n2️⃣ Cartão';
+const RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE = 'Esse procedimento não está disponível para essa unidade nessa campanha. Posso te mostrar outra opção?';
+const RESPOSTA_CONDICAO_SEM_SEGURANCA = 'Não consegui localizar essa condição com segurança. Vou te direcionar para o WhatsApp da unidade para confirmar.';
 
-const PAYMENT_LINKS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQlCShO44WEMJ1D_3hMS7VGbQoxCeZT2EP3HfPaBMEWGmVAziZauarBkfsAdLPZ8NW7qe8FFaPfoX2E/pub?output=csv';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQlCShO44WEMJ1D_3hMS7VGbQoxCeZT2EP3HfPaBMEWGmVAziZauarBkfsAdLPZ8NW7qe8FFaPfoX2E/pub?output=csv';
 const PAYMENT_LINKS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 let paymentLinksRows = [];
 let paymentLinksLoadedAt = 0;
 let paymentLinksLoadPromise = null;
 
-// ════ CHAVES DE PIX REAIS - CR LASER® ════
-const PIX_BRASILIA = 'Pix CR Laser® Brasília:\n\n🔽🔽\n\n43.713.316/0001-33';
-const PIX_CAMPINAS = 'Pix CR Laser® Campinas:\n\nObs.: O Pix é o CNPJ\n\n🔽🔽\n\n60.970.806/0001-34';
-const PIX_GOIANIA = 'PIX CR Laser® Goiânia:\n\n🔽🔽\n\n39.252.455/0001-30';
-const PIX_PALMAS = 'PIX CR Laser® Palmas:\n\n🔽🔽\n\n18.986.800/0001-99';
-const PIX_SAO_PAULO = 'Pix CR Laser® São Paulo:\n\nObs.: O Pix é o CNPJ\n\n🔽🔽\n\n54.153.510/0001-28';
+const PIX_LINKS = {
+  'Brasília': '43.713.316/0001-33',
+  'Campinas': '60.970.806/0001-34',
+  'Goiânia': '39.252.455/0001-30',
+  'Palmas': '18.986.800/0001-99',
+  'São Paulo': '54.153.510/0001-28'
+};
 
 // ════ PLACEHOLDERS PARA LINKS DE CARTÃO ════
 const LINK_CARTAO_BRASILIA = 'INSERIR_LINK_CARTAO_BRASILIA';
@@ -208,13 +219,15 @@ const LINK_CARTAO_GOIANIA = 'INSERIR_LINK_CARTAO_GOIANIA';
 const LINK_CARTAO_PALMAS = 'INSERIR_LINK_CARTAO_PALMAS';
 const LINK_CARTAO_SAO_PAULO = 'INSERIR_LINK_CARTAO_SAO_PAULO';
 
-const PIX_POR_CIDADE = {
-  brasilia: PIX_BRASILIA,
-  campinas: PIX_CAMPINAS,
-  goiania: PIX_GOIANIA,
-  palmas: PIX_PALMAS,
-  saopaulo: PIX_SAO_PAULO
-};
+function getPixPayload(unidade) {
+  const chavePix = PIX_LINKS[unidade];
+
+  console.log('PIX USADO:', PIX_LINKS[unidade]);
+
+  if (!chavePix) return null;
+
+  return `Chave Pix (CNPJ): ${chavePix}`;
+}
 
 const LINK_CARTAO_POR_CIDADE = {
   brasilia: LINK_CARTAO_BRASILIA,
@@ -469,12 +482,53 @@ function normalizeUnidadeKey(unidade = '') {
 
 function normalizeLinkValue(value) {
   const cleaned = String(value ?? '').trim();
-  const lowered = cleaned.toLowerCase();
+  const lowered = normalizeText(cleaned);
+  const indisponiveis = new Set([
+    '',
+    '-',
+    '—',
+    'null',
+    'undefined',
+    'na',
+    'n a',
+    'n/a',
+    'nao tem',
+    'não tem',
+    'indisponivel',
+    'indisponível',
+    'sem link',
+    'sem oferta'
+  ]);
 
-  if (!cleaned || cleaned === '-' || lowered === 'null' || lowered === 'undefined') {
+  if (indisponiveis.has(lowered)) {
     return null;
   }
   return cleaned;
+}
+
+function getWhatsappUnidade(cidade = '') {
+  const cidadeNorm = normalizeText(cidade);
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  if (!unidade || !unidade.telefone) return null;
+  return unidade.telefone;
+}
+
+function validateOffer(offer = {}) {
+  if (!offer || typeof offer !== 'object') return false;
+
+  const requiredFields = [
+    'procedimento',
+    'unidade',
+    'formaPagamento',
+    'valor',
+    'linkPagamento',
+    'whatsappUnidade'
+  ];
+
+  return requiredFields.every((field) => {
+    const value = String(offer[field] ?? '').trim();
+    return Boolean(normalizeLinkValue(value));
+  });
 }
 
 function normalizeRegiaoForMatch(value = '') {
@@ -558,7 +612,7 @@ async function ensurePaymentLinksRowsLoaded(forceRefresh = false) {
     return paymentLinksLoadPromise;
   }
 
-  paymentLinksLoadPromise = fetch(PAYMENT_LINKS_CSV_URL, { cache: 'no-store' })
+  paymentLinksLoadPromise = fetch(CSV_URL, { cache: 'no-store' })
     .then((response) => {
       if (!response.ok) {
         throw new Error(`Falha ao baixar CSV de links (HTTP ${response.status}).`);
@@ -652,13 +706,17 @@ function escolherMelhorLinhaPorTokens(baseRows = [], procedimentoSelecionado = '
   return bestRow;
 }
 
-function lookupLink(procedimentoSelecionado = '', unidade = '') {
+function lookupLink(procedimentoSelecionado = '', unidade = '', formaPagamento = 'cartao') {
+  if (normalizeText(formaPagamento) !== 'cartao') {
+    return { link: null, status: 'payment-not-supported', base: '', regiao: '', formaPagamento };
+  }
+
   const unidadeKey = normalizeUnidadeKey(unidade);
   const { base, regiao } = separarBaseRegiao(procedimentoSelecionado);
 
   if (!base || !unidadeKey) {
     console.log('Link não encontrado:', base, regiao, unidade);
-    return { link: null, status: 'not-found', base, regiao };
+    return { link: null, status: 'not-found', base, regiao, formaPagamento };
   }
 
   const baseNorm = normalizeText(base);
@@ -667,54 +725,132 @@ function lookupLink(procedimentoSelecionado = '', unidade = '') {
 
   if (!baseRows.length) {
     console.log('Link não encontrado:', base, regiao, unidade);
-    return { link: null, status: 'not-found', base, regiao };
+    return { link: null, status: 'not-found', base, regiao, formaPagamento };
   }
 
   let row = null;
 
   if (regiaoNorm) {
     row = baseRows.find((item) => normalizeRegiaoForMatch(item.regiao) === regiaoNorm) || null;
-
-    if (!row) {
-      row = baseRows.find((item) => {
-        const current = normalizeRegiaoForMatch(item.regiao);
-        return current && (current.includes(regiaoNorm) || regiaoNorm.includes(current));
-      }) || null;
-    }
   }
 
-  if (!row) {
-    row = escolherMelhorLinhaPorTokens(baseRows, PROCEDURE_LINK_KEYS[procedimentoSelecionado] || procedimentoSelecionado);
-  }
-
-  if (!row && baseRows.length === 1) {
+  if (!row && !regiaoNorm && baseRows.length === 1) {
     row = baseRows[0];
   }
 
   if (!row) {
     console.log('Link não encontrado:', base, regiao, unidade);
-    return { link: null, status: 'not-found', base, regiao };
+    return { link: null, status: 'not-found', base, regiao, formaPagamento };
   }
 
   const link = row[unidadeKey];
   if (!link) {
     console.log('Link não encontrado:', base, regiao, unidade);
-    return { link: null, status: 'unavailable', base, regiao };
+    return { link: null, status: 'unavailable', base, regiao, formaPagamento };
   }
 
-  return { link, status: 'ok', base, regiao };
+  return { link, status: 'ok', base, regiao, formaPagamento };
 }
 
-function getLink(procedimentoSelecionado, unidade) {
-  return lookupLink(procedimentoSelecionado, unidade).link;
+function getLink(procedimentoSelecionado, unidade, formaPagamento = 'cartao') {
+  return lookupLink(procedimentoSelecionado, unidade, formaPagamento).link;
 }
 
-function montarRespostaPagamentoCartao(linkResp = '') {
+function montarRespostaPagamentoCartao(linkResp = '', cidade = '', procedimento = '', formaPagamento = 'cartao') {
+  function montarRespostaPagamento({ procedimento, cidade, formaPagamento }) {
+  const cidadeNorm = normalizeText(cidade);
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const whatsappUnidade = getWhatsappUnidade(cidadeNorm);
+
+  if (!unidade) {
+    return RESPOSTA_CONDICAO_SEM_SEGURANCA;
+  }
+
+  const nomeCidade = unidade.nomeCompleto.replace('CR Laser® ', '');
+
+  // 🔵 PIX
+  if (formaPagamento === 'pix') {
+    const pix = getPixPayload(nomeCidade);
+
+    if (!pix) {
+      return `${RESPOSTA_CONDICAO_SEM_SEGURANCA}\n\n📲 ${nomeCidade}: ${whatsappUnidade}`;
+    }
+
+    return `Perfeito 😊
+
+Você pode garantir essa condição no Pix utilizando a chave abaixo:
+
+${pix}
+
+Após o pagamento, envie o comprovante no WhatsApp da unidade para agendar:
+
+📲 ${nomeCidade}: ${unidade.telefone}
+
+O agendamento é feito diretamente com a equipe da unidade 😊
+
+Condição válida conforme campanha ativa e disponibilidade.`;
+  }
+
+  // 🟢 CARTÃO
+  const resultado = lookupLink(procedimento, nomeCidade, 'cartao');
+
+  console.log('BUSCANDO LINK:', {
+    procedimento,
+    cidade: nomeCidade,
+    formaPagamento
+  });
+
+  console.log('LINK ENCONTRADO:', resultado);
+
+  if (!resultado || !resultado.link) {
+    return `${RESPOSTA_CONDICAO_SEM_SEGURANCA}\n\n📲 ${nomeCidade}: ${whatsappUnidade}`;
+  }
+
+  return `Perfeito 😊
+
+Você pode garantir essa condição por aqui 👇
+${resultado.link}
+
+Após o pagamento, envie o comprovante diretamente no WhatsApp da unidade para realizar o agendamento:
+
+📲 ${nomeCidade}: ${unidade.telefone}
+
+O agendamento é feito diretamente com a equipe da unidade 😊
+
+Condição válida conforme campanha ativa e disponibilidade.`;
+}
   if (normalizeText(linkResp) === normalizeText(RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE)) {
     return RESPOSTA_PROCEDIMENTO_INDISPONIVEL_UNIDADE;
   }
 
-  return `${linkResp}\n\nDepois do pagamento, envie o comprovante no WhatsApp da unidade para agendar.`;
+  const linkMatch = String(linkResp || '').match(/https?:\/\/\S+/i);
+  const link = linkMatch ? linkMatch[0].trim() : '';
+  const cidadeNorm = normalizeText(cidade);
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const whatsappUnidade = getWhatsappUnidade(cidadeNorm);
+  const nomeCidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+
+  const offer = {
+    procedimento: String(procedimento || '').trim(),
+    unidade: String(nomeCidade || '').trim(),
+    formaPagamento: String(formaPagamento || '').trim(),
+    valor: link,
+    linkPagamento: link,
+    whatsappUnidade: String(whatsappUnidade || '').trim()
+  };
+
+  if (!validateOffer(offer)) {
+    if (whatsappUnidade && nomeCidade) {
+      return `${RESPOSTA_CONDICAO_SEM_SEGURANCA}\n\n📲 ${nomeCidade}: ${whatsappUnidade}`;
+    }
+    return RESPOSTA_CONDICAO_SEM_SEGURANCA;
+  }
+
+  if (!unidade) {
+    return RESPOSTA_CONDICAO_SEM_SEGURANCA;
+  }
+
+  return `Perfeito 😊\n\nVocê pode garantir essa condição por aqui 👇\n${link}\n\nApós o pagamento, envie o comprovante diretamente no WhatsApp da unidade para realizar o agendamento:\n\n📲 ${nomeCidade}: ${unidade.telefone}\n\nO agendamento é feito diretamente com a equipe da unidade 😊\n\nCondição válida conforme campanha ativa e disponibilidade.`;
 }
 
 function expandirAbreviacoes(texto = '') {
@@ -742,6 +878,24 @@ function expandirAbreviacoes(texto = '') {
 
 function identificarCidade(texto = '') {
   const textoNormalizado = normalizeText(texto);
+
+  const aliasesCidade = {
+    bsb: 'brasilia',
+    campinas: 'campinas',
+    spj: 'campinas',
+    gyn: 'goiania',
+    pmw: 'palmas',
+    sp: 'saopaulo'
+  };
+
+  const tokens = textoNormalizado.split(' ').filter(Boolean);
+  for (let i = 0; i < tokens.length; i += 1) {
+    const aliasCidade = aliasesCidade[tokens[i]];
+    if (aliasCidade) {
+      const unidadeAlias = unidades.find((u) => u.cidade === aliasCidade);
+      if (unidadeAlias) return unidadeAlias;
+    }
+  }
 
   // Exact substring match (existing behaviour)
   for (const unidade of unidades) {
@@ -876,7 +1030,7 @@ function detectarInteresseCompraPosPrecoSistema(texto = '') {
 function interpretarFormaPagamentoPorRespostaCurta(texto = '') {
   const t = normalizeText(texto);
   if (['1', 'pix'].includes(t)) return 'pix';
-  if (['2', 'cartao', 'cartão'].includes(t)) return 'cartao';
+  if (['2', 'cartao', 'cartão', 'credito', 'crédito'].includes(t)) return 'cartao';
   return null;
 }
 
@@ -1074,11 +1228,11 @@ function detectarConfirmacaoOferta(texto = '') {
 
 function interpretarCidadePorRespostaCurta(texto = '') {
   const t = normalizeText(texto);
-  if (['brasilia', 'brasilia', 'bsb'].includes(t)) return 'brasilia';
-  if (['campinas'].includes(t)) return 'campinas';
-  if (['goiania', 'goiania', 'gyn'].includes(t)) return 'goiania';
-  if (['palmas', 'pmw'].includes(t)) return 'palmas';
-  if (['sao paulo', 'sao paulo', 'sp', 'spj'].includes(t)) return 'saopaulo';
+  if (['1', 'brasilia', 'bsb'].includes(t)) return 'brasilia';
+  if (['2', 'campinas'].includes(t)) return 'campinas';
+  if (['3', 'goiania', 'gyn'].includes(t)) return 'goiania';
+  if (['4', 'palmas', 'pmw'].includes(t)) return 'palmas';
+  if (['5', 'sao paulo', 'sp', 'spj'].includes(t)) return 'saopaulo';
   return null;
 }
 
@@ -1794,7 +1948,7 @@ function intencaoContextoCompativel(contexto = {}, intencaoPrincipal = '', texto
   if (!estado) return true;
 
   const t = normalizeText(texto);
-  const respostaCurta = ehRespostaCurta(texto) || ['1', '2', 'pix', 'cartao', 'cartão'].includes(t);
+  const respostaCurta = ehRespostaCurta(texto) || ['1', '2', '3', '4', '5', 'pix', 'cartao', 'cartão'].includes(t);
   const temCidade = !!cidadeDetectada;
 
   const estadosContato = [
@@ -2041,7 +2195,12 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     if (procResolvidoCartao) {
       const linkResp = gerarRespostaOfertaCampanha(procResolvidoCartao, cidadeAtual, 'texto');
       if (linkResp) {
-        const r = montarRespostaPagamentoCartao(linkResp);
+        const r = return montarRespostaPagamento({
+  procedimento,
+  cidade,
+  formaPagamento
+});
+(linkResp, cidadeAtual, procResolvidoCartao, 'cartao');
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, formaPagamento: 'cartao', pagamento: 'cartao', aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -2056,7 +2215,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     if (cidadeAtual && procParaEscolha1 && pagamentoAtual) {
       const linkResp = gerarRespostaOfertaCampanha(procParaEscolha1, cidadeAtual, 'texto');
       if (linkResp) {
-        const r = montarRespostaPagamentoCartao(linkResp);
+        const r = montarRespostaPagamentoCartao(linkResp, cidadeAtual, procParaEscolha1, pagamentoAtual);
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -2081,11 +2240,11 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
   }
 
   // ════ REGRA 10: Dados completos → link imediato ════
-  if (cidadeAtual && procFinalAtual && pagamentoAtual && !contexto.linkEnviado && !detectarConfirmacaoPagamento(pergunta)) {
+  if (cidadeAtual && procFinalAtual && pagamentoAtual === 'cartao' && !contexto.linkEnviado && !detectarConfirmacaoPagamento(pergunta)) {
     const procResolvido = resolverProcedimentoPorBase(normalizarProcedimentoBase(procFinalAtual), procFinalAtual) || procFinalAtual;
     const linkResp = gerarRespostaOfertaCampanha(procFinalAtual, cidadeAtual, 'texto') || gerarRespostaOfertaCampanha(procResolvido, cidadeAtual, 'texto');
     if (linkResp) {
-      const r = montarRespostaPagamentoCartao(linkResp);
+      const r = montarRespostaPagamentoCartao(linkResp, cidadeAtual, procResolvido, pagamentoAtual);
       return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
     }
   }
@@ -2153,24 +2312,12 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
 
   // Opções compra (1=sistema / 2=equipe)
   if (etapaAtual === 'fluxo_compra_opcoes') {
-    if (detectarEscolhaSistema(pergunta)) {
-      const r = RESPOSTA_FORMA_PAGAMENTO;
-      return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_compra_aguardando_pagamento', intencaoCompra: 'sistema', cidadeCompra: cidadeAtual, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
-    }
-    if (detectarEscolhaEquipe(pergunta)) {
-      if (cidadeAtual) {
-        const wpp = respostaWhatsappPorCidade(cidadeAtual);
-        if (wpp) return { resposta: wpp, contexto: { cidade: cidadeAtual, cidadeAtual, intencao: 'compra_finalizada_equipe', intencaoCompra: 'equipe', cidadeCompra: cidadeAtual } };
-      }
+    if (!cidadeAtual) {
       const r = RESPOSTA_QUAL_UNIDADE;
-      return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_compra_aguardando_cidade_equipe', ultimaPerguntaBot: r }) };
+      return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_compra_aguardando_cidade_sistema', status_compra: 'em andamento', ultimaPerguntaBot: r }) };
     }
-    const novasFalhasOpc = falhasInterpretacaoAtualizadas(contexto);
-    if (novasFalhasOpc >= 2 && cidadeAtual) {
-      const wpp = respostaWhatsappPorCidade(cidadeAtual);
-      if (wpp) return { resposta: `${RESPOSTA_DIRECIONAR_EQUIPE_PREVENTIVO}\n\n${wpp}`, contexto: { ...contexto, falhasInterpretacao: 0 } };
-    }
-    return { resposta: RESPOSTA_OPCOES_COMPRA, contexto: { ...contexto, falhasInterpretacao: novasFalhasOpc, ultimaPerguntaBot: RESPOSTA_OPCOES_COMPRA } };
+    const r = RESPOSTA_FORMA_PAGAMENTO;
+    return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_compra_aguardando_pagamento', intencaoCompra: 'sistema', cidadeCompra: cidadeAtual, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
   }
 
   // Aguardando cidade (equipe)
@@ -2194,7 +2341,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
       if (formaSalva === 'cartao' && procFinalAtual && !['Botox', 'Ultraformer MPT', 'Lavieen'].includes(procFinalAtual)) {
         const linkResp = gerarRespostaOfertaCampanha(procFinalAtual, cidadeAtual, 'texto');
         if (linkResp) {
-          const r = montarRespostaPagamentoCartao(linkResp);
+          const r = montarRespostaPagamentoCartao(linkResp, cidadeAtual, procFinalAtual, 'cartao');
           return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
         }
       }
@@ -2227,7 +2374,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
       if (procResolvidoAguardando) {
         const linkResp = gerarRespostaOfertaCampanha(procResolvidoAguardando, cidadeCompra, 'texto');
         if (linkResp) {
-          const r = montarRespostaPagamentoCartao(linkResp);
+          const r = montarRespostaPagamentoCartao(linkResp, cidadeCompra, procResolvidoAguardando, 'cartao');
           return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra, formaPagamento: 'cartao', pagamento: 'cartao', aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
         }
       }
@@ -2264,7 +2411,7 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
         }
       }
       if (linkResp) {
-        const r = montarRespostaPagamentoCartao(linkResp);
+        const r = montarRespostaPagamentoCartao(linkResp, cidadeCompra, procResolvido, 'cartao');
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra, procedimentoFinal: procResolvido, procedimento: procResolvido, procedimentoAtual: procResolvido, procedimento_selecionado: procResolvido, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -2360,10 +2507,14 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
     const procParaCompra = (procFinalAtual && !['Botox', 'Ultraformer MPT', 'Lavieen'].includes(procFinalAtual))
       ? procFinalAtual
       : resolverProcedimentoCompraPorContexto({ ...contexto, procedimentoBase: procBaseAtual || contexto.procedimentoBase });
-    if (cidadeAtual && procParaCompra && pagamentoAtual) {
+    if (cidadeAtual && procParaCompra && pagamentoAtual === 'pix') {
+      const r = gerarRespostaPix(cidadeAtual);
+      return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, formaPagamento: 'pix', pagamento: 'pix', procedimentoFinal: procParaCompra, procedimento: procParaCompra, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
+    }
+    if (cidadeAtual && procParaCompra && pagamentoAtual === 'cartao') {
       const linkResp = gerarRespostaOfertaCampanha(procParaCompra, cidadeAtual, 'texto');
       if (linkResp) {
-        const r = montarRespostaPagamentoCartao(linkResp);
+        const r = montarRespostaPagamentoCartao(linkResp, cidadeAtual, procParaCompra, pagamentoAtual);
         return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_confirmacao', cidadeCompra: cidadeAtual, procedimentoFinal: procParaCompra, procedimento: procParaCompra, aguardandoComprovante: true, aguardando_comprovante: true, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
       }
     }
@@ -2379,9 +2530,13 @@ function resolverFluxoCentral(pergunta = '', contexto = {}, extras = {}) {
       const r = RESPOSTA_FORMA_PAGAMENTO;
       return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_compra_aguardando_pagamento', cidadeCompra: cidadeAtual, intencaoCompra: 'sistema', status_compra: 'em andamento', ultimaPerguntaBot: r }) };
     }
-    // Tem cidade e pagamento mas sem procedimento resolvido → pede procedimento
-    const r = 'Perfeito 😊\n\nQual procedimento você quer finalizar?';
-    return { resposta: r, contexto: ctxSaida({ intencao: 'fluxo_pagamento_aguardando_procedimento_cartao', cidadeCompra: cidadeAtual, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
+    // Com cidade e pagamento, mas sem procedimento confiável, aplica fallback seguro.
+    const whatsappUnidade = getWhatsappUnidade(cidadeAtual);
+    const unidadeNome = (unidades.find((u) => u.cidade === normalizeText(cidadeAtual))?.nomeCompleto || '').replace('CR Laser® ', '');
+    const r = whatsappUnidade && unidadeNome
+      ? `${RESPOSTA_CONDICAO_SEM_SEGURANCA}\n\n📲 ${unidadeNome}: ${whatsappUnidade}`
+      : RESPOSTA_CONDICAO_SEM_SEGURANCA;
+    return { resposta: r, contexto: ctxSaida({ intencao: 'compra_finalizada_equipe', cidadeCompra: cidadeAtual, status_compra: 'em andamento', ultimaPerguntaBot: r }) };
   }
 
   // 5. PRECO — orienta para o sistema (Regra 5)
@@ -2604,7 +2759,16 @@ function detectarEscolhaSistema(texto = '') {
 function detectarFormaPagamento(texto = '') {
   const t = normalizeText(texto);
   if (t.includes('pix') || t === 'pix') return 'pix';
-  if (t.includes('cartao') || t.includes('cartão') || t === 'cartao' || t === 'cartão') return 'cartao';
+  if (
+    t.includes('cartao') ||
+    t.includes('cartão') ||
+    t.includes('credito') ||
+    t.includes('crédito') ||
+    t === 'cartao' ||
+    t === 'cartão' ||
+    t === 'credito' ||
+    t === 'crédito'
+  ) return 'cartao';
   return null;
 }
 
@@ -2646,19 +2810,7 @@ function detectarConfirmacaoPagamento(texto = '') {
 }
 
 function anexarReforcoPosLink(resposta = '') {
-  if (!resposta || typeof resposta !== 'string') return resposta;
-
-  const respostaNorm = normalizeText(resposta);
-  if (respostaNorm.includes(normalizeText(RESPOSTA_REFORCO_POS_LINK))) {
-    return resposta;
-  }
-
-  const temLink = resposta.includes('<a href=') || /https?:\/\//i.test(resposta);
-  if (!temLink) {
-    return resposta;
-  }
-
-  return `${resposta}\n\n${RESPOSTA_REFORCO_POS_LINK}`;
+  return resposta;
 }
 
 function anexarUrgenciaOfertaLeve(resposta = '') {
@@ -2745,27 +2897,31 @@ function detectarMudancaFormaPagamento(texto = '') {
 
 function gerarRespostaPix(cidade = '') {
   const cidadeNorm = normalizeText(cidade).replace(/\s+/g, '');
-  const pix = PIX_POR_CIDADE[cidadeNorm];
+  const unidade = unidades.find((u) => u.cidade === cidadeNorm);
+  const nomeUnidade = unidade ? unidade.nomeCompleto.replace('CR Laser® ', '') : cidade;
+  const pixPayload = getPixPayload(nomeUnidade);
+  const telefone = unidade ? unidade.telefone : null;
 
-  if (!pix) {
-    return 'Desculpe, não encontrei a chave Pix desta unidade. Você pode falar direto com a equipe!';
+  if (!pixPayload) {
+    if (telefone) {
+      return `Não consegui localizar o Pix dessa unidade com segurança. Vou te direcionar para o WhatsApp da unidade para confirmar.\n\n📲 ${nomeUnidade}: ${telefone}`;
+    }
+    return 'Não consegui localizar o Pix dessa unidade com segurança. Vou te direcionar para o WhatsApp da unidade para confirmar.';
   }
-
-  // Extrair CNPJ da string PIX (está entre os 🔽🔽 e o final)
-  const cnpjMatch = pix.match(/(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/);
-  const cnpj = cnpjMatch ? cnpjMatch[1] : '';
-
-  // Extrair nome da cidade (primeira palavra após "Laser®")
-  const cityNameMatch = pix.match(/Laser®\s+([^:]+)/);
-  const cityName = cityNameMatch ? cityNameMatch[1].trim() : cidade;
 
   return `Perfeito 😊
 
-Segue o Pix da unidade de ${cityName}:
+Você pode garantir essa condição no Pix utilizando a chave abaixo:
 
-${cnpj}
+${pixPayload}
 
-📍 Importante: confira se os dados pertencem à CR Laser® antes de concluir o pagamento.`;
+Após o pagamento, envie o comprovante no WhatsApp da unidade para agendar:
+
+📲 ${nomeUnidade}: ${telefone}
+
+O agendamento é feito diretamente com a equipe da unidade 😊
+
+Condição válida conforme campanha ativa e disponibilidade.`;
 }
 
 function gerarRespostaCartao(cidade = '') {
@@ -2782,10 +2938,30 @@ function gerarRespostaCartao(cidade = '') {
 }
 
 
-function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = 'html') {
+function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formaOuFormato = 'cartao', formato = 'html') {
+  const formaPagamento = ['pix', 'cartao'].includes(formaOuFormato) ? formaOuFormato : 'cartao';
+  const formatoResposta = ['html', 'texto'].includes(formaOuFormato) ? formaOuFormato : formato;
   const cidadeNorm = normalizeUnidadeKey(cidade);
-  const lookup = lookupLink(procedimento, cidadeNorm);
+
+  console.log('BUSCANDO OFERTA:', {
+    procedimento,
+    unidade: cidadeNorm,
+    formaPagamento
+  });
+
+  const lookup = lookupLink(procedimento, cidadeNorm, formaPagamento);
   const link = lookup.link;
+
+  const offer = {
+    procedimento,
+    unidade: cidadeNorm,
+    formaPagamento,
+    valor: link || null,
+    linkPagamento: link || null,
+    whatsappUnidade: getWhatsappUnidade(cidadeNorm)
+  };
+
+  console.log('OFERTA ENCONTRADA:', offer);
 
   if (!link) {
     if (lookup.status === 'unavailable') {
@@ -2794,7 +2970,7 @@ function gerarRespostaOfertaCampanha(procedimento = '', cidade = '', formato = '
     return null;
   }
 
-  if (formato === 'texto') {
+  if (formatoResposta === 'texto') {
     return `Perfeito 😊
 
 Você pode finalizar sua compra aqui 👇
@@ -3749,6 +3925,35 @@ export default async function handler(req, res) {
       etapa: proximaEtapaCompra
     });
 
+    if (
+      intencaoPrincipal === 'COMPRA' &&
+      cidadeDetectada &&
+      pagamentoDetectado &&
+      !procedimentoSelecionadoMensagem &&
+      !procedimentoDetectadoMensagem &&
+      !procedimentoBaseMensagem
+    ) {
+      const telefoneUnidade = getWhatsappUnidade(cidadeDetectada);
+      const unidadeNome = (unidades.find((u) => u.cidade === cidadeDetectada)?.nomeCompleto || '').replace('CR Laser® ', '');
+      const respostaSegura = telefoneUnidade && unidadeNome
+        ? `${RESPOSTA_CONDICAO_SEM_SEGURANCA}\n\n📲 ${unidadeNome}: ${telefoneUnidade}`
+        : RESPOSTA_CONDICAO_SEM_SEGURANCA;
+
+      return res.status(200).json({
+        resposta: respostaSegura,
+        contexto: {
+          ...contexto,
+          cidade: cidadeDetectada,
+          cidadeAtual: cidadeDetectada,
+          cidadeCompra: cidadeDetectada,
+          formaPagamento: pagamentoDetectado,
+          pagamento: pagamentoDetectado,
+          intencao: 'compra_finalizada_equipe',
+          status_compra: 'em andamento'
+        }
+      });
+    }
+
     // Early return para aparelho/equipamento ANTES de qualquer outra lógica
     const procedimentoAtualNorm = normalizeText(contexto.procedimentoAtual || '');
     const eContextoUltraformer = procedimentoAtualNorm === 'ultraformer' || procedimentoAtualNorm.includes('ultraformer') || procedimentoAtualNorm === 'ultraformer mpt' || procedimentoAtualNorm.includes('ultraformer mpt');
@@ -3859,7 +4064,7 @@ export default async function handler(req, res) {
       extrairProcedimentoFinalContexto(contexto) ||
       resolverProcedimentoCompraPorContexto(contexto);
 
-    if (!detectarConfirmacaoPagamento(pergunta) && procedimentoFinalFechamento && cidadeFechamento && formaPagamentoFechamento) {
+    if (!detectarConfirmacaoPagamento(pergunta) && procedimentoFinalFechamento && cidadeFechamento && formaPagamentoFechamento === 'cartao') {
       const respostaLinkFechamento =
         gerarRespostaOfertaCampanha(procedimentoFinalFechamento, cidadeFechamento, 'texto') ||
         gerarRespostaOfertaCampanha(
@@ -3870,7 +4075,7 @@ export default async function handler(req, res) {
 
       if (respostaLinkFechamento) {
         return res.status(200).json({
-          resposta: montarRespostaPagamentoCartao(respostaLinkFechamento),
+          resposta: montarRespostaPagamentoCartao(respostaLinkFechamento, cidadeFechamento, procedimentoFinalFechamento, formaPagamentoFechamento),
           contexto: {
             ...contexto,
             cidade: cidadeFechamento,
@@ -3903,11 +4108,11 @@ export default async function handler(req, res) {
       const formaPagamentoAtual = contexto.formaPagamento || contexto?.liaContext?.formaPagamento || null;
       const procedimentoCompra = resolverProcedimentoCompraPorContexto(contexto);
 
-      if (cidadeCompraAtual && formaPagamentoAtual) {
+      if (cidadeCompraAtual && formaPagamentoAtual === 'cartao') {
         const linkProcedimento = gerarRespostaOfertaCampanha(procedimentoCompra, cidadeCompraAtual, 'texto');
         if (linkProcedimento) {
           return res.status(200).json({
-            resposta: `${linkProcedimento}\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade para agendar.`,
+            resposta: montarRespostaPagamentoCartao(linkProcedimento, cidadeCompraAtual, procedimentoCompra, formaPagamentoAtual),
             contexto: {
               ...contexto,
               cidade: cidadeCompraAtual,
@@ -4180,7 +4385,7 @@ export default async function handler(req, res) {
         const respostaOferta = gerarRespostaOfertaCampanha(procedimentoCompra, cidadeCompra, 'texto');
         if (respostaOferta) {
           return res.status(200).json({
-            resposta: montarRespostaPagamentoCartao(respostaOferta),
+            resposta: montarRespostaPagamentoCartao(respostaOferta, cidadeCompra, procedimentoCompra, formaPagamentoCompra),
             contexto: {
               ...contexto,
               cidade: cidadeCompra,
@@ -4359,7 +4564,7 @@ export default async function handler(req, res) {
           const respostaOfertaSalva = gerarRespostaOfertaCampanha(procedimentoSalvo, cidadeAtual, 'texto');
           if (respostaOfertaSalva) {
             return res.status(200).json({
-              resposta: montarRespostaPagamentoCartao(respostaOfertaSalva),
+              resposta: montarRespostaPagamentoCartao(respostaOfertaSalva, cidadeAtual, procedimentoSalvo, 'cartao'),
               contexto: {
                 ...contexto,
                 intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4477,7 +4682,7 @@ export default async function handler(req, res) {
           const respostaOfertaDireta = gerarRespostaOfertaCampanha(procedimentoDoContextoDireto, cidadeCompra, 'texto');
           if (respostaOfertaDireta) {
             return res.status(200).json({
-              resposta: montarRespostaPagamentoCartao(respostaOfertaDireta),
+              resposta: montarRespostaPagamentoCartao(respostaOfertaDireta, cidadeCompra, procedimentoDoContextoDireto, 'cartao'),
               contexto: {
                 ...contexto,
                 intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4563,7 +4768,7 @@ export default async function handler(req, res) {
         const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra, 'texto');
         if (respostaOferta) {
           return res.status(200).json({
-            resposta: respostaOferta,
+            resposta: montarRespostaPagamentoCartao(respostaOferta, cidadeCompra, procedimentoDetectado, 'cartao'),
             contexto: {
               ...contexto,
               intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4639,7 +4844,7 @@ export default async function handler(req, res) {
         const respostaOfertaDireta = gerarRespostaOfertaCampanha(procedimentoDoContextoDireto, cidadeCompra, 'texto');
         if (respostaOfertaDireta) {
           return res.status(200).json({
-            resposta: montarRespostaPagamentoCartao(respostaOfertaDireta),
+            resposta: montarRespostaPagamentoCartao(respostaOfertaDireta, cidadeCompra, procedimentoDoContextoDireto, 'cartao'),
             contexto: {
               ...contexto,
               intencao: 'fluxo_pagamento_aguardando_confirmacao',
@@ -4731,7 +4936,7 @@ export default async function handler(req, res) {
       const respostaOferta = gerarRespostaOfertaCampanha(procedimentoDetectado, cidadeCompra, 'texto');
       if (respostaOferta) {
         return res.status(200).json({
-          resposta: montarRespostaPagamentoCartao(respostaOferta),
+          resposta: montarRespostaPagamentoCartao(respostaOferta, cidadeCompra, procedimentoDetectado, 'cartao'),
           contexto: {
             ...contexto,
             intencao: 'fluxo_pagamento_aguardando_confirmacao',

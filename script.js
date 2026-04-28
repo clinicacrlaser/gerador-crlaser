@@ -2082,8 +2082,9 @@ function initLiaV2() {
   window.addEventListener('resize', aplicarModoLia);
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initLiaV2);
-} else {
-  initLiaV2();
-}
+// OLD LIA SYSTEM - REPLACED BY NEW lia-vendas.js
+// if (document.readyState === 'loading') {
+//   document.addEventListener('DOMContentLoaded', initLiaV2);
+// } else {
+//   initLiaV2();
+// }
