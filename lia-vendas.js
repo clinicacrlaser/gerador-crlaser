@@ -476,9 +476,9 @@ async function responderLia(texto) {
     } else if (texto === "2") {
       const link = buscarLink(estado.procedimentoBase, estado.regiao, unidade.nome);
       if (!link) { adicionarMensagemNoChat("Esse procedimento não está disponível para essa unidade nessa campanha.", "lia"); return; }
-      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra:\n\n${link}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra pelo link abaixo:\n\n<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade.\n\nCaso não tenha o telefone, basta me pedir dizendo qual é a sua unidade 😊`, "lia");
     } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
-    aguardandoContinuidade = true;
+    aguardandoContinuidade = texto === "1";
     resetarEstado();
     return;
   }
