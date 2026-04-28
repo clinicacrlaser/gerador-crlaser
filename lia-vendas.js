@@ -352,6 +352,7 @@ function initLiaVendasUI() {
   if (!liaChat || !btnEnviarLia || !liaInput || !liaMessages) return;
 
   function abrirLiaChat() {
+    liaChat.style.zIndex = "12000";
     liaChat.style.display = "block";
     if (liaOverlay) {
       liaOverlay.classList.add("is-visible");
@@ -379,7 +380,8 @@ function initLiaVendasUI() {
     btnFecharLia.addEventListener("click", fecharLiaChat);
   }
 
-  btnEnviarLia.onclick = enviarMensagem;
+  btnEnviarLia.type = "button";
+  btnEnviarLia.addEventListener("click", enviarMensagem);
   liaInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
