@@ -148,6 +148,24 @@ function montarLinkWhatsApp(numeroUnidade) {
   return `https://wa.me/55${numeroLimpo}`;
 }
 
+function ehConsultaPrecoOuDuvida(texto) {
+  const textoNorm = normalizar(texto);
+  const termos = [
+    "preco",
+    "valor",
+    "valores",
+    "promocao",
+    "oferta",
+    "quanto custa",
+    "custa",
+    "custo",
+    "duvida",
+    "duvidas"
+  ];
+
+  return termos.some((termo) => textoNorm.includes(termo));
+}
+
 let estado = {
   etapa: "inicio",
   procedimentoDigitado: null,
@@ -319,6 +337,11 @@ function adicionarMensagemNoChat(texto, tipo) {
 
 async function responderLia(texto) {
   const chave = normalizar(texto);
+
+  if (ehConsultaPrecoOuDuvida(texto) && estado.etapa === "inicio") {
+    adicionarMensagemNoChat("Para ver os valores da oferta, use a parte de cima da página:\n\n1️⃣ Escolha o procedimento\n2️⃣ Clique em GERAR OFERTA\n\nSe quiser tirar dúvidas sobre o procedimento, use a parte de baixo da página em TIRE DÚVIDAS 😊", "lia");
+    return;
+  }
 
   if (aguardandoContinuidade) {
     const chaveLimpa = chave.replace(/[.,!?;:]/g, "").trim();
