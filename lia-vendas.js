@@ -158,12 +158,69 @@ function ehConsultaPrecoOuDuvida(texto) {
     "oferta",
     "quanto custa",
     "custa",
-    "custo",
-    "duvida",
-    "duvidas"
+    "custo"
   ];
 
   return termos.some((termo) => textoNorm.includes(termo));
+}
+
+function ehIntencaoCompraClara(texto) {
+  const textoNorm = normalizar(texto);
+  const termosCompra = [
+    "quero comprar",
+    "quero fechar",
+    "vou comprar",
+    "comprar",
+    "fechar",
+    "pagar",
+    "pagamento",
+    "pix",
+    "cartao",
+    "link de pagamento"
+  ];
+
+  return termosCompra.some((termo) => textoNorm.includes(termo));
+}
+
+function ehDuvidaTecnica(texto) {
+  const textoNorm = normalizar(texto);
+  const termosTecnicos = [
+    "o que e",
+    "explicacao",
+    "indicacao",
+    "resultado",
+    "contraindic",
+    "doi",
+    "duracao",
+    "dura",
+    "sessao",
+    "sessoes",
+    "efeito",
+    "risco",
+    "comparacao",
+    "diferenca",
+    "funciona",
+    "serve para",
+    "melhor tratamento",
+    "melhor procedimento",
+    "qual melhor",
+    "qual procedimento"
+  ];
+
+  return termosTecnicos.some((termo) => textoNorm.includes(termo));
+}
+
+function identificarUnidadePorTexto(texto) {
+  const chave = normalizar(texto);
+  if (unidades[chave]) return unidades[chave];
+
+  if (chave.includes("brasilia")) return unidades["1"];
+  if (chave.includes("campinas")) return unidades["2"];
+  if (chave.includes("goiania")) return unidades["3"];
+  if (chave.includes("palmas")) return unidades["4"];
+  if (chave.includes("sao paulo")) return unidades["5"];
+
+  return null;
 }
 
 let estado = {
@@ -175,6 +232,7 @@ let estado = {
 };
 
 let aguardandoContinuidade = false;
+let aguardandoUnidadeHumano = false;
 
 function resetarEstado() {
   estado = { etapa: "inicio", procedimentoDigitado: null, procedimentoBase: null, regiao: null, unidade: null };
@@ -337,6 +395,25 @@ function adicionarMensagemNoChat(texto, tipo) {
 
 async function responderLia(texto) {
   const chave = normalizar(texto);
+
+  if (aguardandoUnidadeHumano) {
+    const unidade = identificarUnidadePorTexto(texto);
+    if (unidade) {
+      const whatsappLink = montarLinkWhatsApp(unidade.whatsapp);
+      adicionarMensagemNoChat(`Perfeito 😊\n\nWhatsApp da unidade ${unidade.nome}:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>`, "lia");
+      aguardandoUnidadeHumano = false;
+      return;
+    }
+
+    adicionarMensagemNoChat("Me diga sua unidade para eu te enviar o WhatsApp correto:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+    return;
+  }
+
+  if (estado.etapa === "inicio" && ehDuvidaTecnica(texto) && !ehIntencaoCompraClara(texto)) {
+    adicionarMensagemNoChat("Ainda estou em treinamento e posso não saber responder isso com segurança 😊\n\nO ideal é falar com uma pessoa da equipe CR Laser® para te orientar melhor.\n\nSe quiser, me diga sua unidade que eu te envio o WhatsApp correto.", "lia");
+    aguardandoUnidadeHumano = true;
+    return;
+  }
 
   if (ehConsultaPrecoOuDuvida(texto) && estado.etapa === "inicio") {
     adicionarMensagemNoChat("Para ver os valores da oferta, use a parte de cima da página:\n\n1️⃣ Escolha o procedimento\n2️⃣ Clique em GERAR OFERTA\n\nSe quiser tirar dúvidas sobre o procedimento, use a parte de baixo da página em TIRE DÚVIDAS 😊", "lia");
