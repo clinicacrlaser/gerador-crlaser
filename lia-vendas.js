@@ -285,7 +285,7 @@ async function responderLia(texto) {
   }
 }
 
-async function enviarMensagemLia() {
+async function enviarMensagem() {
   const liaInput = document.getElementById("liaInput");
   if (!liaInput) return;
 
@@ -298,19 +298,110 @@ async function enviarMensagemLia() {
   await responderLia(texto.toLowerCase());
 }
 
-// Inicializa ao carregar o DOM
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnEnviarLia = document.getElementById("btnEnviarLia");
-    const liaInput = document.getElementById("liaInput");
-    if (btnEnviarLia) btnEnviarLia.onclick = enviarMensagemLia;
-    if (liaInput) liaInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); enviarMensagemLia(); } });
-    adicionarMensagemNoChat("Oi, eu sou a Lia. Qual procedimento você quer fechar hoje?", "lia");
-  });
-} else {
+function garantirModalLia() {
+  const modalExistente = document.getElementById("liaChat");
+  if (modalExistente) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "liaOverlay";
+  overlay.className = "lia-chat-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+
+  const chat = document.createElement("div");
+  chat.id = "liaChat";
+  chat.className = "lia-chat";
+  chat.style.display = "none";
+  chat.style.position = "fixed";
+  chat.style.bottom = "80px";
+  chat.style.right = "20px";
+  chat.style.width = "320px";
+  chat.style.maxHeight = "420px";
+  chat.style.background = "#0b1a2a";
+  chat.style.borderRadius = "16px";
+  chat.style.boxShadow = "0 0 20px rgba(0,0,0,0.5)";
+  chat.style.zIndex = "9999";
+  chat.style.overflow = "hidden";
+
+  chat.innerHTML = [
+    '<div id="liaChatHeader" class="lia-chat-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0f2a44;color:#00c6ff;font-weight:bold;">',
+    '  Fale com a Lia',
+    '  <span id="btnFecharLia" style="cursor:pointer;">✕</span>',
+    '</div>',
+    '<div id="liaMessages" style="padding:10px;overflow-y:auto;max-height:280px;font-size:14px;color:#fff;"></div>',
+    '<div id="liaInputBar" class="lia-chat-inputbar" style="display:flex;padding:10px;gap:6px;">',
+    '  <input id="liaInput" placeholder="Digite sua dúvida..." style="flex:1;padding:8px;border-radius:8px;border:none;outline:none;"/>',
+    '  <button id="btnEnviarLia" class="lia-send-btn" style="background:#00c6ff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">Enviar ➤</button>',
+    '</div>'
+  ].join("\n");
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(chat);
+}
+
+function initLiaVendasUI() {
+  garantirModalLia();
+
+  const btnAbrirLia = document.getElementById("btnAbrirLia");
+  const btnFecharLia = document.getElementById("btnFecharLia");
+  const liaChat = document.getElementById("liaChat");
+  const liaOverlay = document.getElementById("liaOverlay");
   const btnEnviarLia = document.getElementById("btnEnviarLia");
   const liaInput = document.getElementById("liaInput");
-  if (btnEnviarLia) btnEnviarLia.onclick = enviarMensagemLia;
-  if (liaInput) liaInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); enviarMensagemLia(); } });
-  adicionarMensagemNoChat("Oi, eu sou a Lia. Qual procedimento você quer fechar hoje?", "lia");
+  const liaMessages = document.getElementById("liaMessages");
+
+  if (!liaChat || !btnEnviarLia || !liaInput || !liaMessages) return;
+
+  function abrirLiaChat() {
+    liaChat.style.display = "block";
+    if (liaOverlay) {
+      liaOverlay.classList.add("is-visible");
+      liaOverlay.setAttribute("aria-hidden", "false");
+    }
+    liaInput.focus();
+  }
+
+  function fecharLiaChat() {
+    liaChat.style.display = "none";
+    if (liaOverlay) {
+      liaOverlay.classList.remove("is-visible");
+      liaOverlay.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  if (btnAbrirLia) {
+    btnAbrirLia.onclick = (e) => {
+      e.preventDefault();
+      abrirLiaChat();
+    };
+  }
+
+  if (btnFecharLia) {
+    btnFecharLia.onclick = fecharLiaChat;
+  }
+
+  if (liaOverlay) {
+    liaOverlay.onclick = fecharLiaChat;
+  }
+
+  btnEnviarLia.onclick = enviarMensagem;
+  liaInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      enviarMensagem();
+    }
+  });
+
+  if (!liaMessages.dataset.liaInicializada) {
+    adicionarMensagemNoChat("Oi, eu sou a Lia. Qual procedimento você quer fechar hoje?", "lia");
+    liaMessages.dataset.liaInicializada = "1";
+  }
+}
+
+window.enviarMensagem = enviarMensagem;
+
+// Inicializa ao carregar o DOM
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initLiaVendasUI);
+} else {
+  initLiaVendasUI();
 }
