@@ -376,11 +376,7 @@ function initLiaVendasUI() {
   }
 
   if (btnFecharLia) {
-    btnFecharLia.onclick = fecharLiaChat;
-  }
-
-  if (liaOverlay) {
-    liaOverlay.onclick = fecharLiaChat;
+    btnFecharLia.addEventListener("click", fecharLiaChat);
   }
 
   btnEnviarLia.onclick = enviarMensagem;
