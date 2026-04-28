@@ -156,6 +156,8 @@ let estado = {
   unidade: null
 };
 
+let aguardandoContinuidade = false;
+
 function resetarEstado() {
   estado = { etapa: "inicio", procedimentoDigitado: null, procedimentoBase: null, regiao: null, unidade: null };
 }
@@ -318,6 +320,26 @@ function adicionarMensagemNoChat(texto, tipo) {
 async function responderLia(texto) {
   const chave = normalizar(texto);
 
+  if (aguardandoContinuidade) {
+    const chaveLimpa = chave.replace(/[.,!?;:]/g, "").trim();
+    const respostasEncerramento = new Set([
+      "nao",
+      "agora nao",
+      "so isso",
+      "obrigado",
+      "obrigada",
+      "valeu"
+    ]);
+
+    if (respostasEncerramento.has(chaveLimpa)) {
+      adicionarMensagemNoChat("Perfeito 😊\n\nQualquer dúvida, estou por aqui.", "lia");
+      aguardandoContinuidade = false;
+      return;
+    }
+
+    aguardandoContinuidade = false;
+  }
+
   if (estado.etapa === "inicio") {
     estado.procedimentoDigitado = texto;
 
@@ -433,6 +455,7 @@ async function responderLia(texto) {
       if (!link) { adicionarMensagemNoChat("Esse procedimento não está disponível para essa unidade nessa campanha.", "lia"); return; }
       adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra:\n\n${link}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
     } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
+    aguardandoContinuidade = true;
     resetarEstado();
     return;
   }
