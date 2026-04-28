@@ -296,6 +296,36 @@ async function responderLia(texto) {
   if (estado.etapa === "inicio") {
     estado.procedimentoDigitado = texto;
 
+    const textoNorm = texto
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+    if (textoNorm.includes("ultraformer") || textoNorm.includes("mpt")) {
+      if (
+        textoNorm.includes("full face") ||
+        textoNorm.includes("rosto") ||
+        textoNorm.includes("face")
+      ) {
+        estado.procedimentoBase = "Ultraformer MPT";
+        estado.regiao = "Full Face";
+        estado.etapa = "unidade";
+        perguntarUnidade();
+        return;
+      }
+
+      if (textoNorm.includes("papada")) {
+        estado.procedimentoBase = "Ultraformer MPT";
+        estado.regiao = "Papada";
+        estado.etapa = "unidade";
+        perguntarUnidade();
+        return;
+      }
+
+      perguntarRegiaoUltraformer();
+      return;
+    }
+
     if (analisarTextoProcedimento(texto)) {
       return;
     }
