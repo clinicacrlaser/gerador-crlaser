@@ -160,6 +160,94 @@ function resetarEstado() {
   estado = { etapa: "inicio", procedimentoDigitado: null, procedimentoBase: null, regiao: null, unidade: null };
 }
 
+function perguntarUnidade() {
+  adicionarMensagemNoChat("Perfeito 😊\n\nMe diga a unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+}
+
+function perguntarRegiaoUltraformer() {
+  adicionarMensagemNoChat("Qual região do Ultraformer MPT você quer?\n\n1️⃣ Full Face\n2️⃣ Papada\n3️⃣ Pálpebras\n4️⃣ Pescoço\n5️⃣ Abdome\n6️⃣ Flancos\n7️⃣ Interno de Coxa\n8️⃣ Braços Região do Tchau\n9️⃣ Colo\n🔟 Mãos", "lia");
+}
+
+function analisarTextoProcedimento(texto) {
+  const textoNorm = normalizar(texto);
+
+  if (textoNorm.includes("ultraformer") || textoNorm.includes("mpt")) {
+    if (textoNorm.includes("full face") || textoNorm.includes("rosto") || textoNorm.includes("face")) {
+      estado.procedimentoBase = "Ultraformer MPT";
+      estado.regiao = "Full Face";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    if (textoNorm.includes("papada")) {
+      estado.procedimentoBase = "Ultraformer MPT";
+      estado.regiao = "Papada";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    if (textoNorm.includes("palpebra")) {
+      estado.procedimentoBase = "Ultraformer MPT";
+      estado.regiao = "Pálpebras";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    estado.etapa = "ultraformer_regiao";
+    perguntarRegiaoUltraformer();
+    return true;
+  }
+
+  if (textoNorm.includes("botox")) {
+    if (textoNorm.includes("facial")) {
+      estado.procedimentoBase = "Botox";
+      estado.regiao = "Facial";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    if (textoNorm.includes("suor") || textoNorm.includes("axilar")) {
+      estado.procedimentoBase = "Botox";
+      estado.regiao = "Axilar Suor";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    estado.etapa = "botox_regiao";
+    adicionarMensagemNoChat("Você quer qual Botox?\n\n1️⃣ Botox facial\n2️⃣ Botox suor axilar", "lia");
+    return true;
+  }
+
+  if (textoNorm.includes("lavieen")) {
+    if (textoNorm.includes("melasma")) {
+      estado.procedimentoBase = "Lavieen";
+      estado.regiao = "Melasma";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    if (textoNorm.includes("facial")) {
+      estado.procedimentoBase = "Lavieen";
+      estado.regiao = "Facial completo";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
+
+    estado.etapa = "lavieen_regiao";
+    adicionarMensagemNoChat("Qual Lavieen você quer?\n\n1️⃣ Facial completo\n2️⃣ Melasma\n3️⃣ BB Laser Facial\n4️⃣ Olheiras\n5️⃣ Capilar\n6️⃣ Mãos", "lia");
+    return true;
+  }
+
+  return false;
+}
+
 function adicionarMensagemNoChat(texto, tipo) {
   const liaMessages = document.getElementById("liaMessages");
   if (!liaMessages) return;
@@ -208,11 +296,15 @@ async function responderLia(texto) {
   if (estado.etapa === "inicio") {
     estado.procedimentoDigitado = texto;
 
+    if (analisarTextoProcedimento(texto)) {
+      return;
+    }
+
     if (procedimentos[chave]) {
       estado.procedimentoBase = procedimentos[chave].base;
       estado.regiao = procedimentos[chave].regiao;
       estado.etapa = "unidade";
-      adicionarMensagemNoChat("Perfeito 😊\n\nMe diga a unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+      perguntarUnidade();
       return;
     }
 
@@ -230,7 +322,7 @@ async function responderLia(texto) {
 
     if (ULTRAFORMER_AMBIGUO.includes(chave)) {
       estado.etapa = "ultraformer_regiao";
-      adicionarMensagemNoChat("Qual região do Ultraformer MPT você quer?\n\n1️⃣ Full Face\n2️⃣ Papada\n3️⃣ Pálpebras\n4️⃣ Pescoço\n5️⃣ Abdome\n6️⃣ Flancos\n7️⃣ Interno de Coxa\n8️⃣ Braços Região do Tchau\n9️⃣ Colo\n🔟 Mãos", "lia");
+      perguntarRegiaoUltraformer();
       return;
     }
 
@@ -238,7 +330,7 @@ async function responderLia(texto) {
       estado.procedimentoBase = "Microagulhamento Robótico";
       estado.regiao = "Microagulhamento Robótico";
       estado.etapa = "unidade";
-      adicionarMensagemNoChat("Perfeito 😊\n\nMe diga a unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+      perguntarUnidade();
       return;
     }
 
@@ -250,7 +342,7 @@ async function responderLia(texto) {
     const opcoes = {"1": { base: "Botox", regiao: "Facial" }, "2": { base: "Botox", regiao: "Axilar Suor" }, "botox facial": { base: "Botox", regiao: "Facial" }, "facial": { base: "Botox", regiao: "Facial" }, "botox suor": { base: "Botox", regiao: "Axilar Suor" }, "suor": { base: "Botox", regiao: "Axilar Suor" }, "axilar": { base: "Botox", regiao: "Axilar Suor" }};
     const op = opcoes[chave];
     if (!op) { adicionarMensagemNoChat("Escolha 1 para Botox facial ou 2 para Botox suor axilar.", "lia"); return; }
-    estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; adicionarMensagemNoChat("Perfeito 😊\n\nMe diga a unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+    estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
 
@@ -258,7 +350,7 @@ async function responderLia(texto) {
     const opcoes = {"1": { base: "Lavieen", regiao: "Facial completo" }, "2": { base: "Lavieen", regiao: "Melasma" }, "3": { base: "Lavieen", regiao: "BB Laser Facial" }, "4": { base: "Lavieen", regiao: "Olheiras" }, "5": { base: "Lavieen", regiao: "Capilar" }, "6": { base: "Lavieen", regiao: "Mãos" }, "facial": { base: "Lavieen", regiao: "Facial completo" }, "melasma": { base: "Lavieen", regiao: "Melasma" }, "bb laser": { base: "Lavieen", regiao: "BB Laser Facial" }, "olheiras": { base: "Lavieen", regiao: "Olheiras" }, "capilar": { base: "Lavieen", regiao: "Capilar" }, "maos": { base: "Lavieen", regiao: "Mãos" }};
     const op = opcoes[chave];
     if (!op) { adicionarMensagemNoChat("Escolha uma opção de 1 a 6.", "lia"); return; }
-    estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; adicionarMensagemNoChat("Perfeito 😊\n\nMe diga a unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+    estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
 
@@ -266,7 +358,7 @@ async function responderLia(texto) {
     const opcoes = {"1": { base: "Ultraformer MPT", regiao: "Full Face" }, "2": { base: "Ultraformer MPT", regiao: "Papada" }, "3": { base: "Ultraformer MPT", regiao: "Pálpebras" }, "4": { base: "Ultraformer MPT", regiao: "Pescoço" }, "5": { base: "Ultraformer MPT", regiao: "Abdome" }, "6": { base: "Ultraformer MPT", regiao: "Flancos" }, "7": { base: "Ultraformer MPT", regiao: "Interno de Coxa" }, "8": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" }, "9": { base: "Ultraformer MPT", regiao: "Colo" }, "10": { base: "Ultraformer MPT", regiao: "Mãos" }, "full face": { base: "Ultraformer MPT", regiao: "Full Face" }, "papada": { base: "Ultraformer MPT", regiao: "Papada" }, "palpebras": { base: "Ultraformer MPT", regiao: "Pálpebras" }, "pescoco": { base: "Ultraformer MPT", regiao: "Pescoço" }, "abdome": { base: "Ultraformer MPT", regiao: "Abdome" }, "flancos": { base: "Ultraformer MPT", regiao: "Flancos" }, "interno de coxa": { base: "Ultraformer MPT", regiao: "Interno de Coxa" }, "bracos": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" }, "bracos regiao do tchau": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" }, "colo": { base: "Ultraformer MPT", regiao: "Colo" }, "maos": { base: "Ultraformer MPT", regiao: "Mãos" }};
     const op = opcoes[chave];
     if (!op) { adicionarMensagemNoChat("Escolha uma opção de 1 a 10.", "lia"); return; }
-    estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; adicionarMensagemNoChat("Perfeito 😊\n\nMe diga a unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+    estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
 
