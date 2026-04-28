@@ -280,11 +280,11 @@ async function responderLia(texto) {
     const unidade = unidades[estado.unidade];
     const whatsappLink = montarLinkWhatsApp(unidade.whatsapp);
     if (texto === "1") {
-      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
     } else if (texto === "2") {
       const link = buscarLink(estado.procedimentoBase, estado.regiao, unidade.nome);
       if (!link) { adicionarMensagemNoChat("Esse procedimento não está disponível para essa unidade nessa campanha.", "lia"); return; }
-      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra:\n\n${link}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra:\n\n${link}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
     } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
     resetarEstado();
     return;
