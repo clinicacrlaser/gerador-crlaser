@@ -621,7 +621,10 @@ function garantirModalLia() {
 
   chat.innerHTML = [
     '<div id="liaChatHeader" class="lia-chat-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0f2a44;color:#00c6ff;font-weight:bold;">',
-    '  Fale com a Lia',
+    '  <div style="display:flex;align-items:center;gap:10px;">',
+    '    <img src="assets/lia.png" alt="Lia" style="width:40px;height:40px;border-radius:50%;"/>',
+    '    <span>Fale com a Lia</span>',
+    '  </div>',
     '  <span id="btnFecharLia" style="cursor:pointer;">✕</span>',
     '</div>',
     '<div id="liaMessages" style="padding:10px;overflow-y:auto;max-height:280px;font-size:14px;color:#fff;"></div>',
