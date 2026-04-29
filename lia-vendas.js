@@ -51,7 +51,23 @@ const procedimentos = {
   "ultraformer colo":            { base: "Ultraformer MPT",              regiao: "Colo" },
   "mpt colo":                    { base: "Ultraformer MPT",              regiao: "Colo" },
   "ultraformer maos":            { base: "Ultraformer MPT",              regiao: "Mãos" },
-  "mpt maos":                    { base: "Ultraformer MPT",              regiao: "Mãos" }
+  "mpt maos":                    { base: "Ultraformer MPT",              regiao: "Mãos" },
+  "ultraformer terco inferior":  { base: "Ultraformer MPT",              regiao: "Terço Inferior (Contorno Facial)" },
+  "mpt terco inferior":          { base: "Ultraformer MPT",              regiao: "Terço Inferior (Contorno Facial)" },
+  "ultraformer bichectomia":     { base: "Ultraformer MPT",              regiao: "Bichectomia" },
+  "mpt bichectomia":             { base: "Ultraformer MPT",              regiao: "Bichectomia" },
+  "ultraformer gordura do sutia":{ base: "Ultraformer MPT",              regiao: "Gordura do Sutiã" },
+  "mpt gordura do sutia":        { base: "Ultraformer MPT",              regiao: "Gordura do Sutiã" },
+  "ultraformer gordura pre-axilar": { base: "Ultraformer MPT",           regiao: "Gordura Pré-Axilar" },
+  "mpt gordura pre-axilar":      { base: "Ultraformer MPT",              regiao: "Gordura Pré-Axilar" },
+  "ultraformer bananinha":       { base: "Ultraformer MPT",              regiao: "Bananinha" },
+  "mpt bananinha":               { base: "Ultraformer MPT",              regiao: "Bananinha" },
+  "ultraformer monte de venus":  { base: "Ultraformer MPT",              regiao: "Monte de Vênus" },
+  "mpt monte de venus":          { base: "Ultraformer MPT",              regiao: "Monte de Vênus" },
+  "ultraformer rejuvenescimento intimo": { base: "Ultraformer MPT",      regiao: "Rejuvenescimento Íntimo" },
+  "mpt rejuvenescimento intimo": { base: "Ultraformer MPT",              regiao: "Rejuvenescimento Íntimo" },
+  "ultraformer joelho":          { base: "Ultraformer MPT",              regiao: "Joelho" },
+  "mpt joelho":                  { base: "Ultraformer MPT",              regiao: "Joelho" }
 };
 
 const BOTOX_AMBIGUO = ["botox"];
@@ -278,7 +294,7 @@ function perguntarUnidade() {
 }
 
 function perguntarRegiaoUltraformer() {
-  adicionarMensagemNoChat("Qual região do Ultraformer MPT você quer?\n\n1️⃣ Full Face\n2️⃣ Papada\n3️⃣ Pálpebras\n4️⃣ Pescoço\n5️⃣ Abdome\n6️⃣ Flancos\n7️⃣ Interno de Coxa\n8️⃣ Braços Região do Tchau\n9️⃣ Colo\n🔟 Mãos", "lia");
+  adicionarMensagemNoChat("Qual região do Ultraformer MPT você quer?\n\n1️⃣ Full Face\n2️⃣ Terço Inferior (Contorno Facial)\n3️⃣ Papada\n4️⃣ Bichectomia\n5️⃣ Pescoço\n6️⃣ Colo\n7️⃣ Pálpebras\n8️⃣ Abdome\n9️⃣ Flancos\n🔟 Braços Região do Tchau\n1️⃣1️⃣ Gordura do Sutiã\n1️⃣2️⃣ Gordura Pré-Axilar\n1️⃣3️⃣ Bananinha\n1️⃣4️⃣ Interno de Coxa\n1️⃣5️⃣ Monte de Vênus\n1️⃣6️⃣ Rejuvenescimento Íntimo\n1️⃣7️⃣ Joelho\n1️⃣8️⃣ Mãos", "lia");
 }
 
 function contemAlgum(textoNorm, termos) {
@@ -590,9 +606,50 @@ async function responderLia(texto) {
   }
 
   if (estado.etapa === "ultraformer_regiao") {
-    const opcoes = {"1": { base: "Ultraformer MPT", regiao: "Full Face" }, "2": { base: "Ultraformer MPT", regiao: "Papada" }, "3": { base: "Ultraformer MPT", regiao: "Pálpebras" }, "4": { base: "Ultraformer MPT", regiao: "Pescoço" }, "5": { base: "Ultraformer MPT", regiao: "Abdome" }, "6": { base: "Ultraformer MPT", regiao: "Flancos" }, "7": { base: "Ultraformer MPT", regiao: "Interno de Coxa" }, "8": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" }, "9": { base: "Ultraformer MPT", regiao: "Colo" }, "10": { base: "Ultraformer MPT", regiao: "Mãos" }, "full face": { base: "Ultraformer MPT", regiao: "Full Face" }, "papada": { base: "Ultraformer MPT", regiao: "Papada" }, "palpebras": { base: "Ultraformer MPT", regiao: "Pálpebras" }, "pescoco": { base: "Ultraformer MPT", regiao: "Pescoço" }, "abdome": { base: "Ultraformer MPT", regiao: "Abdome" }, "flancos": { base: "Ultraformer MPT", regiao: "Flancos" }, "interno de coxa": { base: "Ultraformer MPT", regiao: "Interno de Coxa" }, "bracos": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" }, "bracos regiao do tchau": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" }, "colo": { base: "Ultraformer MPT", regiao: "Colo" }, "maos": { base: "Ultraformer MPT", regiao: "Mãos" }};
+    const opcoes = {
+      "1": { base: "Ultraformer MPT", regiao: "Full Face" },
+      "2": { base: "Ultraformer MPT", regiao: "Terço Inferior (Contorno Facial)" },
+      "3": { base: "Ultraformer MPT", regiao: "Papada" },
+      "4": { base: "Ultraformer MPT", regiao: "Bichectomia" },
+      "5": { base: "Ultraformer MPT", regiao: "Pescoço" },
+      "6": { base: "Ultraformer MPT", regiao: "Colo" },
+      "7": { base: "Ultraformer MPT", regiao: "Pálpebras" },
+      "8": { base: "Ultraformer MPT", regiao: "Abdome" },
+      "9": { base: "Ultraformer MPT", regiao: "Flancos" },
+      "10": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" },
+      "11": { base: "Ultraformer MPT", regiao: "Gordura do Sutiã" },
+      "12": { base: "Ultraformer MPT", regiao: "Gordura Pré-Axilar" },
+      "13": { base: "Ultraformer MPT", regiao: "Bananinha" },
+      "14": { base: "Ultraformer MPT", regiao: "Interno de Coxa" },
+      "15": { base: "Ultraformer MPT", regiao: "Monte de Vênus" },
+      "16": { base: "Ultraformer MPT", regiao: "Rejuvenescimento Íntimo" },
+      "17": { base: "Ultraformer MPT", regiao: "Joelho" },
+      "18": { base: "Ultraformer MPT", regiao: "Mãos" },
+      "full face": { base: "Ultraformer MPT", regiao: "Full Face" },
+      "terco inferior": { base: "Ultraformer MPT", regiao: "Terço Inferior (Contorno Facial)" },
+      "contorno facial": { base: "Ultraformer MPT", regiao: "Terço Inferior (Contorno Facial)" },
+      "terco inferior (contorno facial)": { base: "Ultraformer MPT", regiao: "Terço Inferior (Contorno Facial)" },
+      "papada": { base: "Ultraformer MPT", regiao: "Papada" },
+      "bichectomia": { base: "Ultraformer MPT", regiao: "Bichectomia" },
+      "pescoco": { base: "Ultraformer MPT", regiao: "Pescoço" },
+      "colo": { base: "Ultraformer MPT", regiao: "Colo" },
+      "palpebras": { base: "Ultraformer MPT", regiao: "Pálpebras" },
+      "abdome": { base: "Ultraformer MPT", regiao: "Abdome" },
+      "flancos": { base: "Ultraformer MPT", regiao: "Flancos" },
+      "bracos": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" },
+      "bracos regiao do tchau": { base: "Ultraformer MPT", regiao: "Braços Região do Tchau" },
+      "gordura do sutia": { base: "Ultraformer MPT", regiao: "Gordura do Sutiã" },
+      "gordura pre-axilar": { base: "Ultraformer MPT", regiao: "Gordura Pré-Axilar" },
+      "gordura pre axilar": { base: "Ultraformer MPT", regiao: "Gordura Pré-Axilar" },
+      "bananinha": { base: "Ultraformer MPT", regiao: "Bananinha" },
+      "interno de coxa": { base: "Ultraformer MPT", regiao: "Interno de Coxa" },
+      "monte de venus": { base: "Ultraformer MPT", regiao: "Monte de Vênus" },
+      "rejuvenescimento intimo": { base: "Ultraformer MPT", regiao: "Rejuvenescimento Íntimo" },
+      "joelho": { base: "Ultraformer MPT", regiao: "Joelho" },
+      "maos": { base: "Ultraformer MPT", regiao: "Mãos" }
+    };
     const op = opcoes[chave];
-    if (!op) { adicionarMensagemNoChat("Escolha uma opção de 1 a 10.", "lia"); return; }
+    if (!op) { adicionarMensagemNoChat("Escolha uma opção de 1 a 18.", "lia"); return; }
     estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
