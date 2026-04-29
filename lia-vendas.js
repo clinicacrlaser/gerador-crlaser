@@ -483,7 +483,7 @@ function adicionarMensagemNoChat(texto, tipo) {
     bolha.style.color = "#ffffff";
   }
 
-  if (tipo === "lia" && /<a\s+href=/i.test(texto)) {
+  if (tipo === "lia" && (/<a\s+href=/i.test(texto) || /<button\b/i.test(texto))) {
     bolha.innerHTML = texto;
   } else {
     bolha.textContent = texto;
@@ -491,6 +491,50 @@ function adicionarMensagemNoChat(texto, tipo) {
 
   div.appendChild(bolha);
   liaMessages.appendChild(div);
+
+  const botoesCopiar = bolha.querySelectorAll(".btn-copiar-pix[data-pix]");
+  botoesCopiar.forEach((botao) => {
+    if (botao.dataset.bound === "1") return;
+    botao.dataset.bound = "1";
+    botao.addEventListener("click", async () => {
+      const pix = botao.dataset.pix || "";
+      const textoOriginal = botao.textContent || "Copiar Pix";
+      let copiado = false;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(pix);
+          copiado = true;
+        }
+      } catch (e) {
+        copiado = false;
+      }
+
+      if (!copiado) {
+        const campo = document.createElement("textarea");
+        campo.value = pix;
+        campo.style.position = "fixed";
+        campo.style.opacity = "0";
+        document.body.appendChild(campo);
+        campo.focus();
+        campo.select();
+        try {
+          copiado = document.execCommand("copy");
+        } catch (e) {
+          copiado = false;
+        }
+        document.body.removeChild(campo);
+      }
+
+      if (copiado) {
+        botao.textContent = "Pix copiado ✅";
+        setTimeout(() => {
+          botao.textContent = textoOriginal;
+        }, 1800);
+      }
+    });
+  });
+
   liaMessages.scrollTop = liaMessages.scrollHeight;
   setTimeout(() => {
     liaMessages.scrollTop = liaMessages.scrollHeight;
@@ -724,7 +768,7 @@ async function responderLia(texto) {
   if (estado.etapa === "pagamento") {
     const unidade = unidades[estado.unidade];
     if (texto === "1") {
-      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊\n\nSe quiser aproveitar outras ofertas, é só escolher outro procedimento no sistema acima 😊`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\n<button type="button" class="btn-copiar-pix" data-pix="${unidade.pix}" style="margin-top:8px;background:#00c6ff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700;color:#0b1a2a;">Copiar Pix</button>\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊`, "lia");
       aguardandoContinuidade = true;
       resetarEstado();
     } else if (texto === "2") {
