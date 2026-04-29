@@ -111,6 +111,9 @@
   // Normaliza nome do procedimento para buscar desconto correto por família
   function getDiscountGroupByProcedureName(procName) {
     const n = normalizeText(procName);
+    // Depilação a Laser: qualquer variação
+    if (n.includes('depilacao a laser') || n.includes('depilação a laser')) return 'depilacao';
+    if (n.includes('luz intensa pulsada') || n.includes('luz pulsada')) return 'luzpulsada';
     if (n.includes('ultraformer mpt') || n.includes('ultraformer')) return 'ultraformer';
     if (n.includes('lavieen') || n.includes('laser lavieen')) return 'lavieen';
     if (n.includes('botox')) return 'botox';
@@ -119,6 +122,7 @@
     if (n.includes('scizer')) return 'scizer';
     if (n.includes('endymed')) return 'endymed';
     if (n.includes('microagulhamento')) return 'microagulhamento';
+    // fallback para outros nomes
     if (n.includes('luz pulsada') || n.includes('luz intensa pulsada')) return 'luzpulsada';
     if (n.includes('depilacao') || n.includes('depilação')) return 'depilacao';
     return null;
