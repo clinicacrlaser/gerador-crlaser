@@ -286,6 +286,17 @@ async function enviarMensagem() {
   await responder(texto.toLowerCase());
 }
 
+// Mensagem inicial ao abrir o chat
+window.addEventListener('DOMContentLoaded', function() {
+  const mensagens = document.getElementById('messages');
+  if (mensagens && mensagens.children.length === 0) {
+    adicionarMensagem(
+      `Oi, eu sou a Lia 😊\n\nEstou aqui para te ajudar a comprar seu procedimento.\n\nQual procedimento você quer fazer?\n\nExemplo: Botox, Ultraformer, Lavieen`,
+      "lia"
+    );
+  }
+});
+
 const MSG_UNIDADE = `Perfeito 😊
 
 Escolha a unidade:
