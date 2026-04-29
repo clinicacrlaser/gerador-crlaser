@@ -987,7 +987,10 @@ function initLiaVendasUI() {
   });
 
   if (!liaMessages.dataset.liaInicializada) {
-    adicionarMensagemNoChat("Perfeito 😊\nMe diga o procedimento que você quer comprar.", "lia");
+    adicionarMensagemNoChat(
+      `Oi, eu sou a Lia 😊\n\nEstou aqui para te ajudar a comprar seu procedimento.\n\nQual procedimento você quer fazer?\n\nExemplo: Botox, Ultraformer, Lavieen`,
+      "lia"
+    );
     liaMessages.dataset.liaInicializada = "1";
   }
 
