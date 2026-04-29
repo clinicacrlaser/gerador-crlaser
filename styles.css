@@ -784,7 +784,7 @@ body {
 
 .lia-chat-overlay.is-visible {
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .lia-send-btn {
@@ -848,8 +848,9 @@ body {
     height: 50vh !important;
     max-height: 50vh !important;
     border-radius: 16px 16px 0 0 !important;
-    z-index: 10000 !important;
+    z-index: 1000000 !important;
     overflow: hidden !important;
+    pointer-events: auto !important;
   }
 
   #btnCopiarQA {
@@ -874,19 +875,26 @@ body {
   #liaChat #liaInputBar {
     position: sticky;
     bottom: 0;
-    z-index: 2;
+    z-index: 1000001;
     background: #0b1a2a;
     border-top: 1px solid rgba(24, 199, 209, 0.25);
     padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    pointer-events: auto !important;
   }
 
   #liaChat #liaInput {
     font-size: 16px;
+    position: relative;
+    z-index: 1000001;
+    pointer-events: auto !important;
   }
 
   #liaChat .lia-send-btn {
     min-height: 48px;
     padding: 12px 18px !important;
+    position: relative;
+    z-index: 1000001;
+    pointer-events: auto !important;
   }
 
   body.lia-mobile-open {

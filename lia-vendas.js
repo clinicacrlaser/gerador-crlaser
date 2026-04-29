@@ -726,10 +726,22 @@ function initLiaVendasUI() {
     if (liaOverlay) {
       liaOverlay.classList.add("is-visible");
       liaOverlay.setAttribute("aria-hidden", "false");
+      liaOverlay.style.pointerEvents = "none";
     }
     if (window.matchMedia("(max-width: 768px)").matches) {
       liaChat.style.bottom = "0px";
+      liaChat.style.pointerEvents = "auto";
+      liaChat.style.zIndex = "1000000";
+      liaInput.style.pointerEvents = "auto";
+      liaInput.style.position = "relative";
+      liaInput.style.zIndex = "1000001";
+      btnEnviarLia.style.pointerEvents = "auto";
+      btnEnviarLia.style.position = "relative";
+      btnEnviarLia.style.zIndex = "1000001";
     }
+    liaInput.disabled = false;
+    liaInput.readOnly = false;
+    btnEnviarLia.disabled = false;
     liaInput.focus();
   }
 
@@ -756,6 +768,13 @@ function initLiaVendasUI() {
   btnEnviarLia.disabled = false;
   liaInput.disabled = false;
   liaInput.readOnly = false;
+  liaChat.style.pointerEvents = "auto";
+  liaInput.style.pointerEvents = "auto";
+  liaInput.style.position = "relative";
+  liaInput.style.zIndex = "1000001";
+  btnEnviarLia.style.pointerEvents = "auto";
+  btnEnviarLia.style.position = "relative";
+  btnEnviarLia.style.zIndex = "1000001";
   liaInput.style.background = "#0f1e2e";
   liaInput.style.color = "#ffffff";
   btnEnviarLia.addEventListener("click", enviarMensagem);
