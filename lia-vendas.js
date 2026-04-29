@@ -605,9 +605,8 @@ async function responderLia(texto) {
 
   if (estado.etapa === "pagamento") {
     const unidade = unidades[estado.unidade];
-    const whatsappLink = montarLinkWhatsApp(unidade.whatsapp);
     if (texto === "1") {
-      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n\n${unidade.pix}\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade.\n\nCaso não tenha o telefone, basta me pedir dizendo qual é a sua unidade 😊\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
       aguardandoContinuidade = true;
       resetarEstado();
     } else if (texto === "2") {
