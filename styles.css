@@ -87,6 +87,7 @@
     bottom: 10px;
     font-size: 0.98rem;
     padding: 12px 14px;
+    margin-bottom: 60px; /* espaço extra para não colar no botão da Lia */
   }
   .modal-whatsapp-content {
     padding: 18px 6vw 18px 6vw;

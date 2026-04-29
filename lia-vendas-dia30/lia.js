@@ -288,7 +288,7 @@ async function enviarMensagem() {
 
 const MSG_UNIDADE = `Perfeito 😊
 
-Me diga a unidade:
+Escolha a unidade:
 
 1️⃣ Brasília
 2️⃣ Campinas
