@@ -444,7 +444,10 @@ function adicionarMensagemNoChat(texto, tipo) {
 
   div.appendChild(bolha);
   liaMessages.appendChild(div);
-  bolha.scrollIntoView({ behavior: "smooth", block: "end" });
+  liaMessages.scrollTop = liaMessages.scrollHeight;
+  setTimeout(() => {
+    liaMessages.scrollTop = liaMessages.scrollHeight;
+  }, 50);
 }
 
 async function responderLia(texto) {
