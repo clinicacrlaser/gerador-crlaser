@@ -509,8 +509,17 @@ function adicionarMensagemNoChat(texto, tipo) {
     bolha.style.color = "#ffffff";
   }
 
-  if (tipo === "lia") {
-    bolha.innerHTML = transformarLinks(texto);
+  if (tipo === "lia" && typeof texto === "object" && texto.tipo === "pagamento" && texto.linkPagamento) {
+    bolha.innerHTML = `${texto.texto.replace(/\n/g, '<br>')}<br><button type="button" class="btn-link-pagamento" style="margin-top:16px;background:#00c6ff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-weight:700;color:#0b1a2a;font-size:16px;pointer-events:auto;">Abrir pagamento</button>`;
+    const btn = bolha.querySelector('.btn-link-pagamento');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        window.open(texto.linkPagamento, '_blank', 'noopener,noreferrer');
+      });
+    }
+  } else if (tipo === "lia") {
+    bolha.innerHTML = transformarLinks(typeof texto === "string" ? texto : "");
   } else {
     bolha.textContent = texto;
   }
