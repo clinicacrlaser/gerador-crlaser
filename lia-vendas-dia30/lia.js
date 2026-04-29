@@ -494,7 +494,7 @@ async function responder(texto) {
 
     if (texto === "1") {
       adicionarMensagem(
-`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nPara falar com a unidade, use o botão WhatsApp das unidades na página.`,
+`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nApós o pagamento, envie o comprovante 😊\n\nSe precisar falar com a unidade, clique no botão “WhatsApp das unidades” aqui na tela.`,
         "lia"
       );
 
@@ -510,7 +510,7 @@ async function responder(texto) {
       }
 
       adicionarMensagem(
-`Perfeito 😊\n\nFinalize sua compra:\n${link}\n\nPara falar com a unidade, use o botão WhatsApp das unidades na página.`,
+`Perfeito 😊\n\nFinalize sua compra:\n${link}\n\nApós o pagamento, envie o comprovante 😊\n\nSe precisar falar com a unidade, clique no botão “WhatsApp das unidades” aqui na tela.`,
         "lia"
       );
 
