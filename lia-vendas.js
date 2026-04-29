@@ -502,7 +502,7 @@ function adicionarMensagemNoChat(texto, tipo) {
     bolha.style.color = "#ffffff";
   }
 
-  if (tipo === "lia" && (/<a\s+href=/i.test(texto) || /<button\b/i.test(texto))) {
+  if (tipo === "lia") {
     bolha.innerHTML = texto;
   } else {
     bolha.textContent = texto;
