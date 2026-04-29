@@ -566,7 +566,7 @@
 
   <script src="data/ofertas.js?v=1"></script>
   <script src="script.js?v=2"></script>
-    <script src="lia-vendas.js?v=1"></script>
+  <script src="lia-vendas.js?v=1"></script>
   <script>
     // ...existing code...
     // Garante clique no botão inteiro para abrir o chat Lia
@@ -578,7 +578,15 @@
         liaOverlay.setAttribute('aria-hidden', 'false');
       }
     };
-    // ...existing code...
+    // Corrige eventos do modal de atenção: X e 'Entendi' fecham o modal
+    function fecharPopupOverlay() {
+      var overlay = document.getElementById('popupOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+    var btnClose = document.getElementById('popupClose');
+    if (btnClose) btnClose.onclick = fecharPopupOverlay;
+    var btnOk = document.getElementById('popupOk');
+    if (btnOk) btnOk.onclick = fecharPopupOverlay;
   </script>
 </body>
 </html>
