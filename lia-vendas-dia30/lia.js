@@ -373,7 +373,10 @@ async function responder(texto) {
       return;
     }
 
-    adicionarMensagem("Me diga qual procedimento você quer comprar.", "lia");
+    adicionarMensagem(
+      `Oi, eu sou a Lia 😊\n\nEstou aqui para te ajudar a comprar seu procedimento.\n\nQual procedimento você quer fazer?\n\nExemplo: Botox, Ultraformer, Lavieen`,
+      "lia"
+    );
     return;
   }
 
