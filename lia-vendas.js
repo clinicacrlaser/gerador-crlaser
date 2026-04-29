@@ -467,7 +467,7 @@ async function responderLia(texto) {
     aguardandoUnidadeHumano = false;
     aguardandoUnidadeParaTelefone = false;
     resetarEstado();
-    adicionarMensagemNoChat("Por nada 😊\n\nFico à disposição se precisar de algo.", "lia");
+    adicionarMensagemNoChat("Por nada 😊\n\nVamos fechar mais algum?", "lia");
     return;
   }
 
@@ -498,7 +498,7 @@ async function responderLia(texto) {
   }
 
   if (estado.etapa === "inicio" && ehDuvidaTecnica(texto) && !ehIntencaoCompraClara(texto)) {
-    adicionarMensagemNoChat("Ainda estou em treinamento e posso não saber responder isso com segurança 😊\n\nO ideal é falar com uma pessoa da equipe CR Laser® para te orientar melhor.\n\nSe quiser, me diga sua unidade que eu te envio o WhatsApp correto.", "lia");
+    adicionarMensagemNoChat("Ainda estou em treinamento para dúvidas 😊\n\nPara te orientar melhor, fale direto com a unidade.\n\nQuer que eu te passe o WhatsApp?", "lia");
     aguardandoUnidadeHumano = true;
     return;
   }
@@ -569,7 +569,7 @@ async function responderLia(texto) {
       return;
     }
 
-    adicionarMensagemNoChat("Me diga qual procedimento você quer comprar.", "lia");
+    adicionarMensagemNoChat("Me diga o procedimento que você quer comprar 😊\nExemplo: Botox, Ultraformer, Lavieen", "lia");
     return;
   }
 
@@ -599,20 +599,20 @@ async function responderLia(texto) {
 
   if (estado.etapa === "unidade") {
     if (!unidades[texto]) { adicionarMensagemNoChat("Escolha uma opção de 1 a 5.", "lia"); return; }
-    estado.unidade = texto; estado.etapa = "pagamento"; adicionarMensagemNoChat("Você prefere:\n\n1️⃣ Pix\n2️⃣ Cartão", "lia");
+    estado.unidade = texto; estado.etapa = "pagamento"; adicionarMensagemNoChat("Como você prefere pagar?\n\n1️⃣ Pix\n2️⃣ Cartão", "lia");
     return;
   }
 
   if (estado.etapa === "pagamento") {
     const unidade = unidades[estado.unidade];
     if (texto === "1") {
-      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n\n${unidade.pix}\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade.\n\nCaso não tenha o telefone, basta me pedir dizendo qual é a sua unidade 😊\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊\n\nQuer incluir mais algum procedimento?`, "lia");
       aguardandoContinuidade = true;
       resetarEstado();
     } else if (texto === "2") {
       const link = buscarLink(estado.procedimentoBase, estado.regiao, unidade.nome);
       if (!link) { adicionarMensagemNoChat("Esse procedimento não está disponível para essa unidade nessa campanha.", "lia"); return; }
-      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra pelo link abaixo:\n\n<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade.\n\nCaso não tenha o telefone, basta me pedir dizendo qual é a sua unidade 😊`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra aqui:\n<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊`, "lia");
       aguardandoUnidadeParaTelefone = true;
     } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
     return;
@@ -797,7 +797,7 @@ function initLiaVendasUI() {
   });
 
   if (!liaMessages.dataset.liaInicializada) {
-    adicionarMensagemNoChat("Oi, eu sou a Lia. Qual procedimento você quer fechar hoje?", "lia");
+    adicionarMensagemNoChat("Perfeito 😊\nMe diga o procedimento que você quer comprar.", "lia");
     liaMessages.dataset.liaInicializada = "1";
   }
 
