@@ -65,16 +65,16 @@
   ];
 
   const DISCOUNT_RATES = {
-    ultraformer: [0.30, 0.35, 0.40, 0.45],
-    lavieen: [0.45, 0.50, 0.55, 0.60],
-    botox: [0.25, 0.30, 0.35, 0.40],
-    preenchedor: [0.25, 0.30, 0.35, 0.40],
-    diamond: [0.30, 0.35, 0.40, 0.45],
-    scizer: [0.40, 0.45, 0.50, 0.55],
-    endymed: [0.45, 0.50, 0.55, 0.60],
-    microagulhamento: [0.05, 0.10, 0.15, 0.25],
-    luzpulsada: [0.35, 0.40, 0.45, 0.50],
-    depilacao: [0.40, 0.50, 0.50, 0.50]
+    ultraformer: [0.45, 0.45, 0.45, 0.45], // 45%
+    lavieen: [0.60, 0.60, 0.60, 0.60],     // 60%
+    botox: [0.40, 0.40, 0.40, 0.40],       // 40%
+    preenchedor: [0.40, 0.40, 0.40, 0.40], // 40%
+    diamond: [0.45, 0.45, 0.45, 0.45],     // 45%
+    scizer: [0.55, 0.55, 0.55, 0.55],      // 55%
+    endymed: [0.60, 0.60, 0.60, 0.60],     // 60%
+    microagulhamento: [0.20, 0.20, 0.20, 0.20], // 20%
+    luzpulsada: [0.50, 0.50, 0.50, 0.50],  // 50% (ajustar se necessário)
+    depilacao: [0.55, 0.55, 0.55, 0.55]    // 55% (ajustar se necessário)
   };
 
   const HIGHLIGHT_BOTOX_PROC_IDX = '0';
