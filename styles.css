@@ -949,6 +949,28 @@ body {
   }
 }
 
+/* Garantia final de visibilidade do botao da Lia no mobile */
+@media (max-width: 768px) {
+  #btnAbrirLia,
+  #liaButton,
+  .lia-button,
+  .lia-floating-button,
+  button[aria-label="Fale com a Lia"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    right: 16px !important;
+    bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+    z-index: 999999 !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 140px !important;
+    padding: 12px 18px !important;
+    pointer-events: auto !important;
+  }
+}
+
 .suggestion-label {
   margin: 0 0 14px;
   font-size: 0.82rem;
