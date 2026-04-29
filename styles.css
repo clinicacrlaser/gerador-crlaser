@@ -819,55 +819,49 @@ body {
   padding: 20px 0 0;
 }
 @media (max-width: 768px) {
-  #btnAbrirLia,
+  #btnAbrirLia {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   #liaChat {
-    display: none !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 50vh !important;
+    max-height: 50vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    z-index: 10000 !important;
+    overflow: hidden !important;
   }
 
   #btnCopiarQA {
     display: none;
   }
 
-  #liaChat.is-mobile-fullscreen {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: auto !important;
-    bottom: auto !important;
-    width: 100% !important;
-    height: 100dvh !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-    z-index: 12000 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    transform: translateY(100%);
-    opacity: 0;
-    transition: transform 250ms ease-out, opacity 250ms ease-out;
-    will-change: transform, opacity;
-  }
-
-  #liaChat.is-mobile-fullscreen.is-open {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  #liaChat.is-mobile-fullscreen #liaChatHeader {
+  #liaChat #liaChatHeader {
     position: sticky;
     top: 0;
     z-index: 2;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
   }
 
-  #liaChat.is-mobile-fullscreen #liaMessages {
+  #liaChat #liaMessages {
     flex: 1 1 auto;
-    max-height: none !important;
+    max-height: calc(50vh - 130px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     padding: 12px !important;
   }
 
-  #liaChat.is-mobile-fullscreen #liaInputBar {
+  #liaChat #liaInputBar {
     position: sticky;
     bottom: 0;
     z-index: 2;
@@ -876,11 +870,11 @@ body {
     padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
-  #liaChat.is-mobile-fullscreen #liaInput {
+  #liaChat #liaInput {
     font-size: 16px;
   }
 
-  #liaChat.is-mobile-fullscreen .lia-send-btn {
+  #liaChat .lia-send-btn {
     min-height: 48px;
     padding: 12px 18px !important;
   }
