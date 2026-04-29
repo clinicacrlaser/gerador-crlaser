@@ -246,6 +246,7 @@ let estado = {
 
 let aguardandoContinuidade = false;
 let aguardandoUnidadeHumano = false;
+let aguardandoUnidadeParaTelefone = false;
 
 function resetarEstado() {
   estado = { etapa: "inicio", procedimentoDigitado: null, procedimentoBase: null, regiao: null, unidade: null };
@@ -412,6 +413,7 @@ async function responderLia(texto) {
   if (ehMensagemAgradecimento(texto)) {
     aguardandoContinuidade = false;
     aguardandoUnidadeHumano = false;
+    aguardandoUnidadeParaTelefone = false;
     resetarEstado();
     adicionarMensagemNoChat("De nada 😊\n\nFico à disposição se precisar de algo.", "lia");
     return;
@@ -427,6 +429,20 @@ async function responderLia(texto) {
     }
 
     adicionarMensagemNoChat("Me diga sua unidade para eu te enviar o WhatsApp correto:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
+    return;
+  }
+
+  if (aguardandoUnidadeParaTelefone) {
+    const unidade = identificarUnidadePorTexto(texto);
+    if (unidade) {
+      const whatsappLink = montarLinkWhatsApp(unidade.whatsapp);
+      adicionarMensagemNoChat(`Perfeito 😊\n\nFale com a unidade pelo WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>`, "lia");
+      aguardandoUnidadeParaTelefone = false;
+      resetarEstado();
+      return;
+    }
+
+    adicionarMensagemNoChat("Me diga sua unidade:\n\n1️⃣ Brasília\n2️⃣ Campinas\n3️⃣ Goiânia\n4️⃣ Palmas\n5️⃣ São Paulo", "lia");
     return;
   }
 
@@ -571,13 +587,14 @@ async function responderLia(texto) {
     const whatsappLink = montarLinkWhatsApp(unidade.whatsapp);
     if (texto === "1") {
       adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\n📲 Falar com a unidade no WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>\n\nPosso te ajudar com mais algum procedimento? 😊`, "lia");
+      aguardandoContinuidade = true;
+      resetarEstado();
     } else if (texto === "2") {
       const link = buscarLink(estado.procedimentoBase, estado.regiao, unidade.nome);
       if (!link) { adicionarMensagemNoChat("Esse procedimento não está disponível para essa unidade nessa campanha.", "lia"); return; }
       adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra pelo link abaixo:\n\n<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>\n\nApós o pagamento, envie o comprovante para o WhatsApp da unidade.\n\nCaso não tenha o telefone, basta me pedir dizendo qual é a sua unidade 😊`, "lia");
+      aguardandoUnidadeParaTelefone = true;
     } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
-    aguardandoContinuidade = texto === "1";
-    resetarEstado();
     return;
   }
 }
