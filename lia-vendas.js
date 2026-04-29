@@ -11,6 +11,14 @@ const unidades = {
   "5": { nome: "São Paulo", pix: "54.153.510/0001-28", whatsapp: "11967292039" }
 };
 
+const mapaWhats = {
+  "brasilia": "https://wa.me/5561981316493",
+  "campinas": "https://wa.me/5519991818366",
+  "goiania": "https://wa.me/5562985499102",
+  "palmas": "https://wa.me/5563981226319",
+  "sao paulo": "https://wa.me/5511967292039"
+};
+
 const procedimentos = {
   "botox facial":                { base: "Botox",                        regiao: "Facial" },
   "botox suor":                  { base: "Botox",                        regiao: "Axilar Suor" },
@@ -219,6 +227,19 @@ function identificarUnidadePorTexto(texto) {
   if (chave.includes("goiania")) return unidades["3"];
   if (chave.includes("palmas")) return unidades["4"];
   if (chave.includes("sao paulo")) return unidades["5"];
+
+  return null;
+}
+
+function buscarLinkWhatsApp(texto) {
+  const chave = normalizar(texto);
+  if (mapaWhats[chave]) return mapaWhats[chave];
+
+  if (chave.includes("brasilia")) return mapaWhats["brasilia"];
+  if (chave.includes("campinas")) return mapaWhats["campinas"];
+  if (chave.includes("goiania")) return mapaWhats["goiania"];
+  if (chave.includes("palmas")) return mapaWhats["palmas"];
+  if (chave.includes("sao paulo")) return mapaWhats["sao paulo"];
 
   return null;
 }
@@ -433,9 +454,8 @@ async function responderLia(texto) {
   }
 
   if (aguardandoUnidadeParaTelefone) {
-    const unidade = identificarUnidadePorTexto(texto);
-    if (unidade) {
-      const whatsappLink = montarLinkWhatsApp(unidade.whatsapp);
+    const whatsappLink = buscarLinkWhatsApp(texto);
+    if (whatsappLink) {
       adicionarMensagemNoChat(`Perfeito 😊\n\nFale com a unidade pelo WhatsApp:\n<a href="${whatsappLink}" target="_blank" rel="noopener noreferrer">${whatsappLink}</a>`, "lia");
       aguardandoUnidadeParaTelefone = false;
       resetarEstado();
