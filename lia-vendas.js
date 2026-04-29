@@ -281,10 +281,39 @@ function perguntarRegiaoUltraformer() {
   adicionarMensagemNoChat("Qual região do Ultraformer MPT você quer?\n\n1️⃣ Full Face\n2️⃣ Papada\n3️⃣ Pálpebras\n4️⃣ Pescoço\n5️⃣ Abdome\n6️⃣ Flancos\n7️⃣ Interno de Coxa\n8️⃣ Braços Região do Tchau\n9️⃣ Colo\n🔟 Mãos", "lia");
 }
 
+function contemAlgum(textoNorm, termos) {
+  return termos.some((termo) => textoNorm.includes(termo));
+}
+
+const SINONIMOS_PROCEDIMENTO = {
+  botoxFacial: ["botox", "toxina", "rugas", "linhas", "testa", "pe de galinha"],
+  preenchedor: ["preenchimento", "preenchedor", "acido hialuronico", "labios", "boca", "olheira", "bigode chines"],
+  ultraformer: ["ultra", "ultraformer", "mpt", "flacidez", "lifting", "pele caida", "rosto caido", "papada"],
+  lavieen: ["lavieen", "melasma", "mancha", "manchas", "pele manchada"],
+  scizer: ["gordura", "gordura localizada", "barriga", "flanco", "culote"],
+  endymed: ["flacidez leve", "pele mole", "braco mole", "pescoco"]
+};
+
 function analisarTextoProcedimento(texto) {
   const textoNorm = normalizar(texto);
 
-  if (textoNorm.includes("ultraformer") || textoNorm.includes("mpt")) {
+  if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.endymed)) {
+    estado.procedimentoBase = "Endymed Radiofrequência 3DEEP";
+    estado.regiao = "Endymed Radiofrequência 3DEEP";
+    estado.etapa = "unidade";
+    perguntarUnidade();
+    return true;
+  }
+
+  if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.scizer)) {
+    estado.procedimentoBase = "Scizer";
+    estado.regiao = "Corporal Por Região";
+    estado.etapa = "unidade";
+    perguntarUnidade();
+    return true;
+  }
+
+  if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.ultraformer)) {
     if (textoNorm.includes("full face") || textoNorm.includes("rosto") || textoNorm.includes("face")) {
       estado.procedimentoBase = "Ultraformer MPT";
       estado.regiao = "Full Face";
@@ -314,15 +343,7 @@ function analisarTextoProcedimento(texto) {
     return true;
   }
 
-  if (textoNorm.includes("botox")) {
-    if (textoNorm.includes("facial")) {
-      estado.procedimentoBase = "Botox";
-      estado.regiao = "Facial";
-      estado.etapa = "unidade";
-      perguntarUnidade();
-      return true;
-    }
-
+  if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.botoxFacial)) {
     if (textoNorm.includes("suor") || textoNorm.includes("axilar")) {
       estado.procedimentoBase = "Botox";
       estado.regiao = "Axilar Suor";
@@ -331,13 +352,17 @@ function analisarTextoProcedimento(texto) {
       return true;
     }
 
-    estado.etapa = "botox_regiao";
-    adicionarMensagemNoChat("Você quer qual Botox?\n\n1️⃣ Botox facial\n2️⃣ Botox suor axilar", "lia");
-    return true;
+    if (textoNorm.includes("facial") || contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.botoxFacial)) {
+      estado.procedimentoBase = "Botox";
+      estado.regiao = "Facial";
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return true;
+    }
   }
 
-  if (textoNorm.includes("lavieen")) {
-    if (textoNorm.includes("melasma")) {
+  if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.lavieen)) {
+    if (textoNorm.includes("melasma") || textoNorm.includes("mancha") || textoNorm.includes("pele manchada")) {
       estado.procedimentoBase = "Lavieen";
       estado.regiao = "Melasma";
       estado.etapa = "unidade";
@@ -369,13 +394,7 @@ function analisarTextoProcedimento(texto) {
     return true;
   }
 
-  if (
-    textoNorm.includes("preenchimento") ||
-    textoNorm.includes("preenchedor") ||
-    textoNorm.includes("acido hialuronico") ||
-    textoNorm.includes("acido hialuronico") ||
-    textoNorm.includes("hialuronico")
-  ) {
+  if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.preenchedor) || textoNorm.includes("hialuronico")) {
     estado.procedimentoBase = "Preenchedor";
     estado.regiao = "Uma Ampola";
     estado.etapa = "unidade";
@@ -499,36 +518,6 @@ async function responderLia(texto) {
 
   if (estado.etapa === "inicio") {
     estado.procedimentoDigitado = texto;
-
-    const textoNorm = texto
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-
-    if (textoNorm.includes("ultraformer") || textoNorm.includes("mpt") || textoNorm === "ultra") {
-      if (
-        textoNorm.includes("full face") ||
-        textoNorm.includes("rosto") ||
-        textoNorm.includes("face")
-      ) {
-        estado.procedimentoBase = "Ultraformer MPT";
-        estado.regiao = "Full Face";
-        estado.etapa = "unidade";
-        perguntarUnidade();
-        return;
-      }
-
-      if (textoNorm.includes("papada")) {
-        estado.procedimentoBase = "Ultraformer MPT";
-        estado.regiao = "Papada";
-        estado.etapa = "unidade";
-        perguntarUnidade();
-        return;
-      }
-
-      perguntarRegiaoUltraformer();
-      return;
-    }
 
     if (analisarTextoProcedimento(texto)) {
       return;
