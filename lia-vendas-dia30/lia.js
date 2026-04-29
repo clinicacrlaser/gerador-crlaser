@@ -108,70 +108,94 @@ const LINKS = {
   },
   "Ultraformer MPT": {
     "Full Face": {
-      "Brasília": "https://cielolink.com.br/3IdBDxq",
+      "Brasília": "https://cielolink.com.br/4bl7OGp",
       "Campinas": "https://cielolink.com.br/4hMMcVZ",
       "Goiânia": "https://cielolink.com.br/4kWJPjS",
       "Palmas": "https://cielolink.com.br/4pWxfEt",
       "São Paulo": "https://cielolink.com.br/4k8hne7"
     },
     "Papada": {
-      "Brasília": "https://cielolink.com.br/40hOlS4",
+      "Brasília": "https://cielolink.com.br/4uqFdbb",
       "Campinas": "https://cielolink.com.br/3WIYKnO",
       "Goiânia": "https://cielolink.com.br/3HBDoo6",
       "Palmas": "https://cielolink.com.br/43jpYF9",
       "São Paulo": "https://cielolink.com.br/4l2Kn8u"
     },
     "Pálpebras": {
-      "Brasília": "https://cielolink.com.br/4nhX5l2",
+      "Brasília": "https://cielolink.com.br/4b6AzaT",
       "Campinas": "https://cielolink.com.br/4hNiG2x",
       "Goiânia": "https://cielolink.com.br/4e0R2xc",
       "Palmas": "https://cielolink.com.br/4kEvokX",
       "São Paulo": "https://cielolink.com.br/4kbqN8K"
     },
     "Pescoço": {
-      "Brasília": "https://cielolink.com.br/4nfB2eQ",
+      "Brasília": "https://cielolink.com.br/4rpyNX5",
       "Campinas": "https://cielolink.com.br/49GEfzH",
       "Goiânia": "https://cielolink.com.br/3TmRlss",
       "Palmas": "https://cielolink.com.br/4htLaOz",
       "São Paulo": "https://cielolink.com.br/4kagiCH"
     },
     "Abdome": {
-      "Brasília": "https://cielolink.com.br/3HXv3eI",
+      "Brasília": "https://cielolink.com.br/4ltYPr0",
       "Campinas": "https://cielolink.com.br/4hNP19u",
       "Goiânia": "https://cielolink.com.br/3SJG05E",
       "Palmas": "https://cielolink.com.br/442qoAM",
       "São Paulo": "https://cielolink.com.br/4kZQudA"
     },
     "Flancos": {
-      "Brasília": "https://cielolink.com.br/40mfAej",
+      "Brasília": "https://cielolink.com.br/4137fvY",
       "Campinas": "https://cielolink.com.br/43ZgOxR",
       "Goiânia": "https://cielolink.com.br/4l7ONKW",
       "Palmas": "https://cielolink.com.br/4mtqtmV",
       "São Paulo": "https://cielolink.com.br/4k72hFF"
     },
     "Interno de Coxa": {
-      "Brasília": "https://cielolink.com.br/46cVlDv",
+      "Brasília": "https://cielolink.com.br/3P4eilw",
       "Campinas": "https://cielolink.com.br/4oVCkf1",
       "Goiânia": "https://cielolink.com.br/4l0t870",
       "Palmas": "https://cielolink.com.br/44vVv7J",
       "São Paulo": "https://cielolink.com.br/43Yd5RH"
     },
     "Braços Região do Tchau": {
-      "Brasília": "https://cielolink.com.br/4eiTq2d",
+      "Brasília": "https://cielolink.com.br/4rr6Ga4",
       "Campinas": "https://cielolink.com.br/3WIGD1q",
       "Goiânia": "https://cielolink.com.br/4kNv5Ej",
       "Palmas": "https://cielolink.com.br/44tQmx0",
       "São Paulo": "https://cielolink.com.br/3ZMX12H"
     },
     "Colo": {
-      "Brasília": "https://cielolink.com.br/3Ta4F3v",
+      "Brasília": "https://cielolink.com.br/4b6u4Vw",
       "Campinas": "https://cielolink.com.br/3LokIdr",
       "Goiânia": "https://cielolink.com.br/3FAFMeh",
       "Palmas": "https://cielolink.com.br/421rBXD",
       "São Paulo": "https://cielolink.com.br/4kgUxRK"
     },
     "Mãos": {
-      "Brasília": "https://cielolink.com.br/3TEQSlC",
+      "Brasília": "https://cielolink.com.br/4sFedTA",
+    },
+    "Terço Inferior (Contorno Facial)": {
+      "Brasília": "https://cielolink.com.br/4sACUka",
+    },
+    "Bichectomia": {
+      "Brasília": "https://cielolink.com.br/4lKeYJb",
+    },
+    "Gordura do Sutiã": {
+      "Brasília": "https://cielolink.com.br/4b8z8sB",
+    },
+    "Gordura Pré-Axilar": {
+      "Brasília": "https://cielolink.com.br/4bC5SdP",
+    },
+    "Bananinha": {
+      "Brasília": "https://cielolink.com.br/4bgR5Fv",
+    },
+    "Monte de Vênus": {
+      "Brasília": "https://cielolink.com.br/4rrTWjm",
+    },
+    "Rejuvenescimento Íntimo": {
+      "Brasília": "https://cielolink.com.br/3OXFe6x",
+    },
+    "Joelho": {
+      "Brasília": "https://cielolink.com.br/4rtSr4q",
       "Campinas": "https://cielolink.com.br/4ow6VQF",
       "Goiânia": "https://cielolink.com.br/43QLO3L",
       "Palmas": "https://cielolink.com.br/44cXY5M",
