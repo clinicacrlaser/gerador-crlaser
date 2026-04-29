@@ -579,7 +579,7 @@ async function responderLia(texto) {
     aguardandoUnidadeHumano = false;
     aguardandoUnidadeParaTelefone = false;
     resetarEstado();
-    adicionarMensagemNoChat("Perfeito 😊\n\nQualquer dúvida, estou por aqui.", "lia");
+    adicionarMensagemNoChat("Perfeito 😊\n\nFico à disposição.", "lia");
     return;
   }
 
