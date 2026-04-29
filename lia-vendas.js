@@ -281,6 +281,20 @@ function ehMensagemAgradecimento(texto) {
   return agradecimentos.has(chave);
 }
 
+function ehTrocaDeProcedimento(texto) {
+  const textoNorm = normalizar(texto);
+  const gatilhos = [
+    "ultraformer",
+    "mpt",
+    "lavieen",
+    "botox",
+    "preenchimento",
+    "bioestimulador"
+  ];
+
+  return gatilhos.some((gatilho) => textoNorm.includes(gatilho));
+}
+
 let estado = {
   etapa: "inicio",
   procedimentoDigitado: null,
@@ -493,6 +507,45 @@ async function responderLia(texto) {
     resetarEstado();
     adicionarMensagemNoChat("Por nada 😊\n\nVamos fechar mais algum?", "lia");
     return;
+  }
+
+  if (estado.etapa !== "inicio" && ehTrocaDeProcedimento(texto)) {
+    aguardandoContinuidade = false;
+    aguardandoUnidadeHumano = false;
+    aguardandoUnidadeParaTelefone = false;
+    resetarEstado();
+
+    adicionarMensagemNoChat("Perfeito 😊\n\nVamos começar.\n\nMe diga qual procedimento você quer comprar.", "lia");
+
+    if (analisarTextoProcedimento(texto)) {
+      return;
+    }
+
+    if (procedimentos[chave]) {
+      estado.procedimentoBase = procedimentos[chave].base;
+      estado.regiao = procedimentos[chave].regiao;
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return;
+    }
+
+    if (BOTOX_AMBIGUO.includes(chave)) {
+      estado.etapa = "tipoBotox";
+      adicionarMensagemNoChat("Você quer qual Botox?\n\n1️⃣ Botox facial\n2️⃣ Botox suor axilar", "lia");
+      return;
+    }
+
+    if (LAVIEEN_AMBIGUO.includes(chave)) {
+      estado.etapa = "lavieen_regiao";
+      adicionarMensagemNoChat("Qual Lavieen você quer?\n\n1️⃣ Facial completo\n2️⃣ Melasma\n3️⃣ BB Laser Facial\n4️⃣ Olheiras\n5️⃣ Capilar\n6️⃣ Mãos", "lia");
+      return;
+    }
+
+    if (ULTRAFORMER_AMBIGUO.includes(chave)) {
+      estado.etapa = "ultraformer_regiao";
+      perguntarRegiaoUltraformer();
+      return;
+    }
   }
 
   if (aguardandoUnidadeHumano) {
