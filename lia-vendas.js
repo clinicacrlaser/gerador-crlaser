@@ -829,7 +829,11 @@ async function responderLia(texto) {
     } else if (texto === "2") {
       const link = buscarLink(estado.procedimentoBase, estado.regiao, unidade.nome);
       if (!link) { adicionarMensagemNoChat("Esse procedimento não está disponível para essa unidade nessa campanha.", "lia"); return; }
-      adicionarMensagemNoChat(`Perfeito 😊\n\nFinalize sua compra aqui:\n${link}\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊`, "lia");
+      adicionarMensagemNoChat({
+        tipo: "pagamento",
+        texto: `Perfeito 😊\n\nFinalize sua compra pelo botão abaixo:`,
+        linkPagamento: link
+      }, "lia");
       aguardandoUnidadeParaTelefone = true;
     } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
     return;
