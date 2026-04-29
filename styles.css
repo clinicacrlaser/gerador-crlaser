@@ -1,3 +1,47 @@
+/* Botões flutuantes fixos - base */
+#floatingBtnRow {
+  pointer-events: none;
+}
+.floating-btn {
+  pointer-events: auto;
+  position: fixed;
+  z-index: 9999;
+  min-width: 140px;
+  min-height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  padding: 12px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.whatsapp-btn {
+  background: #25d366;
+  color: #fff;
+  left: 24px;
+  bottom: 24px;
+}
+.whatsapp-btn:hover,
+.whatsapp-btn:focus {
+  background: #128c7e;
+}
+.lia-btn {
+  background: linear-gradient(135deg,#00c6ff,#0072ff);
+  color: #fff;
+  right: 24px;
+  bottom: 24px;
+}
+.lia-btn:hover,
+.lia-btn:focus {
+  background: linear-gradient(135deg,#0099cc,#005fa3);
+}
+
+/* Mobile: botões lado a lado no rodapé */
 @media (max-width: 768px) {
   #floatingBtnRow {
     position: fixed;
@@ -11,9 +55,10 @@
     width: auto;
     max-width: none;
     justify-content: center;
-    padding: 0;
+    pointer-events: none;
   }
-  #floatingBtnRow button {
+  .floating-btn {
+    position: static;
     flex: 1 1 0;
     min-width: 0;
     width: 100%;
@@ -24,6 +69,17 @@
     border-radius: 16px;
     margin: 0;
     box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    pointer-events: auto;
+  }
+  .whatsapp-btn {
+    left: unset;
+    right: unset;
+    bottom: unset;
+  }
+  .lia-btn {
+    left: unset;
+    right: unset;
+    bottom: unset;
   }
 }
 /* ── BOTÃO FIXO WHATSAPP DAS UNIDADES ── */
