@@ -344,6 +344,15 @@ function analisarTextoProcedimento(texto) {
   }
 
   if (contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.botoxFacial)) {
+    const mencionaBotox = textoNorm.includes("botox");
+    const mencionaTipoEspecifico = textoNorm.includes("facial") || textoNorm.includes("suor") || textoNorm.includes("axilar");
+
+    if (mencionaBotox && !mencionaTipoEspecifico) {
+      estado.etapa = "tipoBotox";
+      adicionarMensagemNoChat("Você quer qual Botox?\n\n1️⃣ Botox facial\n2️⃣ Botox suor axilar", "lia");
+      return true;
+    }
+
     if (textoNorm.includes("suor") || textoNorm.includes("axilar")) {
       estado.procedimentoBase = "Botox";
       estado.regiao = "Axilar Suor";
@@ -352,7 +361,7 @@ function analisarTextoProcedimento(texto) {
       return true;
     }
 
-    if (textoNorm.includes("facial") || contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.botoxFacial)) {
+    if (textoNorm.includes("facial") || contemAlgum(textoNorm, SINONIMOS_PROCEDIMENTO.botoxFacial.filter((termo) => termo !== "botox"))) {
       estado.procedimentoBase = "Botox";
       estado.regiao = "Facial";
       estado.etapa = "unidade";
@@ -535,7 +544,7 @@ async function responderLia(texto) {
     }
 
     if (BOTOX_AMBIGUO.includes(chave)) {
-      estado.etapa = "botox_regiao";
+      estado.etapa = "tipoBotox";
       adicionarMensagemNoChat("Você quer qual Botox?\n\n1️⃣ Botox facial\n2️⃣ Botox suor axilar", "lia");
       return;
     }
@@ -564,7 +573,7 @@ async function responderLia(texto) {
     return;
   }
 
-  if (estado.etapa === "botox_regiao") {
+  if (estado.etapa === "tipoBotox" || estado.etapa === "botox_regiao") {
     const opcoes = {"1": { base: "Botox", regiao: "Facial" }, "2": { base: "Botox", regiao: "Axilar Suor" }, "botox facial": { base: "Botox", regiao: "Facial" }, "facial": { base: "Botox", regiao: "Facial" }, "botox suor": { base: "Botox", regiao: "Axilar Suor" }, "suor": { base: "Botox", regiao: "Axilar Suor" }, "axilar": { base: "Botox", regiao: "Axilar Suor" }};
     const op = opcoes[chave];
     if (!op) { adicionarMensagemNoChat("Escolha 1 para Botox facial ou 2 para Botox suor axilar.", "lia"); return; }
