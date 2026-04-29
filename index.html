@@ -1,3 +1,27 @@
+  <script>
+    // Função global para abrir o chat Lia
+    window.abrirChatLia = function () {
+      const chat = document.querySelector("#lia-chat, .lia-chat, .lia-modal, #liaModal, .lia-widget");
+      if (chat) {
+        chat.style.display = "block";
+        chat.classList.add("open", "ativo", "active");
+      }
+    };
+    // Bind universal para o botão 'Compre com a Lia' após DOM pronto
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll("button, a, div").forEach(el => {
+        if ((el.textContent || "").trim().includes("Compre com a Lia")) {
+          el.style.pointerEvents = "auto";
+          el.style.cursor = "pointer";
+          el.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.abrirChatLia();
+          });
+        }
+      });
+    });
+  </script>
 
   <!-- BOTÕES FLUTUANTES FIXOS -->
   <div id="floatingBtnRow" style="position:fixed;right:20px;bottom:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;">
