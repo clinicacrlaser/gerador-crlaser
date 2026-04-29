@@ -427,12 +427,12 @@ function adicionarMensagemNoChat(texto, tipo) {
   bolha.style.wordBreak = "break-word";
 
   if (tipo === "user") {
-    bolha.style.background = "rgba(24,199,209,0.12)";
-    bolha.style.border = "1px solid rgba(24,199,209,0.30)";
+    bolha.style.background = "#163047";
+    bolha.style.border = "1px solid rgba(24,199,209,0.35)";
     bolha.style.color = "#ffffff";
   } else {
-    bolha.style.background = "rgba(255,255,255,0.05)";
-    bolha.style.border = "1px solid rgba(255,255,255,0.10)";
+    bolha.style.background = "#0f1e2e";
+    bolha.style.border = "1px solid rgba(255,255,255,0.12)";
     bolha.style.color = "#ffffff";
   }
 
@@ -610,7 +610,12 @@ async function responderLia(texto) {
 
 async function enviarMensagem() {
   const liaInput = document.getElementById("liaInput");
+  const btnEnviarLia = document.getElementById("btnEnviarLia");
   if (!liaInput) return;
+
+  liaInput.disabled = false;
+  liaInput.readOnly = false;
+  if (btnEnviarLia) btnEnviarLia.disabled = false;
 
   const texto = liaInput.value.trim();
   if (!texto) return;
@@ -618,7 +623,15 @@ async function enviarMensagem() {
   adicionarMensagemNoChat(texto, "user");
   liaInput.value = "";
 
-  await responderLia(texto.toLowerCase());
+  try {
+    await responderLia(texto.toLowerCase());
+  } finally {
+    liaInput.disabled = false;
+    liaInput.readOnly = false;
+    liaInput.value = "";
+    liaInput.focus();
+    if (btnEnviarLia) btnEnviarLia.disabled = false;
+  }
 }
 
 function garantirModalLia() {
@@ -714,6 +727,9 @@ function initLiaVendasUI() {
       liaOverlay.classList.add("is-visible");
       liaOverlay.setAttribute("aria-hidden", "false");
     }
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      liaChat.style.bottom = "0px";
+    }
     liaInput.focus();
   }
 
@@ -737,6 +753,11 @@ function initLiaVendasUI() {
   }
 
   btnEnviarLia.type = "button";
+  btnEnviarLia.disabled = false;
+  liaInput.disabled = false;
+  liaInput.readOnly = false;
+  liaInput.style.background = "#0f1e2e";
+  liaInput.style.color = "#ffffff";
   btnEnviarLia.addEventListener("click", enviarMensagem);
   liaInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -748,6 +769,20 @@ function initLiaVendasUI() {
   if (!liaMessages.dataset.liaInicializada) {
     adicionarMensagemNoChat("Oi, eu sou a Lia. Qual procedimento você quer fechar hoje?", "lia");
     liaMessages.dataset.liaInicializada = "1";
+  }
+
+  if (window.visualViewport) {
+    const ajustarChatParaTeclado = () => {
+      if (!window.matchMedia("(max-width: 768px)").matches) return;
+      if (liaChat.style.display === "none") return;
+
+      const viewport = window.visualViewport;
+      const tecladoAberto = Math.max(0, window.innerHeight - (viewport.height + viewport.offsetTop));
+      liaChat.style.bottom = `${tecladoAberto}px`;
+    };
+
+    window.visualViewport.addEventListener("resize", ajustarChatParaTeclado);
+    window.visualViewport.addEventListener("scroll", ajustarChatParaTeclado);
   }
 }
 

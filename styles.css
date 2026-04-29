@@ -812,6 +812,16 @@ body {
   filter: brightness(0.98);
 }
 
+#liaInput {
+  background: #0f1e2e !important;
+  color: #ffffff !important;
+}
+
+#liaInput::placeholder {
+  color: #8aa3b8 !important;
+  opacity: 1;
+}
+
 /* ════════════════════════════════════════════
    SUGESTÃO INTELIGENTE
 ════════════════════════════════════════════ */
