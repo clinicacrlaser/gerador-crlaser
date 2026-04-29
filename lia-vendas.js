@@ -563,6 +563,17 @@ function adicionarMensagemNoChat(texto, tipo) {
 async function responderLia(texto) {
   const chave = normalizar(texto);
 
+  // NOVO: Se usuário digitou um novo procedimento, resetar estado antes de processar
+  // Não reseta se for só número
+  const palavrasChaveProc = [
+    "botox", "ultraformer", "mpt", "lavieen", "scizer", "endymed", "bioestimulador", "preench", "microagulhamento", "depilacao", "depilação", "luz pulsada"
+  ];
+  const ehApenasNumero = /^[0-9]+$/.test(texto.trim());
+  const textoNorm = normalizar(texto);
+  if (!ehApenasNumero && palavrasChaveProc.some(p => textoNorm.includes(p))) {
+    resetarEstado();
+  }
+
   if (ehMensagemEncerramento(texto) && !ehIntencaoCompraClara(texto)) {
     aguardandoContinuidade = false;
     aguardandoUnidadeHumano = false;
