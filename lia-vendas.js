@@ -606,7 +606,7 @@ async function responderLia(texto) {
   if (estado.etapa === "pagamento") {
     const unidade = unidades[estado.unidade];
     if (texto === "1") {
-      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊\n\nQuer incluir mais algum procedimento?`, "lia");
+      adicionarMensagemNoChat(`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nApós o pagamento, envie o comprovante.\n\nSe precisar do telefone da unidade, me diga qual é 😊\n\nSe quiser aproveitar outras ofertas, é só escolher outro procedimento no sistema acima 😊`, "lia");
       aguardandoContinuidade = true;
       resetarEstado();
     } else if (texto === "2") {
