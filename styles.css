@@ -1059,11 +1059,11 @@ body {
   }
 
   .page {
-    padding-bottom: 90px;
+    padding-bottom: 60px;
   }
 
   .qa-page {
-    margin-bottom: 90px;
+    margin-bottom: 60px;
   }
 
   .offer-countdown-bar {
@@ -1173,11 +1173,11 @@ body {
 
 @media (min-width: 601px) and (max-width: 760px) {
   .page {
-    padding-bottom: 90px;
+    padding-bottom: 60px;
   }
 
   .qa-page {
-    margin-bottom: 90px;
+    margin-bottom: 60px;
   }
 
   .form-section {
