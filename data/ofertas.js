@@ -109,20 +109,31 @@
   }
 
   // Normaliza nome do procedimento para buscar desconto correto por família
+
   function getDiscountGroupByProcedureName(procName) {
-    const n = normalizeText(procName);
+    // Normaliza nome: remove acentos, minúsculas, sessões, espaços extras
+    let n = normalizeText(procName)
+      .replace(/\b[12] sessoes?\b/g, '')
+      .replace(/\b[12] sessões?\b/g, '')
+      .replace(/\bsessao\b/g, '')
+      .replace(/\bsessão\b/g, '')
+      .replace(/\bsessoes\b/g, '')
+      .replace(/\bsessões\b/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
     // Procedimentos que usam o desconto de Luz Intensa Pulsada (50%)
     if (
       n.includes('hollywood peel') ||
-      n.includes('despigmentacao a laser') || n.includes('despigmentação a laser') ||
-      n.includes('laser fracionado pixel') ||
+      n.includes('despigmentacao a laser') || n.includes('despigmentacao a laser') ||
+      n.includes('laser fracionado') ||
       n.includes('luz intensa pulsada') ||
       n.includes('luz pulsada')
     ) {
       return 'luzpulsada';
     }
     // Depilação a Laser: qualquer variação
-    if (n.includes('depilacao a laser') || n.includes('depilação a laser')) return 'depilacao';
+    if (n.includes('depilacao a laser') || n.includes('depilacao a laser')) return 'depilacao';
     if (n.includes('ultraformer mpt') || n.includes('ultraformer')) return 'ultraformer';
     if (n.includes('lavieen') || n.includes('laser lavieen')) return 'lavieen';
     if (n.includes('botox')) return 'botox';
@@ -133,7 +144,7 @@
     if (n.includes('microagulhamento')) return 'microagulhamento';
     // fallback para outros nomes
     if (n.includes('luz pulsada') || n.includes('luz intensa pulsada')) return 'luzpulsada';
-    if (n.includes('depilacao') || n.includes('depilação')) return 'depilacao';
+    if (n.includes('depilacao') || n.includes('depilacao')) return 'depilacao';
     return null;
   }
 
