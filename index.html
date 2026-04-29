@@ -24,11 +24,9 @@
   </script>
 
   <!-- BOTÕES FLUTUANTES FIXOS -->
-  <div id="floatingBtnRow" style="position:fixed;right:20px;bottom:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;">
-    <button id="btnWhatsappUnidades" type="button" aria-label="WhatsApp das unidades" style="background:#25d366;color:#fff;font-weight:bold;border:none;padding:12px 18px;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,0.18);cursor:pointer;min-width:140px;">
-      WhatsApp das unidades
-    </button>
-    <button id="btnAbrirLia" style="background:linear-gradient(135deg,#00c6ff,#0072ff);color:white;border:none;padding:12px 18px;border-radius:20px;cursor:pointer;min-width:140px;z-index:10001;pointer-events:auto;">Compre com a Lia</button>
+  <div id="floatingBtnRow">
+    <button id="btnWhatsappUnidades" type="button" aria-label="WhatsApp das unidades">WhatsApp das unidades</button>
+    <button id="btnAbrirLia" type="button" aria-label="Compre com a Lia">Compre com a Lia</button>
   </div>
 
   <!-- MODAL WHATSAPP UNIDADES -->
@@ -47,23 +45,18 @@
   </div>
   <script>
     // Botão WhatsApp das unidades
-    document.getElementById('btnWhatsappUnidades').onclick = function() {
-      document.getElementById('modalWhatsappUnidades').style.display = 'flex';
+    // Botão WhatsApp das unidades: abre só o modal WhatsApp
+    document.getElementById('btnWhatsappUnidades').onclick = function(e) {
+      e.stopPropagation();
+      var modal = document.getElementById('modalWhatsappUnidades');
+      if (modal) modal.style.display = 'flex';
     };
-    function fecharModalWhatsappUnidades() {
-      document.getElementById('modalWhatsappUnidades').style.display = 'none';
-    }
-    document.getElementById('modalWhatsappUnidades').addEventListener('click', function(event) {
-      if (event.target === this) fecharModalWhatsappUnidades();
-    });
-    // Botão Lia abre chat (mantém lógica original)
-    // Garante clique no botão inteiro para abrir o chat Lia
+    // Botão Lia: abre só o chat Lia
     document.getElementById('btnAbrirLia').onclick = function(e) {
       e.stopPropagation();
-      if (typeof abrirLiaChat === 'function') {
-        abrirLiaChat();
+      if (typeof window.abrirChatLia === 'function') {
+        window.abrirChatLia();
       } else {
-        // fallback: lógica direta
         var liaChat = document.getElementById('liaChat');
         var liaOverlay = document.getElementById('liaOverlay');
         if (liaChat && liaOverlay) {
@@ -72,41 +65,23 @@
         }
       }
     };
-    // Layout responsivo dos botões flutuantes
-    function ajustarFloatingBtnRow() {
-      var row = document.getElementById('floatingBtnRow');
-      if (window.innerWidth <= 768) {
-        row.style.flexDirection = 'row';
-        row.style.left = '0';
-        row.style.right = '0';
-        row.style.justifyContent = 'center';
-        row.style.gap = '10px';
-        row.style.bottom = '20px';
-        row.style.width = '100vw';
-        row.style.maxWidth = '100vw';
-        row.style.padding = '0 10px';
-        // Mesma altura
-        var btns = row.querySelectorAll('button');
-        var maxH = 0;
-        btns.forEach(b => { b.style.height = 'auto'; maxH = Math.max(maxH, b.offsetHeight); });
-        btns.forEach(b => { b.style.height = maxH + 'px'; });
-      } else {
-        row.style.flexDirection = 'column';
-        row.style.left = '';
-        row.style.right = '20px';
-        row.style.justifyContent = '';
-        row.style.gap = '10px';
-        row.style.bottom = '20px';
-        row.style.width = '';
-        row.style.maxWidth = '';
-        row.style.padding = '';
-        // Reset altura
-        var btns = row.querySelectorAll('button');
-        btns.forEach(b => { b.style.height = ''; });
-      }
+    // Fechar modal WhatsApp
+    function fecharModalWhatsappUnidades() {
+      var modal = document.getElementById('modalWhatsappUnidades');
+      if (modal) modal.style.display = 'none';
     }
-    window.addEventListener('resize', ajustarFloatingBtnRow);
-    document.addEventListener('DOMContentLoaded', ajustarFloatingBtnRow);
+    document.getElementById('modalWhatsappUnidades').addEventListener('click', function(event) {
+      if (event.target === this) fecharModalWhatsappUnidades();
+    });
+    // Fechar chat Lia
+    document.getElementById('btnFecharLia').onclick = function(e) {
+      e.stopPropagation();
+      var liaChat = document.getElementById('liaChat');
+      var liaOverlay = document.getElementById('liaOverlay');
+      if (liaChat) liaChat.style.display = 'none';
+      if (liaOverlay) liaOverlay.setAttribute('aria-hidden', 'true');
+    };
+    // Layout responsivo dos botões flutuantes (CSS já cobre, JS não é mais necessário)
   </script>
 <!DOCTYPE html>
 <html lang="pt-BR">
