@@ -625,6 +625,36 @@ function garantirModalLia() {
   const modalExistente = document.getElementById("liaChat");
   if (modalExistente) return;
 
+  if (!document.getElementById("liaChatMobileStyle")) {
+    const responsiveStyle = document.createElement("style");
+    responsiveStyle.id = "liaChatMobileStyle";
+    responsiveStyle.textContent = `
+      @media (max-width: 768px) {
+        #liaChat {
+          width: 100% !important;
+          height: 50vh !important;
+          max-height: 50vh !important;
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          border-radius: 16px 16px 0 0 !important;
+          overflow: hidden !important;
+        }
+
+        #liaMessages {
+          max-height: calc(50vh - 130px) !important;
+          overflow-y: auto !important;
+        }
+
+        #liaInputBar {
+          padding-bottom: max(10px, env(safe-area-inset-bottom));
+        }
+      }
+    `;
+    document.head.appendChild(responsiveStyle);
+  }
+
   const overlay = document.createElement("div");
   overlay.id = "liaOverlay";
   overlay.className = "lia-chat-overlay";
