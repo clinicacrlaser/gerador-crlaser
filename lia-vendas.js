@@ -281,6 +281,25 @@ function ehMensagemAgradecimento(texto) {
   return agradecimentos.has(chave);
 }
 
+function ehMensagemEncerramento(texto) {
+  const chave = normalizar(texto).replace(/[.,!?;:]/g, "").trim();
+  const encerramentos = new Set([
+    "ok",
+    "certo",
+    "entendi",
+    "obrigado",
+    "obrigada",
+    "no momento nao",
+    "no momento nao quero mais nada",
+    "agora nao",
+    "nao quero mais nada",
+    "so isso",
+    "era so isso"
+  ]);
+
+  return encerramentos.has(chave);
+}
+
 function ehTrocaDeProcedimento(texto) {
   const textoNorm = normalizar(texto);
   const gatilhos = [
@@ -543,6 +562,15 @@ function adicionarMensagemNoChat(texto, tipo) {
 
 async function responderLia(texto) {
   const chave = normalizar(texto);
+
+  if (ehMensagemEncerramento(texto) && !ehIntencaoCompraClara(texto)) {
+    aguardandoContinuidade = false;
+    aguardandoUnidadeHumano = false;
+    aguardandoUnidadeParaTelefone = false;
+    resetarEstado();
+    adicionarMensagemNoChat("Perfeito 😊\n\nQualquer dúvida, estou por aqui.", "lia");
+    return;
+  }
 
   if (ehMensagemAgradecimento(texto)) {
     aguardandoContinuidade = false;
