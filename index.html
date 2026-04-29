@@ -74,14 +74,21 @@
     document.getElementById('modalWhatsappUnidades').addEventListener('click', function(event) {
       if (event.target === this) fecharModalWhatsappUnidades();
     });
-    // Fechar chat Lia
-    document.getElementById('btnFecharLia').onclick = function(e) {
-      e.stopPropagation();
+    // Fechar chat Lia: garante evento sempre ligado após DOM pronto
+    function bindFecharLia() {
+      var btnFecharLia = document.getElementById('btnFecharLia');
       var liaChat = document.getElementById('liaChat');
-      var liaOverlay = document.getElementById('liaOverlay');
-      if (liaChat) liaChat.style.display = 'none';
-      if (liaOverlay) liaOverlay.setAttribute('aria-hidden', 'true');
-    };
+      if (btnFecharLia && liaChat) {
+        btnFecharLia.onclick = function(e) {
+          e.stopPropagation();
+          liaChat.style.display = 'none';
+          var liaOverlay = document.getElementById('liaOverlay');
+          if (liaOverlay) liaOverlay.setAttribute('aria-hidden', 'true');
+        };
+      }
+    }
+    document.addEventListener('DOMContentLoaded', bindFecharLia);
+    bindFecharLia();
     // Layout responsivo dos botões flutuantes (CSS já cobre, JS não é mais necessário)
   </script>
 <!DOCTYPE html>
