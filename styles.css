@@ -75,18 +75,25 @@
     text-overflow: ellipsis;
   }
   .whatsapp-btn {
-    left: unset;
-    right: unset;
-    bottom: unset;
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    width: auto;
+    min-width: 150px;
+    max-width: 180px;
+    height: 52px;
     background: #25d366;
     color: #fff;
+    z-index: 9999;
   }
   .lia-btn {
-    left: unset;
-    right: unset;
-    bottom: unset;
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    height: 52px;
     background: linear-gradient(135deg,#00c6ff,#0072ff);
     color: #fff;
+    z-index: 9999;
   }
 }
 /* ── BOTÃO FIXO WHATSAPP DAS UNIDADES ── */
