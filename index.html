@@ -1,3 +1,48 @@
+  <!-- BOTÃO FIXO WHATSAPP DAS UNIDADES -->
+  <button id="btnWhatsappUnidades" type="button" aria-label="WhatsApp das unidades" style="position:fixed;right:20px;bottom:80px;z-index:9999;background:#25d366;color:#fff;font-weight:bold;border:none;padding:12px 18px;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,0.18);cursor:pointer;">
+    WhatsApp das unidades
+  </button>
+
+  <!-- MODAL WHATSAPP UNIDADES -->
+  <div id="modalWhatsappUnidades" style="display:none;position:fixed;z-index:10000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
+    <div style="background:#0D1321;color:#F5F7FA;border-radius:18px;padding:32px 24px 24px 24px;min-width:260px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.32);position:relative;text-align:center;">
+      <button onclick="fecharModalWhatsappUnidades()" aria-label="Fechar" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;">&times;</button>
+      <h2 style="margin-bottom:18px;">Escolha a unidade</h2>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <a href="https://wa.me/5561981316493" target="_blank" rel="noopener" style="background:#25d366;color:#fff;text-decoration:none;font-size:1.1rem;font-weight:600;border-radius:8px;padding:12px 0;">Brasília</a>
+        <a href="https://wa.me/5519991818366" target="_blank" rel="noopener" style="background:#25d366;color:#fff;text-decoration:none;font-size:1.1rem;font-weight:600;border-radius:8px;padding:12px 0;">Campinas</a>
+        <a href="https://wa.me/5562985499102" target="_blank" rel="noopener" style="background:#25d366;color:#fff;text-decoration:none;font-size:1.1rem;font-weight:600;border-radius:8px;padding:12px 0;">Goiânia</a>
+        <a href="https://wa.me/5563981226319" target="_blank" rel="noopener" style="background:#25d366;color:#fff;text-decoration:none;font-size:1.1rem;font-weight:600;border-radius:8px;padding:12px 0;">Palmas</a>
+        <a href="https://wa.me/5511967292039" target="_blank" rel="noopener" style="background:#25d366;color:#fff;text-decoration:none;font-size:1.1rem;font-weight:600;border-radius:8px;padding:12px 0;">São Paulo</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Botão WhatsApp das unidades
+    document.getElementById('btnWhatsappUnidades').onclick = function() {
+      document.getElementById('modalWhatsappUnidades').style.display = 'flex';
+    };
+    function fecharModalWhatsappUnidades() {
+      document.getElementById('modalWhatsappUnidades').style.display = 'none';
+    }
+    // Fechar modal ao clicar fora do conteúdo
+    document.getElementById('modalWhatsappUnidades').addEventListener('click', function(event) {
+      if (event.target === this) fecharModalWhatsappUnidades();
+    });
+    // Responsividade: manter separado do botão Lia no mobile
+    function ajustarPosicaoWhatsappBtn() {
+      var btn = document.getElementById('btnWhatsappUnidades');
+      if (window.innerWidth <= 600) {
+        btn.style.bottom = '70px';
+        btn.style.right = '10px';
+      } else {
+        btn.style.bottom = '80px';
+        btn.style.right = '20px';
+      }
+    }
+    window.addEventListener('resize', ajustarPosicaoWhatsappBtn);
+    document.addEventListener('DOMContentLoaded', ajustarPosicaoWhatsappBtn);
+  </script>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
