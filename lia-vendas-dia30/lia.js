@@ -480,14 +480,7 @@ async function responder(texto) {
 
     if (texto === "1") {
       adicionarMensagem(
-`Perfeito 😊
-
-Chave Pix:
-${unidade.pix}
-
-Envie o comprovante no WhatsApp:
-
-${unidade.whatsapp}`,
+`Perfeito 😊\n\nChave Pix:\n${unidade.pix}\n\nPara falar com a unidade, use o botão WhatsApp das unidades na página.`,
         "lia"
       );
 
@@ -503,15 +496,7 @@ ${unidade.whatsapp}`,
       }
 
       adicionarMensagem(
-`Perfeito 😊
-
-Finalize sua compra:
-
-${link}
-
-Depois envie o comprovante no WhatsApp:
-
-${unidade.whatsapp}`,
+`Perfeito 😊\n\nFinalize sua compra:\n${link}\n\nPara falar com a unidade, use o botão WhatsApp das unidades na página.`,
         "lia"
       );
 

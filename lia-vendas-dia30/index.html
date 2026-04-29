@@ -91,6 +91,39 @@
     </div>
   </div>
 
+  <!-- Botão fixo WhatsApp das unidades -->
+  <button id="btn-whatsapp-unidades" onclick="abrirModalWhatsapp()" aria-label="WhatsApp das unidades">
+    WhatsApp das unidades
+  </button>
+
+  <!-- Modal WhatsApp das unidades -->
+  <div id="modal-whatsapp-unidades" class="modal-whatsapp" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-whatsapp">
+    <div class="modal-whatsapp-content">
+      <button class="modal-whatsapp-close" onclick="fecharModalWhatsapp()" aria-label="Fechar">&times;</button>
+      <h2 id="titulo-modal-whatsapp">Escolha a unidade</h2>
+      <ul class="modal-whatsapp-list">
+        <li><a href="https://wa.me/5561981316493" target="_blank" rel="noopener">Brasília</a></li>
+        <li><a href="https://wa.me/5519991818366" target="_blank" rel="noopener">Campinas</a></li>
+        <li><a href="https://wa.me/5562985499102" target="_blank" rel="noopener">Goiânia</a></li>
+        <li><a href="https://wa.me/5563981226319" target="_blank" rel="noopener">Palmas</a></li>
+        <li><a href="https://wa.me/5511967292039" target="_blank" rel="noopener">São Paulo</a></li>
+      </ul>
+    </div>
+  </div>
+
   <script src="./lia.js"></script>
+  <script>
+    function abrirModalWhatsapp() {
+      document.getElementById('modal-whatsapp-unidades').style.display = 'flex';
+    }
+    function fecharModalWhatsapp() {
+      document.getElementById('modal-whatsapp-unidades').style.display = 'none';
+    }
+    // Fechar modal ao clicar fora do conteúdo
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('modal-whatsapp-unidades');
+      if (event.target === modal) fecharModalWhatsapp();
+    });
+  </script>
 </body>
 </html>

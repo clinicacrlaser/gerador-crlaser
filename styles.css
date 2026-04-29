@@ -1,3 +1,103 @@
+/* ── BOTÃO FIXO WHATSAPP DAS UNIDADES ── */
+#btn-whatsapp-unidades {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  background: #25d366;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 22px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#btn-whatsapp-unidades:hover,
+#btn-whatsapp-unidades:focus {
+  background: #128c7e;
+}
+
+/* ── MODAL WHATSAPP DAS UNIDADES ── */
+.modal-whatsapp {
+  display: none;
+  position: fixed;
+  z-index: 1100;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.45);
+  align-items: center;
+  justify-content: center;
+}
+.modal-whatsapp[style*="display: flex"] {
+  display: flex !important;
+}
+.modal-whatsapp-content {
+  background: var(--card, #0D1321);
+  color: var(--text, #F5F7FA);
+  border-radius: 18px;
+  padding: 32px 24px 24px 24px;
+  min-width: 260px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.32);
+  position: relative;
+  text-align: center;
+}
+.modal-whatsapp-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+}
+.modal-whatsapp-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-whatsapp-list a {
+  display: block;
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 12px 0;
+  transition: background 0.2s;
+}
+.modal-whatsapp-list a:hover,
+.modal-whatsapp-list a:focus {
+  background: #128c7e;
+}
+
+@media (max-width: 600px) {
+  #btn-whatsapp-unidades {
+    right: 10px;
+    bottom: 10px;
+    font-size: 0.98rem;
+    padding: 12px 14px;
+  }
+  .modal-whatsapp-content {
+    padding: 18px 6vw 18px 6vw;
+    min-width: 0;
+    max-width: 98vw;
+  }
+  .modal-whatsapp-list a {
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+}
 /* ══════════════════════════════════════════
    CR LASER® — GERADOR DE OFERTAS
    Visual Premium v2
