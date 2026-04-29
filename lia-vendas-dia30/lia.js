@@ -315,6 +315,34 @@ function definirProcedimento(base, regiao) {
 }
 
 async function responder(texto) {
+
+  // Dúvidas técnicas: intercepta e responde com mensagem padrão
+  const duvidasTecnicas = [
+    "como funciona",
+    "dói",
+    "doi",
+    "quanto tempo dura",
+    "quantas sessões",
+    "quantas sessoes",
+    "é seguro",
+    "e seguro",
+    "efeitos colaterais",
+    "recuperação",
+    "recuperacao",
+    "resultado",
+    "antes e depois",
+    "posso fazer"
+  ];
+  const textoNormalizado = normalizar(texto);
+  if (duvidasTecnicas.some(frase => textoNormalizado.includes(normalizar(frase)))) {
+    adicionarMensagem(
+      "Essa parte é melhor nossa equipe te explicar certinho 😊\n\nClique no botão 'WhatsApp' aqui embaixo que te direciono direto para a unidade.",
+      "lia"
+    );
+    resetarEstado();
+    return;
+  }
+
   const chave = normalizar(texto);
 
   // ── ETAPA INICIO ────────────────────────────────────────────────
