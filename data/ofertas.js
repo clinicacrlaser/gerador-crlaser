@@ -108,6 +108,22 @@
     return '0';
   }
 
+  // Normaliza nome do procedimento para buscar desconto correto por família
+  function getDiscountGroupByProcedureName(procName) {
+    const n = normalizeText(procName);
+    if (n.includes('ultraformer mpt') || n.includes('ultraformer')) return 'ultraformer';
+    if (n.includes('lavieen') || n.includes('laser lavieen')) return 'lavieen';
+    if (n.includes('botox')) return 'botox';
+    if (n.includes('preenchedor') || n.includes('preenchimento')) return 'preenchedor';
+    if (n.includes('bioestimulador diamond') || n.includes('bioestimulador')) return 'diamond';
+    if (n.includes('scizer')) return 'scizer';
+    if (n.includes('endymed')) return 'endymed';
+    if (n.includes('microagulhamento')) return 'microagulhamento';
+    if (n.includes('luz pulsada') || n.includes('luz intensa pulsada')) return 'luzpulsada';
+    if (n.includes('depilacao') || n.includes('depilação')) return 'depilacao';
+    return null;
+  }
+
   function calculateProcedureOffer(procIdx, offerIdx) {
     const parsedProcIdx = Number(procIdx);
     const procedure = PROCEDURES[parsedProcIdx];
@@ -116,8 +132,13 @@
       return null;
     }
 
-    const safeOfferIndex = getOfferIndexForGroup(procedure.group, offerIdx);
-    const discountRate = DISCOUNT_RATES[procedure.group][Number(safeOfferIndex)];
+    // Busca grupo normalizado para desconto
+    let discountGroup = getDiscountGroupByProcedureName(procedure.name);
+    // fallback: usa o grupo original se não encontrar
+    if (!discountGroup) discountGroup = procedure.group;
+
+    const safeOfferIndex = getOfferIndexForGroup(discountGroup, offerIdx);
+    const discountRate = DISCOUNT_RATES[discountGroup][Number(safeOfferIndex)];
     const discountPct = Math.round(discountRate * 100);
 
     const originalPix = procedure.pix;
