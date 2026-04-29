@@ -156,15 +156,15 @@ const LINKS = {
     "Mãos": { "Brasília": "https://cielolink.com.br/4sFedTA", "Campinas": "https://cielolink.com.br/41ZHYn4", "Goiânia": "https://cielolink.com.br/3Nlqz4v", "Palmas": "https://cielolink.com.br/4loaIih", "São Paulo": "https://cielolink.com.br/40ZDXyf" }
   },
   "Lavieen": {
-    "Facial completo": { "Brasília": "https://cielolink.com.br/4rwLbVv", "Campinas": "https://cielolink.com.br/4ddzH5d" },
-    "Face + Pescoço": { "Brasília": "https://cielolink.com.br/4n95pnB", "Campinas": "https://cielolink.com.br/3QHPIrm" },
-    "Pescoço + Colo": { "Brasília": "https://cielolink.com.br/4uinWku", "Campinas": "https://cielolink.com.br/3PaoJ7m" },
-    "Face + Pescoço + Colo": { "Brasília": "https://cielolink.com.br/3Pl1Mhv", "Campinas": "https://cielolink.com.br/3QHKMTm" },
-    "BBLaser Facial": { "Brasília": "https://cielolink.com.br/46UAzsa", "Campinas": "https://cielolink.com.br/4mZpzjW" },
-    "Melasma": { "Brasília": "https://cielolink.com.br/4rq5qEl", "Campinas": "https://cielolink.com.br/49i0ESR" },
-    "Olheiras": { "Brasília": "https://cielolink.com.br/40tKi54", "Campinas": "https://cielolink.com.br/4w6BlNF" },
-    "Capilar": { "Brasília": "https://cielolink.com.br/4sLSPMP", "Campinas": "https://cielolink.com.br/4tGdl2b" },
-    "Mãos": { "Brasília": "https://cielolink.com.br/4ls4cH1", "Campinas": "https://cielolink.com.br/4uhYsTp" }
+    "Facial completo": { "Brasília": "https://cielolink.com.br/4rwLbVv", "Campinas": "https://cielolink.com.br/4ddzH5d", "Goiânia": "https://cielolink.com.br/47uV3I1" },
+    "Face + Pescoço": { "Brasília": "https://cielolink.com.br/4n95pnB", "Campinas": "https://cielolink.com.br/3QHPIrm", "Goiânia": "https://cielolink.com.br/4bhnj1W" },
+    "Pescoço + Colo": { "Brasília": "https://cielolink.com.br/4uinWku", "Campinas": "https://cielolink.com.br/3PaoJ7m", "Goiânia": "https://cielolink.com.br/3QGKpbE" },
+    "Face + Pescoço + Colo": { "Brasília": "https://cielolink.com.br/3Pl1Mhv", "Campinas": "https://cielolink.com.br/3QHKMTm", "Goiânia": "https://cielolink.com.br/4bnyUN9" },
+    "BBLaser Facial": { "Brasília": "https://cielolink.com.br/46UAzsa", "Campinas": "https://cielolink.com.br/4mZpzjW", "Goiânia": "https://cielolink.com.br/4rx5H8d" },
+    "Melasma": { "Brasília": "https://cielolink.com.br/4rq5qEl", "Campinas": "https://cielolink.com.br/49i0ESR", "Goiânia": "https://cielolink.com.br/4ur9jve" },
+    "Olheiras": { "Brasília": "https://cielolink.com.br/40tKi54", "Campinas": "https://cielolink.com.br/4w6BlNF", "Goiânia": "https://cielolink.com.br/4bjPwoS" },
+    "Capilar": { "Brasília": "https://cielolink.com.br/4sLSPMP", "Campinas": "https://cielolink.com.br/4tGdl2b", "Goiânia": "https://cielolink.com.br/4lt89LV" },
+    "Mãos": { "Brasília": "https://cielolink.com.br/4ls4cH1", "Campinas": "https://cielolink.com.br/4uhYsTp", "Goiânia": "https://cielolink.com.br/4bleST8" }
   },
   "Microagulhamento Robótico": {
     "Microagulhamento Robótico": {
