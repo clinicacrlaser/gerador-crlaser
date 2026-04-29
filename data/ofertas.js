@@ -111,9 +111,18 @@
   // Normaliza nome do procedimento para buscar desconto correto por família
   function getDiscountGroupByProcedureName(procName) {
     const n = normalizeText(procName);
+    // Procedimentos que usam o desconto de Luz Intensa Pulsada (50%)
+    if (
+      n.includes('hollywood peel') ||
+      n.includes('despigmentacao a laser') || n.includes('despigmentação a laser') ||
+      n.includes('laser fracionado pixel') ||
+      n.includes('luz intensa pulsada') ||
+      n.includes('luz pulsada')
+    ) {
+      return 'luzpulsada';
+    }
     // Depilação a Laser: qualquer variação
     if (n.includes('depilacao a laser') || n.includes('depilação a laser')) return 'depilacao';
-    if (n.includes('luz intensa pulsada') || n.includes('luz pulsada')) return 'luzpulsada';
     if (n.includes('ultraformer mpt') || n.includes('ultraformer')) return 'ultraformer';
     if (n.includes('lavieen') || n.includes('laser lavieen')) return 'lavieen';
     if (n.includes('botox')) return 'botox';
