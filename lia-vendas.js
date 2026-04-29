@@ -1,3 +1,10 @@
+// Torna URLs em links clicáveis (apenas para mensagens da Lia)
+function transformarLinks(texto) {
+  return texto.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+}
 // ═══════════════════════════════════════════════════════════════════════════
 // LIA VENDAS — Integrada ao site principal CR Laser®
 // Adapta os IDs do novo lia.js (lia-vendas-dia30) para o site principal
@@ -503,7 +510,7 @@ function adicionarMensagemNoChat(texto, tipo) {
   }
 
   if (tipo === "lia") {
-    bolha.innerHTML = texto;
+    bolha.innerHTML = transformarLinks(texto);
   } else {
     bolha.textContent = texto;
   }
