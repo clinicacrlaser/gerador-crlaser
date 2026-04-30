@@ -1,0 +1,37 @@
+[1mdiff --git a/lia-vendas.js b/lia-vendas.js[m
+[1mindex ea0323c..5405805 100644[m
+[1m--- a/lia-vendas.js[m
+[1m+++ b/lia-vendas.js[m
+[36m@@ -99,7 +99,7 @@[m [mconst LINKS = {[m
+     "Axilar Suor": {[m
+       "Brasília": "https://cielolink.com.br/442sDEc",[m
+       "Campinas": "https://cielolink.com.br/47P9eHd",[m
+[31m-      "Goiânia": "https://cielolink.com.br/3O16Siy",[m
+[32m+[m[32m      "Goiânia": "https://cielolink.com.br/3HF407C",[m
+       "Palmas": "https://cielolink.com.br/4bGnHHA",[m
+       "São Paulo": "https://cielolink.com.br/3PH1MbU"[m
+     }[m
+[36m@@ -113,15 +113,15 @@[m [mconst LINKS = {[m
+       "São Paulo": "https://cielolink.com.br/3Qa4AhM"[m
+     }[m
+   },[m
+[31m-  "Bioestimulador Diamond": {[m
+     "Bioestimulador Diamond": {[m
+[31m-      "Brasília": "https://cielolink.com.br/4rq69Fz",[m
+[31m-      "Campinas": "https://cielolink.com.br/4eduoDX",[m
+[31m-      "Goiânia": "https://cielolink.com.br/3PyLxxi",[m
+[31m-      "Palmas": "https://cielolink.com.br/430UpzN",[m
+[31m-      "São Paulo": "https://cielolink.com.br/4k3zUbn"[m
+[31m-    }[m
+[31m-  },[m
+[32m+[m[32m      "Bioestimulador Diamond": {[m
+[32m+[m[32m        "Brasília": "https://cielolink.com.br/4rq69Fz",[m
+[32m+[m[32m        "Campinas": "https://cielolink.com.br/4eduoDX",[m
+[32m+[m[32m        "Goiânia": "https://cielolink.com.br/3PyLxxi",[m
+[32m+[m[32m        "Palmas": "https://cielolink.com.br/430UpzN",[m
+[32m+[m[32m        "São Paulo": "https://cielolink.com.br/4k3zUbn"[m
+[32m+[m[32m      }[m
+[32m+[m[32m    },[m
+   "Scizer": {[m
+     "Corporal Por Região": {[m
+       "Brasília": "https://cielolink.com.br/4niM3My",[m

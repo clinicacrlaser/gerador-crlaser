@@ -99,7 +99,7 @@ const LINKS = {
     "Axilar Suor": {
       "Brasília": "https://cielolink.com.br/442sDEc",
       "Campinas": "https://cielolink.com.br/47P9eHd",
-      "Goiânia": "https://cielolink.com.br/3O16Siy",
+      "Goiânia": "https://cielolink.com.br/3HF407C",
       "Palmas": "https://cielolink.com.br/4bGnHHA",
       "São Paulo": "https://cielolink.com.br/3PH1MbU"
     }
@@ -113,15 +113,15 @@ const LINKS = {
       "São Paulo": "https://cielolink.com.br/3Qa4AhM"
     }
   },
-  "Bioestimulador Diamond": {
     "Bioestimulador Diamond": {
-      "Brasília": "https://cielolink.com.br/4rq69Fz",
-      "Campinas": "https://cielolink.com.br/4eduoDX",
-      "Goiânia": "https://cielolink.com.br/3PyLxxi",
-      "Palmas": "https://cielolink.com.br/430UpzN",
-      "São Paulo": "https://cielolink.com.br/4k3zUbn"
-    }
-  },
+      "Bioestimulador Diamond": {
+        "Brasília": "https://cielolink.com.br/4rq69Fz",
+        "Campinas": "https://cielolink.com.br/4eduoDX",
+        "Goiânia": "https://cielolink.com.br/3PyLxxi",
+        "Palmas": "https://cielolink.com.br/430UpzN",
+        "São Paulo": "https://cielolink.com.br/4k3zUbn"
+      }
+    },
   "Scizer": {
     "Corporal Por Região": {
       "Brasília": "https://cielolink.com.br/4niM3My",
