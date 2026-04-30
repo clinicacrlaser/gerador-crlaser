@@ -85,14 +85,14 @@ const MICROAGULHAMENTO_AMBIGUO = ["microagulhamento", "microagulhamento robótic
 const LINKS = {
   "Botox": {
     "Facial": {
-      "Brasília": "https://cielolink.com.br/4t0kASi",
+      "Brasília": "https://cielolink.com.br/4ngsAMn",
       "Campinas": "https://cielolink.com.br/4igbg8p",
       "Goiânia": "https://cielolink.com.br/4198sSD",
       "Palmas": "https://cielolink.com.br/4m1v7dh",
       "São Paulo": "https://cielolink.com.br/4sJCiJH"
     },
     "Axilar Suor": {
-      "Brasília": "https://cielolink.com.br/41RXUHO",
+      "Brasília": "https://cielolink.com.br/442sDEc",
       "Campinas": "https://cielolink.com.br/47P9eHd",
       "Goiânia": "https://cielolink.com.br/3O16Siy",
       "Palmas": "https://cielolink.com.br/4bGnHHA",
@@ -101,7 +101,7 @@ const LINKS = {
   },
   "Preenchedor": {
     "Uma Ampola": {
-      "Brasília": "https://cielolink.com.br/4mcm7ls",
+      "Brasília": "https://cielolink.com.br/45WF59V",
       "Campinas": "https://cielolink.com.br/3WUFXGd",
       "Goiânia": "https://cielolink.com.br/4s8p87T",
       "Palmas": "https://cielolink.com.br/417PGLr",
@@ -110,7 +110,7 @@ const LINKS = {
   },
   "Bioestimulador Diamond": {
     "Bioestimulador Diamond": {
-      "Brasília": "https://cielolink.com.br/3HUzUx6",
+      "Brasília": "https://cielolink.com.br/4rq69Fz",
       "Campinas": "https://cielolink.com.br/49Vqe14",
       "Goiânia": "https://cielolink.com.br/4l02GKP",
       "Palmas": "https://cielolink.com.br/430UpzN",
