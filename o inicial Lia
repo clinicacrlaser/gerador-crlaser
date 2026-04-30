@@ -1,0 +1,33 @@
+[1mdiff --git a/index.html b/index.html[m
+[1mindex 8d874c2..9342857 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -531,11 +531,23 @@[m
+     <div id="popupBox">[m
+       <button id="popupClose" aria-label="Fechar">&times;</button>[m
+       <div class="popup-icon">🚨</div>[m
+[31m-      <h2>ATENÇÃO</h2>[m
+[31m-      <p>Dia 30 de abril:</p>[m
+[31m-      <p><strong>👉 Lançamento da Lia</strong></p>[m
+[31m-      <p>Condições especiais diferentes das atuais.</p>[m
+[31m-      <p>Se puder esperar, vale a pena 😊</p>[m
+[32m+[m[32m      <h2>ATENÇÃO 🚨</h2>[m
+[32m+[m[32m      <p>A Lia está em teste e, por isso, pode apresentar falhas.</p>[m
+[32m+[m[32m      <p>Confira os dados da empresa no feed da @crlaser.oficial ou, se achar melhor, pelo WhatsApp da sua unidade de atendimento.</p>[m
+[32m+[m[32m      <p><strong>REGRAS:</strong></p>[m
+[32m+[m[32m      <ul>[m
+[32m+[m[32m        <li>NÃO alterar links.</li>[m
+[32m+[m[32m        <li>NÃO mexer na planilha CSV.</li>[m
+[32m+[m[32m        <li>NÃO mexer no objeto LINKS.</li>[m
+[32m+[m[32m        <li>NÃO alterar fluxo.</li>[m
+[32m+[m[32m        <li>NÃO alterar lógica.</li>[m
+[32m+[m[32m        <li>NÃO alterar botão.</li>[m
+[32m+[m[32m        <li>NÃO alterar Pix.</li>[m
+[32m+[m[32m        <li>NÃO alterar layout.</li>[m
+[32m+[m[32m        <li>NÃO alterar regras comerciais.</li>[m
+[32m+[m[32m        <li>Apenas trocar o texto exibido no modal de abertura.</li>[m
+[32m+[m[32m        <li>Manter o botão "Entendi".</li>[m
+[32m+[m[32m      </ul>[m
+       <hr class="popup-divider" />[m
+       <button id="popupOk">Entendi</button>[m
+     </div>[m
