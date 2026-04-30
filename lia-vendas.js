@@ -88,7 +88,7 @@ const LINKS = {
       "Brasília": "https://cielolink.com.br/4ngsAMn",
       "Campinas": "https://cielolink.com.br/3QBKA8d",
       "Goiânia": "https://cielolink.com.br/3HBRYfi",
-      "Palmas": "https://cielolink.com.br/4m1v7dh",
+      "Palmas": "https://cielolink.com.br/3WwGkGI",
       "São Paulo": "https://cielolink.com.br/4sJCiJH"
     },
     "Suor Axilar": {
@@ -100,7 +100,7 @@ const LINKS = {
       "Brasília": "https://cielolink.com.br/442sDEc",
       "Campinas": "https://cielolink.com.br/47P9eHd",
       "Goiânia": "https://cielolink.com.br/3HF407C",
-      "Palmas": "https://cielolink.com.br/4bGnHHA",
+      "Palmas": "https://cielolink.com.br/4sZM3mE",
       "São Paulo": "https://cielolink.com.br/3PH1MbU"
     }
   },
@@ -109,7 +109,7 @@ const LINKS = {
       "Brasília": "https://cielolink.com.br/45WF59V",
       "Campinas": "https://cielolink.com.br/4n4CXU2",
       "Goiânia": "https://cielolink.com.br/4kIr3wY",
-      "Palmas": "https://cielolink.com.br/417PGLr",
+      "Palmas": "https://cielolink.com.br/4h4u9dG",
       "São Paulo": "https://cielolink.com.br/3Qa4AhM"
     }
   },

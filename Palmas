@@ -1,0 +1,31 @@
+[1mdiff --git a/lia-vendas.js b/lia-vendas.js[m
+[1mindex 5405805..956b42d 100644[m
+[1m--- a/lia-vendas.js[m
+[1m+++ b/lia-vendas.js[m
+[36m@@ -88,7 +88,7 @@[m [mconst LINKS = {[m
+       "Brasília": "https://cielolink.com.br/4ngsAMn",[m
+       "Campinas": "https://cielolink.com.br/3QBKA8d",[m
+       "Goiânia": "https://cielolink.com.br/3HBRYfi",[m
+[31m-      "Palmas": "https://cielolink.com.br/4m1v7dh",[m
+[32m+[m[32m      "Palmas": "https://cielolink.com.br/3WwGkGI",[m
+       "São Paulo": "https://cielolink.com.br/4sJCiJH"[m
+     },[m
+     "Suor Axilar": {[m
+[36m@@ -100,7 +100,7 @@[m [mconst LINKS = {[m
+       "Brasília": "https://cielolink.com.br/442sDEc",[m
+       "Campinas": "https://cielolink.com.br/47P9eHd",[m
+       "Goiânia": "https://cielolink.com.br/3HF407C",[m
+[31m-      "Palmas": "https://cielolink.com.br/4bGnHHA",[m
+[32m+[m[32m      "Palmas": "https://cielolink.com.br/4sZM3mE",[m
+       "São Paulo": "https://cielolink.com.br/3PH1MbU"[m
+     }[m
+   },[m
+[36m@@ -109,7 +109,7 @@[m [mconst LINKS = {[m
+       "Brasília": "https://cielolink.com.br/45WF59V",[m
+       "Campinas": "https://cielolink.com.br/4n4CXU2",[m
+       "Goiânia": "https://cielolink.com.br/4kIr3wY",[m
+[31m-      "Palmas": "https://cielolink.com.br/417PGLr",[m
+[32m+[m[32m      "Palmas": "https://cielolink.com.br/4h4u9dG",[m
+       "São Paulo": "https://cielolink.com.br/3Qa4AhM"[m
+     }[m
+   },[m
