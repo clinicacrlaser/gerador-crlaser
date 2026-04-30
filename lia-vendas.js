@@ -91,6 +91,9 @@ const LINKS = {
       "Palmas": "https://cielolink.com.br/4m1v7dh",
       "São Paulo": "https://cielolink.com.br/4sJCiJH"
     },
+    "Suor Axilar": {
+      "Brasília": "https://cielolink.com.br/442sDEc"
+    },
     "Axilar Suor": {
       "Brasília": "https://cielolink.com.br/442sDEc",
       "Campinas": "https://cielolink.com.br/47P9eHd",
