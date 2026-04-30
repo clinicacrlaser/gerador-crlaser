@@ -86,13 +86,14 @@ const LINKS = {
   "Botox": {
     "Facial": {
       "Brasília": "https://cielolink.com.br/4ngsAMn",
-      "Campinas": "https://cielolink.com.br/4igbg8p",
+      "Campinas": "https://cielolink.com.br/3QBKA8d",
       "Goiânia": "https://cielolink.com.br/4198sSD",
       "Palmas": "https://cielolink.com.br/4m1v7dh",
       "São Paulo": "https://cielolink.com.br/4sJCiJH"
     },
     "Suor Axilar": {
-      "Brasília": "https://cielolink.com.br/442sDEc"
+      "Brasília": "https://cielolink.com.br/442sDEc",
+      "Campinas": "https://cielolink.com.br/4tI31qz"
     },
     "Axilar Suor": {
       "Brasília": "https://cielolink.com.br/442sDEc",
@@ -105,7 +106,7 @@ const LINKS = {
   "Preenchedor": {
     "Uma Ampola": {
       "Brasília": "https://cielolink.com.br/45WF59V",
-      "Campinas": "https://cielolink.com.br/3WUFXGd",
+      "Campinas": "https://cielolink.com.br/4n4CXU2",
       "Goiânia": "https://cielolink.com.br/4s8p87T",
       "Palmas": "https://cielolink.com.br/417PGLr",
       "São Paulo": "https://cielolink.com.br/3Qa4AhM"
@@ -114,7 +115,7 @@ const LINKS = {
   "Bioestimulador Diamond": {
     "Bioestimulador Diamond": {
       "Brasília": "https://cielolink.com.br/4rq69Fz",
-      "Campinas": "https://cielolink.com.br/49Vqe14",
+      "Campinas": "https://cielolink.com.br/4eduoDX",
       "Goiânia": "https://cielolink.com.br/4l02GKP",
       "Palmas": "https://cielolink.com.br/430UpzN",
       "São Paulo": "https://cielolink.com.br/4k3zUbn"
