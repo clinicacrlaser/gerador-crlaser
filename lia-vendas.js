@@ -1027,7 +1027,7 @@ function initLiaVendasUI() {
 
   if (!liaMessages.dataset.liaInicializada) {
     adicionarMensagemNoChat(
-      `Oi, eu sou a Lia 😊\n\nEstou aqui para te ajudar a comprar seu procedimento.\n\nQual procedimento você quer fazer?\n\nExemplo: Botox, Ultraformer, Lavieen`,
+      `Oi, eu sou a Lia 😊\n\nEstou aqui para te ajudar a comprar seu procedimento.\n\nEscolha uma opção:\n\n1. Ultraformer MPT\n2. Laser Lavieen\n3. Botox\n4. Preenchedor\n5. Bioestimulador Diamond\n6. Scizer Gordura Localizada\n7. Endymed Radiofrequência 3DEEP\n8. Microagulhamento Robótico\n9. Luz Intensa Pulsada — somente Goiânia\n10. Laser Fracionado — somente Goiânia\n11. Hollywood Peel — somente Goiânia\n12. Depilação a Laser — somente Goiânia\n\nDigite o número ou o nome do procedimento.`,
       "lia"
     );
     liaMessages.dataset.liaInicializada = "1";
