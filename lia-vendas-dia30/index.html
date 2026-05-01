@@ -17,7 +17,7 @@
 
     .chat {
       width: 100%;
-      max-width: 520px;
+      max-width: 600px;
       background: #0b1728;
       border: 1px solid #00c8d7;
       border-radius: 18px;
@@ -53,6 +53,23 @@
     .lia {
       color: #7dd3fc;
       text-align: left;
+    }
+
+    /* Reduz fonte da lista inicial de procedimentos da Lia */
+    .lia.lia-inicial {
+      font-size: 15px;
+      line-height: 1.45;
+      word-break: keep-all;
+      white-space: pre-line;
+    }
+    @media (min-width: 600px) {
+      .lia.lia-inicial {
+        font-size: 14.5px;
+        line-height: 1.45;
+        word-break: keep-all;
+        white-space: pre-line;
+      }
+    }
     }
 
     .input-area {
