@@ -299,7 +299,7 @@ function getNextLaunchDate() {
   return new Date(year, month + 1, 30, 23, 59, 0, 0);
 }
 
-const OFFER_END_DATE = getNextLaunchDate();
+const OFFER_END_DATE = new Date("2026-05-02T12:00:00-03:00");
 
 function padCountdown(value) {
   return String(value).padStart(2, '0');
