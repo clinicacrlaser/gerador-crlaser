@@ -715,6 +715,31 @@ async function responderLia(texto) {
   if (estado.etapa === "inicio") {
     estado.procedimentoDigitado = texto;
 
+    // Mapeamento de número para procedimento
+    const mapaNumeros = {
+      "1": { base: "Ultraformer MPT", regiao: "Full Face" },
+      "2": { base: "Lavieen", regiao: "Facial completo" },
+      "3": { base: "Botox", regiao: "Facial" },
+      "4": { base: "Preenchedor", regiao: "Uma Ampola" },
+      "5": { base: "Bioestimulador Diamond", regiao: "Bioestimulador Diamond" },
+      "6": { base: "Scizer", regiao: "Corporal Por Região" },
+      "7": { base: "Endymed Radiofrequência 3DEEP", regiao: "Endymed Radiofrequência 3DEEP" },
+      "8": { base: "Microagulhamento Robótico", regiao: "Microagulhamento Robótico" },
+      "9": { base: "Luz Pulsada", regiao: "Luz Pulsada" },
+      "10": { base: "Laser Fracionado Pixel", regiao: "Laser Fracionado Pixel" },
+      "11": { base: "Hollywood Peel", regiao: "Hollywood Peel" },
+      "12": { base: "Depilação a Laser", regiao: "Depilação a Laser" }
+    };
+
+    if (mapaNumeros[texto.trim()]) {
+      const op = mapaNumeros[texto.trim()];
+      estado.procedimentoBase = op.base;
+      estado.regiao = op.regiao;
+      estado.etapa = "unidade";
+      perguntarUnidade();
+      return;
+    }
+
     if (analisarTextoProcedimento(texto)) {
       return;
     }
