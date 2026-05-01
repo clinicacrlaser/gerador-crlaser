@@ -787,7 +787,13 @@ async function responderLia(texto) {
   if (estado.etapa === "tipoBotox" || estado.etapa === "botox_regiao") {
     const opcoes = {"1": { base: "Botox", regiao: "Facial" }, "2": { base: "Botox", regiao: "Axilar Suor" }, "botox facial": { base: "Botox", regiao: "Facial" }, "facial": { base: "Botox", regiao: "Facial" }, "botox suor": { base: "Botox", regiao: "Axilar Suor" }, "suor": { base: "Botox", regiao: "Axilar Suor" }, "axilar": { base: "Botox", regiao: "Axilar Suor" }};
     const op = opcoes[chave];
-    if (!op) { adicionarMensagemNoChat("Escolha 1 para Botox facial ou 2 para Botox suor axilar.", "lia"); return; }
+    if (!op) {
+      adicionarMensagemNoChat(
+        "Você quer qual Botox?\n\n1. Botox facial\n2. Botox suor axilar\n\nDigite uma das opções acima para continuar 😊",
+        "lia"
+      );
+      return;
+    }
     estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
@@ -795,7 +801,13 @@ async function responderLia(texto) {
   if (estado.etapa === "lavieen_regiao") {
     const opcoes = {"1": { base: "Lavieen", regiao: "Facial completo" }, "2": { base: "Lavieen", regiao: "Melasma" }, "3": { base: "Lavieen", regiao: "BB Laser Facial" }, "4": { base: "Lavieen", regiao: "Olheiras" }, "5": { base: "Lavieen", regiao: "Capilar" }, "6": { base: "Lavieen", regiao: "Mãos" }, "facial": { base: "Lavieen", regiao: "Facial completo" }, "melasma": { base: "Lavieen", regiao: "Melasma" }, "bb laser": { base: "Lavieen", regiao: "BB Laser Facial" }, "olheiras": { base: "Lavieen", regiao: "Olheiras" }, "capilar": { base: "Lavieen", regiao: "Capilar" }, "maos": { base: "Lavieen", regiao: "Mãos" }};
     const op = opcoes[chave];
-    if (!op) { adicionarMensagemNoChat("Escolha uma opção de 1 a 6.", "lia"); return; }
+    if (!op) {
+      adicionarMensagemNoChat(
+        "Qual Lavieen você quer?\n\n1. Facial completo\n2. Melasma\n3. BB Laser Facial\n4. Olheiras\n5. Capilar\n6. Mãos\n\nDigite uma das opções acima para continuar 😊",
+        "lia"
+      );
+      return;
+    }
     estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
@@ -844,13 +856,25 @@ async function responderLia(texto) {
       "maos": { base: "Ultraformer MPT", regiao: "Mãos" }
     };
     const op = opcoes[chave];
-    if (!op) { adicionarMensagemNoChat("Escolha uma opção de 1 a 18.", "lia"); return; }
+    if (!op) {
+      adicionarMensagemNoChat(
+        "Qual região do Ultraformer MPT você quer?\n\n1. Full Face\n2. Terço Inferior (Contorno Facial)\n3. Papada\n4. Bichectomia\n5. Pescoço\n6. Colo\n7. Pálpebras\n8. Abdome\n9. Flancos\n10. Braços Região do Tchau\n11. Gordura do Sutiã\n12. Gordura Pré-Axilar\n13. Bananinha\n14. Interno de Coxa\n15. Monte de Vênus\n16. Rejuvenescimento Íntimo\n17. Joelho\n18. Mãos\n\nDigite uma das opções acima para continuar 😊",
+        "lia"
+      );
+      return;
+    }
     estado.procedimentoBase = op.base; estado.regiao = op.regiao; estado.etapa = "unidade"; perguntarUnidade();
     return;
   }
 
   if (estado.etapa === "unidade") {
-    if (!unidades[texto]) { adicionarMensagemNoChat("Escolha uma opção de 1 a 5.", "lia"); return; }
+    if (!unidades[texto]) {
+      adicionarMensagemNoChat(
+        "Me diga a unidade:\n\n1. Brasília\n2. Campinas\n3. Goiânia\n4. Palmas\n5. São Paulo\n\nDigite uma das opções acima para continuar 😊",
+        "lia"
+      );
+      return;
+    }
     estado.unidade = texto; estado.etapa = "pagamento"; adicionarMensagemNoChat("Como você prefere pagar?\n\n1️⃣ Pix\n2️⃣ Cartão", "lia");
     return;
   }
@@ -870,7 +894,13 @@ async function responderLia(texto) {
         linkPagamento: link
       }, "lia");
       aguardandoUnidadeParaTelefone = true;
-    } else { adicionarMensagemNoChat("Escolha 1 para Pix ou 2 para Cartão.", "lia"); return; }
+    } else {
+      adicionarMensagemNoChat(
+        "Como você prefere pagar?\n\n1️⃣ Pix\n2️⃣ Cartão\n\nDigite uma das opções acima para continuar 😊",
+        "lia"
+      );
+      return;
+    }
     return;
   }
 }
