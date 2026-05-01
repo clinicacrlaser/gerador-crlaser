@@ -777,8 +777,10 @@ async function responderLia(texto) {
       perguntarUnidade();
       return;
     }
-
-    adicionarMensagemNoChat("Me diga o procedimento que você quer comprar 😊\nExemplo: Botox, Ultraformer, Lavieen", "lia");
+    adicionarMensagemNoChat(
+      "Não encontrei essa opção 😊\n\nDigite o número do procedimento ou escolha uma das opções abaixo:\n\n1. Ultraformer MPT\n2. Laser Lavieen\n3. Botox\n4. Preenchedor\n5. Bioestimulador Diamond\n6. Scizer Gordura Localizada\n7. Endymed Radiofrequência\n8. Microagulhamento Robótico\n9. Luz Intensa Pulsada (Goiânia)\n10. Laser Fracionado (Goiânia)\n11. Hollywood Peel (Goiânia)\n12. Depilação a Laser (Goiânia)",
+      "lia"
+    );
     return;
   }
 
