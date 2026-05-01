@@ -131,9 +131,24 @@
       border: 1px solid rgba(24,199,209,0.35);
       border-radius: 18px;
       box-shadow: 0 0 28px rgba(0,200,255,0.22), 0 0 60px rgba(0,200,255,0.10);
-      max-width: 420px;
+      max-width: 520px;
       width: 100%;
-      padding: 36px 28px 28px;
+      padding: 36px 32px 28px;
+          /* Modal: cada parágrafo em uma linha no desktop, quebra normal no mobile */
+          @media (min-width: 600px) {
+            #popupBox .popup-main,
+            #popupBox .popup-sub {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+          @media (max-width: 599px) {
+            #popupBox .popup-main,
+            #popupBox .popup-sub {
+              white-space: normal;
+            }
+          }
       position: relative;
       text-align: center;
       font-family: 'Inter', sans-serif;
