@@ -163,10 +163,24 @@
       letter-spacing: 0.04em;
     }
     #popupBox p {
-      font-size: 0.97rem;
+      font-size: 1.05rem;
       color: #B8C2D1;
-      line-height: 1.65;
-      margin: 0 0 10px;
+      line-height: 1.7;
+      margin: 0 auto 12px auto;
+      max-width: 340px;
+      text-align: center;
+      word-break: normal;
+        #popupBox .popup-main {
+          font-size: 1.08rem;
+          font-weight: 500;
+          margin-bottom: 14px;
+          color: #F5F7FA;
+        }
+        #popupBox .popup-sub {
+          font-size: 0.98rem;
+          color: #18C7D1;
+          margin-bottom: 0;
+        }
     }
     #popupBox p strong { color: #18C7D1; }
     #popupBox .popup-divider {
@@ -531,9 +545,9 @@
     <div id="popupBox">
       <button id="popupClose" aria-label="Fechar">&times;</button>
       <div class="popup-icon">🚨</div>
-      <h2>ATENÇÃO 🚨</h2>
-      <p>A Lia está em teste e, por isso, pode apresentar falhas.</p>
-      <p>Confira os dados da empresa no feed da @crlaser.oficial ou, se achar melhor, pelo WhatsApp da sua unidade de atendimento.</p>
+      <h2>ATENÇÃO</h2>
+      <p class="popup-main">A Lia está em teste e pode apresentar falhas.</p>
+      <p class="popup-sub">Confira os dados da empresa no feed <strong>@crlaser.oficial</strong> ou pelo WhatsApp da sua unidade.</p>
       <hr class="popup-divider" />
       <button id="popupOk">Entendi</button>
     </div>
