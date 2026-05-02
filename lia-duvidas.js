@@ -54,42 +54,100 @@ function parseCSVSeguro(csv) {
 }
 
 function buscarResposta(pergunta) {
-  const proibidas = ['preço', 'preco', 'valor', 'quanto', 'promo', 'promoção', 'oferta', 'comprar', 'compra', 'pagar', 'pagamento', 'pix', 'link', 'desconto'];
+  // 1. Saudações simples
+  const saudacoes = [
+    'oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'tudo bem'
+  ];
   const perguntaNorm = normalizar(pergunta);
+  if (saudacoes.includes(perguntaNorm)) {
+    return {
+      mensagem: 'Olá 😊<br>Sou a Lia e posso te ajudar com dúvidas sobre os procedimentos da CR Laser®. <br>Digite sua dúvida.',
+      link: ''
+    };
+  }
+
+  // 7. Perguntas de preço, valor, promoção, desconto, comprar, pagamento, Pix ou cartão
+  const proibidas = [
+    'preço', 'preco', 'valor', 'quanto', 'promo', 'promoção', 'oferta', 'comprar', 'compra', 'pagar', 'pagamento', 'pix', 'link', 'desconto', 'cartao', 'cartão'
+  ];
   if (proibidas.some(p => perguntaNorm.includes(p))) {
     return {
       mensagem: 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.',
       link: ''
     };
   }
+
+  // 3. Palavras genéricas a ignorar
+  const stopwords = new Set([
+    'o','a','os','as','de','do','da','dos','das','em','para','com','que','qual','quais','como','por','é','e','ou','um','uma','sobre','procedimento','tratamento','cr','laser','no','na','nos','nas','ao','aos','à','às','se','sua','seu','minha','meu','pra','pro','pelo','pela','pelos','pelas'
+  ]);
+  // 2. Pesos
+  const PESO_TITULO = 6;
+  const PESO_CATEGORIA = 3;
+  const PESO_MENSAGEM = 1;
+
+  // 5 e 6. Palavras-chave para priorização
+  const originalKeys = ['original', 'verdadeiro', 'autêntico', 'autentico', 'autoridade', 'segurança', 'seguranca'];
+  const dorKeys = ['dói', 'doi', 'dor', 'dolorido', 'dolorida', 'doeu', 'doer', 'dores', 'aplicação', 'aplicacao'];
+  const perguntaTokens = perguntaNorm.split(' ').filter(p => p && !stopwords.has(p));
+  if (perguntaTokens.length === 0) return null;
+
   let melhor = null;
   let melhorScore = 0;
+  let melhorTitulo = '';
+  let empate = false;
+
   for (const duvida of baseDuvidas) {
     let score = 0;
     const titulo = normalizar(duvida['TÍTULO'] || '');
     const categoria = normalizar(duvida['CATEGORIA'] || '');
     const mensagem = normalizar(duvida['MENSAGEM'] || '');
-    // Peso: título 3, categoria 2, mensagem 1
-    if (perguntaNorm && titulo) {
-      const palavrasPerg = perguntaNorm.split(' ');
-      for (const p of palavrasPerg) {
-        if (titulo.includes(p)) score += 3;
-        if (categoria.includes(p)) score += 2;
-        if (mensagem.includes(p)) score += 1;
+
+    // 5. Prioridade para "original"
+    if (originalKeys.some(k => perguntaNorm.includes(k))) {
+      if (titulo.includes('original') || categoria.includes('original') || titulo.includes('autoridade') || categoria.includes('autoridade') || titulo.includes('seguranca') || categoria.includes('seguranca') || titulo.includes('segurança') || categoria.includes('segurança')) {
+        score += 10;
       }
     }
+    // 6. Prioridade para "dor"
+    if (dorKeys.some(k => perguntaNorm.includes(k))) {
+      if (titulo.includes('dói') || titulo.includes('doi') || titulo.includes('dor') || titulo.includes('aplicacao') || titulo.includes('aplicação')) {
+        score += 8;
+      }
+    }
+
+    for (const p of perguntaTokens) {
+      if (titulo.includes(p)) score += PESO_TITULO;
+      if (categoria.includes(p)) score += PESO_CATEGORIA;
+      if (mensagem.includes(p)) score += PESO_MENSAGEM;
+    }
+
     if (score > melhorScore) {
       melhor = duvida;
       melhorScore = score;
+      melhorTitulo = duvida['TÍTULO'] || '';
+      empate = false;
+    } else if (score === melhorScore && score > 0) {
+      empate = true;
     }
   }
-  if (melhor && melhorScore > 0) {
-    return {
-      mensagem: melhor['MENSAGEM'] || '',
-      link: melhor['LINK_COMPLEMENTAR'] || ''
-    };
+
+  // 4 e 9. Só responder se a pontuação for realmente segura e não houver empate
+  const LIMIAR_SEGURO = 10;
+  if (!melhor || melhorScore < LIMIAR_SEGURO || empate) {
+    console.log('Pergunta:', pergunta);
+    console.log('Título escolhido: (nenhum)');
+    console.log('Pontuação final:', melhorScore);
+    return null;
   }
-  return null;
+  // 10. Log para validação
+  console.log('Pergunta:', pergunta);
+  console.log('Título escolhido:', melhorTitulo);
+  console.log('Pontuação final:', melhorScore);
+  return {
+    mensagem: melhor['MENSAGEM'] || '',
+    link: melhor['LINK_COMPLEMENTAR'] || ''
+  };
 }
 
 function mostrarMensagemInicial() {
