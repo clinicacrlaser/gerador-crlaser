@@ -1,7 +1,7 @@
 // api/debug-lia-ia.js - Rota de debug para Lia IA (ESM)
 
 
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTuZWS1FSLb_BwDRQy4_HwlzCklKoUd8oO1NOP4ITKaI100iQEuM_x3ANFjB8tgjkfJQMx3LBmbbzij/pub?gid=0&single=true&output=csv';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/17KgtQRbHpt4Pwif1Of5s3ukWXSaetfXJvcH7H6PKQlQ/export?format=csv&gid=7168740';
 
 function parseCSVSeguro(csv) {
   if (csv.charCodeAt(0) === 0xFEFF) csv = csv.slice(1);
