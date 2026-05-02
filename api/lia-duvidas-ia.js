@@ -85,9 +85,48 @@ async function baixarCSV() {
   return texto;
 }
 
-async function callOpenAI(pergunta, base) {
-  // Monta base completa
-  let baseTexto = base.map((t, i) => {
+// Função para normalizar texto (sem acento, minúsculo, sem pontuação)
+function normalizarBusca(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[.,;:!?\-–—_()\[\]{}"'`´^~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buscarLinhasRelevantes(pergunta, base) {
+  const perguntaNorm = normalizarBusca(pergunta);
+  const tokens = perguntaNorm.split(' ').filter(Boolean);
+  // Regras especiais para botox pontos aplicação
+  const isBotoxPontos = perguntaNorm.includes('botox') && (perguntaNorm.includes('pontos') || perguntaNorm.includes('aplicacao') || perguntaNorm.includes('aplica') || perguntaNorm.includes('onde aplica') || perguntaNorm.includes('locais') || perguntaNorm.includes('regioes'));
+  let scored = base.map(linha => {
+    let score = 0;
+    const tituloNorm = normalizarBusca(linha.titulo);
+    const categoriaNorm = normalizarBusca(linha.categoria);
+    const mensagemNorm = normalizarBusca(linha.mensagem);
+    // Peso alto para palavras no título
+    for (const t of tokens) {
+      if (tituloNorm.includes(t)) score += 10;
+      if (categoriaNorm.includes(t)) score += 4;
+      if (mensagemNorm.includes(t)) score += 2;
+    }
+    // Regra especial botox pontos aplicação
+    if (isBotoxPontos && tituloNorm.includes('botox') && (tituloNorm.includes('pontos') || tituloNorm.includes('aplicacao'))) {
+      score += 30;
+    }
+    return { ...linha, score };
+  });
+  scored = scored.filter(l => l.score > 0);
+  scored.sort((a, b) => b.score - a.score);
+  // Seleciona top 5 a 10 linhas
+  return scored.slice(0, 10);
+}
+
+async function callOpenAI(pergunta, linhasRelevantes) {
+  // Monta base reduzida
+  let baseTexto = linhasRelevantes.map((t, i) => {
     return `[${i+1}]\nCategoria: ${t.categoria}\nTítulo: ${t.titulo}\nMensagem: ${t.mensagem}\nLink: ${t.link}`;
   }).join("\n\n");
 
@@ -184,11 +223,25 @@ export default async function handler(req, res) {
         console.log('[LIA-IA] Fallback: base vazia');
         return;
       }
-      // 4. Chamar OpenAI com a base completa
+
+      // 4. Busca de contexto antes da IA
+      console.log('[LIA-IA] Pergunta:', pergunta);
+      const linhasRelevantes = buscarLinhasRelevantes(pergunta, base);
+      console.log('[LIA-IA] Linhas relevantes:', linhasRelevantes.length);
+      console.log('[LIA-IA] Títulos enviados para IA:', linhasRelevantes.map(l => l.titulo));
+
+      if (!linhasRelevantes.length) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.' }));
+        console.log('[LIA-IA] Fallback: nenhuma linha relevante');
+        return;
+      }
+
+      // 5. Chamar OpenAI com as linhas relevantes
       let respostaFinal;
       try {
         console.log('[LIA-IA] Chamando OpenAI...');
-        const respostaIA = await callOpenAI(pergunta, base);
+        const respostaIA = await callOpenAI(pergunta, linhasRelevantes);
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
 
         // 1. Corrigir regra de preço/oferta: só mostrar resposta de valores se pergunta realmente for sobre preço/compra
@@ -197,11 +250,9 @@ export default async function handler(req, res) {
           respostaFinal = 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.';
         } else {
           // 2. Corrigir links: só incluir "Veja também" se link complementar for URL real
-          // Extrai todos os links http(s) da base
-          const linksValidos = base
+          const linksValidos = linhasRelevantes
             .map(l => l.link)
             .filter(link => typeof link === 'string' && /^https?:\/\//i.test(link));
-          // Se houver link válido e a resposta não contiver "Veja também", incluir
           if (linksValidos.length > 0 && !/Veja também/i.test(respostaFinal)) {
             respostaFinal += `<br><br>Veja também:<br><a href="${linksValidos[0]}" target="_blank" style="color:#18c7d1;word-break:break-all;">${linksValidos[0]}</a>`;
           }
