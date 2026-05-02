@@ -64,65 +64,7 @@ function normalizar(str) {
     .trim();
 }
 
-function selecionarTrechosRelevantes(pergunta, base) {
-  // Aliases fortes
-  const aliases = {
-    mpt: 'Ultraformer MPT',
-    ultraformer: 'Ultraformer MPT',
-    'ultraformer mpt': 'Ultraformer MPT',
-    botox: 'Botox',
-    lavieen: 'Lavieen',
-    bioestimulador: 'Bioestimulador Diamond',
-    preenchedor: 'Preenchedor',
-    scizer: 'Scizer',
-    endymed: 'Endymed',
-    ifine: 'Endymed Ifine',
-    'microagulhamento': 'Microagulhamento Robótico'
-  };
-  const proibidas = ['preço','preco','valor','quanto','promo','promoção','oferta','comprar','compra','pagar','pagamento','pix','link','desconto','cartao','cartão'];
-  const saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem'];
-  const perguntaNorm = normalizar(pergunta);
-  if (proibidas.some(p => perguntaNorm.includes(p))) return [];
-  if (saudacoes.includes(perguntaNorm)) return [];
-  const stopwords = new Set(['o','a','os','as','de','do','da','dos','das','em','para','com','que','qual','quais','como','por','é','e','ou','um','uma','sobre','procedimento','tratamento','cr','laser','no','na','nos','nas','ao','aos','à','às','se','sua','seu','minha','meu','pra','pro','pelo','pela','pelos','pelas']);
-  const tokens = perguntaNorm.split(' ').filter(p => p && !stopwords.has(p));
-  // Detecta alias
-  let aliasMatch = null;
-  for (const key in aliases) {
-    if (perguntaNorm.includes(key)) {
-      aliasMatch = aliases[key];
-      break;
-    }
-  }
-  let scored = base.map(linha => {
-    let score = 0;
-    const titulo = normalizar(linha.titulo||'');
-    const categoria = normalizar(linha.categoria||'');
-    const mensagem = normalizar(linha.mensagem||'');
-    // Se alias, dar boost para linhas que contenham o termo expandido
-    if (aliasMatch) {
-      if (titulo.includes(normalizar(aliasMatch))) score += 20;
-      if (categoria.includes(normalizar(aliasMatch))) score += 12;
-      if (mensagem.includes(normalizar(aliasMatch))) score += 6;
-    }
-    for (const t of tokens) {
-      if (titulo.includes(t)) score += 6;
-      if (categoria.includes(t)) score += 3;
-      if (mensagem.includes(t)) score += 1;
-    }
-    return { ...linha, score };
-  });
-  scored = scored.filter(l => l.score > 0);
-  scored.sort((a,b) => b.score - a.score);
-  // Logging: pergunta recebida e top 5 títulos
-  console.log('[LIA-IA] Pergunta:', pergunta);
-  for (let i = 0; i < Math.min(5, scored.length); i++) {
-    console.log(`[LIA-IA] Top${i+1}:`, scored[i].titulo, 'Pontuação:', scored[i].score);
-  }
-  // Se alias, retorna até 10 trechos
-  if (aliasMatch) return scored.slice(0, 10);
-  return scored.slice(0, 4);
-}
+// Função removida: agora a IA interpreta toda a base
 
 
 async function baixarCSV() {
@@ -143,12 +85,14 @@ async function baixarCSV() {
   return texto;
 }
 
-async function callOpenAI(pergunta, trechos) {
-  let contexto = '';
-  trechos.forEach((t, i) => {
-    contexto += `Trecho ${i+1}:\nCategoria: ${t.categoria}\nTítulo: ${t.titulo}\nMensagem: ${t.mensagem}\n`;
-  });
-  let prompt = `Você é a Lia IA, assistente da CR Laser®. Responda de forma curta, natural e segura, usando SOMENTE as informações dos trechos abaixo.\nSe não houver informação suficiente, diga: Ainda estou em treinamento para responder essa dúvida com segurança 😊 Por favor, fale com o WhatsApp da sua unidade de atendimento.\n\nPergunta: ${pergunta}\n\n${contexto}\nResposta:`;
+async function callOpenAI(pergunta, base) {
+  // Monta base completa
+  let baseTexto = base.map((t, i) => {
+    return `[${i+1}]\nCategoria: ${t.categoria}\nTítulo: ${t.titulo}\nMensagem: ${t.mensagem}\nLink: ${t.link}`;
+  }).join("\n\n");
+
+  const prompt = `Você é a Lia IA, assistente da CR Laser®.\nResponda de forma natural, simpática e objetiva.\nUse exclusivamente as informações da BASE DE CONHECIMENTO.\nNão invente informações.\nNão use conhecimento externo.\nSe a resposta puder ser inferida claramente a partir da base, responda.\nSe a base não tiver informação suficiente, diga:\n"Ainda estou em treinamento para responder essa dúvida com segurança 😊\nPor favor, fale com o WhatsApp da sua unidade de atendimento."\n\nSe a pergunta for sobre preço, valor, promoção, desconto, compra, pagamento, Pix ou cartão, responda sempre:\n"Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade."\n\nSe a base tiver LINK_COMPLEMENTAR relevante para a resposta, incluir no final:\n"Veja também:\n[link]"\n\nBASE DE CONHECIMENTO:\n${baseTexto}\n\nPergunta do usuário: ${pergunta}\n\nResposta:`;
+
   const response = await fetch(OPENAI_API_URL, {
     method: "POST",
     headers: {
@@ -181,43 +125,42 @@ export default async function handler(req, res) {
   req.on('end', async () => {
     try {
       const { pergunta } = JSON.parse(body);
-      // 7. Perguntas proibidas
+      // Logs
+      console.log('[LIA-IA] Pergunta recebida:', pergunta);
+      // 1. Perguntas proibidas (preço, valor, compra, etc)
       const proibidas = ['preço','preco','valor','quanto','promo','promoção','oferta','comprar','compra','pagar','pagamento','pix','link','desconto','cartao','cartão'];
       if (proibidas.some(p => normalizar(pergunta).includes(p))) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ resposta: 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.' }));
+        console.log('[LIA-IA] Respondeu: preço/compra');
         return;
       }
-      // 1. Saudações
+      // 2. Saudações
       const saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem'];
       if (saudacoes.includes(normalizar(pergunta))) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ resposta: 'Olá 😊<br>Sou a Lia IA e posso te ajudar com dúvidas sobre os procedimentos da CR Laser®. <br>Digite sua dúvida.' }));
+        console.log('[LIA-IA] Respondeu: saudação');
         return;
       }
-      // 4. Baixar CSV
+      // 3. Baixar e normalizar base
       const csv = await baixarCSV();
       const base = parseCSVSeguro(csv);
-      // 5. Selecionar trechos relevantes
-      const trechos = selecionarTrechosRelevantes(pergunta, base);
-      if (!trechos.length) {
+      if (!base.length) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ resposta: 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.' }));
+        console.log('[LIA-IA] Fallback: base vazia');
         return;
       }
-      // 6. Chamar OpenAI
+      // 4. Chamar OpenAI com a base completa
       let respostaFinal;
       try {
-        const respostaIA = await callOpenAI(pergunta, trechos);
+        console.log('[LIA-IA] Chamando OpenAI...');
+        const respostaIA = await callOpenAI(pergunta, base);
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
       } catch (err) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
-      }
-      // 8. Se houver link complementar, incluir
-      const link = trechos[0].link;
-      if (link) {
-        respostaFinal += `<br><br>Veja também:<br><a href="${link}" target="_blank" style="color:#18c7d1;word-break:break-all;">${link}</a>`;
       }
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ resposta: respostaFinal }));
