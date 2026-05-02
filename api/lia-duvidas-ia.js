@@ -1,8 +1,9 @@
 // api/lia-duvidas-ia.js - API para Lia IA
-const https = require('https');
-const http = require('http');
-const { parse } = require('url');
-const { Readable } = require('stream');
+
+import https from 'https';
+import http from 'http';
+import { parse } from 'url';
+import { Readable } from 'stream';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTuZWS1FSLb_BwDRQy4_HwlzCklKoUd8oO1NOP4ITKaI100iQEuM_x3ANFjB8tgjkfJQMx3LBmbbzij/pub?output=csv';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -121,7 +122,7 @@ async function callOpenAI(pergunta, trechos) {
   });
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ erro: 'Método não permitido' }));
