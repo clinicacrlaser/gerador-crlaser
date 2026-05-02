@@ -93,7 +93,7 @@ function buscarResposta(pergunta) {
 }
 
 function mostrarMensagemInicial() {
-  adicionarMensagem('Oi, eu sou a Lia 😊<br>Posso te ajudar com dúvidas sobre os procedimentos da CR Laser®.<br><br>Digite sua dúvida abaixo.', 'lia');
+  adicionarMensagem('Oi, eu sou a Lia 😊<br><br>Estou aqui para tirar dúvidas sobre os procedimentos da CR Laser®.<br><br>Digite sua pergunta abaixo.', 'lia');
 }
 
 async function carregarCSV() {
