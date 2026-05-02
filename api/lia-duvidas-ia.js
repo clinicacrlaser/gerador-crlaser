@@ -4,8 +4,8 @@
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/17KgtQRbHpt4Pwif1Of5s3ukWXSaetfXJvcH7H6PKQlQ/export?format=csv&gid=7168740';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
-const MODEL = 'gpt-4-1106-preview'; // gpt-4.1-mini (use o nome correto da API)
+const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
+const MODEL = 'gpt-4.1-mini';
 
 function parseCSVSeguro(csv) {
   // Remove BOM se existir
@@ -142,38 +142,28 @@ async function baixarCSV() {
 async function callOpenAI(pergunta, trechos) {
   let contexto = '';
   trechos.forEach((t, i) => {
-    contexto += `Trecho ${i+1}:\nCategoria: ${t['CATEGORIA']}\nTítulo: ${t['TÍTULO']}\nMensagem: ${t['MENSAGEM']}\n`;
+    contexto += `Trecho ${i+1}:\nCategoria: ${t['CATEGORIA']}\nTítulo: ${t['TITULO'] || t['TÍTULO'] || ''}\nMensagem: ${t['MENSAGEM']}\n`;
   });
   let prompt = `Você é a Lia IA, assistente da CR Laser®. Responda de forma curta, natural e segura, usando SOMENTE as informações dos trechos abaixo.\nSe não houver informação suficiente, diga: Ainda estou em treinamento para responder essa dúvida com segurança 😊 Por favor, fale com o WhatsApp da sua unidade de atendimento.\n\nPergunta: ${pergunta}\n\n${contexto}\nResposta:`;
-  const body = JSON.stringify({
-    model: MODEL,
-    messages: [{ role: 'user', content: prompt }],
-    max_tokens: 200,
-    temperature: 0.2
+  const response = await fetch(OPENAI_API_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      input: prompt,
+      temperature: 0.2,
+      max_output_tokens: 500
+    })
   });
-  return new Promise((resolve, reject) => {
-    const req = https.request(OPENAI_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      }
-    }, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          const resposta = json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content;
-          resolve(resposta);
-        } catch (e) { reject(e); }
-      });
-      res.on('error', reject);
-    });
-    req.on('error', reject);
-    req.write(body);
-    req.end();
-  });
+  const data = await response.json();
+  if (!response.ok) {
+    console.error("[LIA-IA] OpenAI erro:", data);
+    throw new Error(data?.error?.message || "Erro ao consultar OpenAI");
+  }
+  return data.output_text;
 }
 
 export default async function handler(req, res) {
@@ -212,8 +202,14 @@ export default async function handler(req, res) {
         return;
       }
       // 6. Chamar OpenAI
-      const respostaIA = await callOpenAI(pergunta, trechos);
-      let respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
+      let respostaFinal;
+      try {
+        const respostaIA = await callOpenAI(pergunta, trechos);
+        respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
+      } catch (err) {
+        console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
+        respostaFinal = 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
+      }
       // 8. Se houver LINK_COMPLEMENTAR, incluir
       const link = trechos[0]['LINK_COMPLEMENTAR'];
       if (link) {
