@@ -1,9 +1,6 @@
 // api/lia-duvidas-ia.js - API para Lia IA
 
-import https from 'https';
-import http from 'http';
-import { parse } from 'url';
-import { Readable } from 'stream';
+
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTuZWS1FSLb_BwDRQy4_HwlzCklKoUd8oO1NOP4ITKaI100iQEuM_x3ANFjB8tgjkfJQMx3LBmbbzij/pub?gid=0&single=true&output=csv';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -123,15 +120,23 @@ function selecionarTrechosRelevantes(pergunta, base) {
   return scored.slice(0, 4);
 }
 
-async function fetchCSV() {
-  return new Promise((resolve, reject) => {
-    https.get(CSV_URL, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-      res.on('error', reject);
-    }).on('error', reject);
+
+async function baixarCSV() {
+  const response = await fetch(CSV_URL, {
+    redirect: "follow",
+    headers: {
+      "User-Agent": "Mozilla/5.0",
+      "Accept": "text/csv,text/plain,*/*"
+    }
   });
+  const texto = await response.text();
+  if (!response.ok) {
+    throw new Error("Erro ao baixar CSV: " + response.status);
+  }
+  if (texto.trim().startsWith("<") || texto.toLowerCase().includes("<html")) {
+    throw new Error("A planilha retornou HTML, não CSV. Verifique publicação da planilha.");
+  }
+  return texto;
 }
 
 async function callOpenAI(pergunta, trechos) {
@@ -197,7 +202,7 @@ export default async function handler(req, res) {
         return;
       }
       // 4. Baixar CSV
-      const csv = await fetchCSV();
+      const csv = await baixarCSV();
       const base = parseCSVSeguro(csv);
       // 5. Selecionar trechos relevantes
       const trechos = selecionarTrechosRelevantes(pergunta, base);
