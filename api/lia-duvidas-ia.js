@@ -93,25 +93,56 @@ async function callOpenAI(pergunta, base) {
 
   const prompt = `Você é a Lia IA, assistente da CR Laser®.\nResponda de forma natural, simpática e objetiva.\nUse exclusivamente as informações da BASE DE CONHECIMENTO.\nNão invente informações.\nNão use conhecimento externo.\nSe a resposta puder ser inferida claramente a partir da base, responda.\nSe a base não tiver informação suficiente, diga:\n"Ainda estou em treinamento para responder essa dúvida com segurança 😊\nPor favor, fale com o WhatsApp da sua unidade de atendimento."\n\nSe a pergunta for sobre preço, valor, promoção, desconto, compra, pagamento, Pix ou cartão, responda sempre:\n"Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade."\n\nSe a base tiver LINK_COMPLEMENTAR relevante para a resposta, incluir no final:\n"Veja também:\n[link]"\n\nBASE DE CONHECIMENTO:\n${baseTexto}\n\nPergunta do usuário: ${pergunta}\n\nResposta:`;
 
-  const response = await fetch(OPENAI_API_URL, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENAI_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      input: prompt,
-      temperature: 0.2,
-      max_output_tokens: 500
-    })
-  });
-  const data = await response.json();
-  if (!response.ok) {
-    console.error("[LIA-IA] OpenAI erro:", data);
-    throw new Error(data?.error?.message || "Erro ao consultar OpenAI");
+  // Timeout de 20s
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+  let response, data;
+  try {
+    response = await fetch(OPENAI_API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        input: prompt,
+        temperature: 0.2,
+        max_output_tokens: 500
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    console.log('[LIA-IA] OpenAI status:', response.status);
+    console.log('[LIA-IA] OpenAI ok:', response.ok);
+    let text = await response.text();
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      data = text;
+    }
+    if (!response.ok) {
+      console.error("[LIA-IA] Erro OpenAI completo:", data);
+      throw new Error(data?.error?.message || "Erro ao consultar OpenAI");
+    }
+    console.log('[LIA-IA] OpenAI respondeu com sucesso');
+    // Diagnóstico de extração de texto
+    let resposta = data && data.output_text;
+    if (!resposta && data && data.output && data.output[0] && data.output[0].content && data.output[0].content[0] && data.output[0].content[0].text) {
+      resposta = data.output[0].content[0].text;
+    }
+    if (!resposta) {
+      console.error("[LIA-IA] Resposta OpenAI sem texto:", data);
+    }
+    return resposta;
+  } catch (err) {
+    clearTimeout(timeout);
+    if (err.name === 'AbortError') {
+      console.error('[LIA-IA] Timeout na chamada OpenAI');
+      throw new Error('Timeout na chamada OpenAI');
+    }
+    throw err;
   }
-  return data.output_text;
 }
 
 export default async function handler(req, res) {
@@ -160,7 +191,7 @@ export default async function handler(req, res) {
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
       } catch (err) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
-        respostaFinal = 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
+        respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
       }
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ resposta: respostaFinal }));
