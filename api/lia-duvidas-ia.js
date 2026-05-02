@@ -11,9 +11,23 @@ const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4-1106-preview'; // gpt-4.1-mini (use o nome correto da API)
 
 function parseCSVSeguro(csv) {
+  // Remove BOM se existir
+  if (csv.charCodeAt(0) === 0xFEFF) csv = csv.slice(1);
   const linhas = csv.split(/\r?\n/).filter(Boolean);
   if (linhas.length < 2) return [];
-  const cabecalho = linhas[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  // Normaliza cabeçalhos
+  const normalizeHeader = h => h.replace(/\uFEFF/g, '').replace(/\s+/g, '').replace(/_/g, '').toLowerCase();
+  const cabecalhoRaw = linhas[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const cabecalho = cabecalhoRaw.map(normalizeHeader);
+  // Mapeamento para nomes padronizados
+  const headerMap = {};
+  cabecalho.forEach((h, i) => {
+    if (/categoria/.test(h)) headerMap[i] = 'CATEGORIA';
+    else if (/titulo|título/.test(h)) headerMap[i] = 'TITULO';
+    else if (/mensagem/.test(h)) headerMap[i] = 'MENSAGEM';
+    else if (/linkcomplementar|linkcomplementar|linkcomplementar/.test(h) || /link/.test(h)) headerMap[i] = 'LINK_COMPLEMENTAR';
+    else headerMap[i] = h.toUpperCase();
+  });
   const dados = [];
   for (let i = 1; i < linhas.length; i++) {
     let linha = linhas[i];
@@ -29,10 +43,13 @@ function parseCSVSeguro(csv) {
     if (campos.length < 4) continue;
     const obj = {};
     for (let j = 0; j < cabecalho.length; j++) {
-      obj[cabecalho[j].toUpperCase()] = (campos[j] || '').trim();
+      obj[headerMap[j]] = (campos[j] || '').trim();
     }
     dados.push(obj);
   }
+  // Logging: quantidade de linhas e nomes de colunas
+  console.log('[LIA-IA] Linhas carregadas:', dados.length);
+  console.log('[LIA-IA] Colunas detectadas:', Object.keys(dados[0] || {}));
   return dados;
 }
 
@@ -47,7 +64,20 @@ function normalizar(str) {
 }
 
 function selecionarTrechosRelevantes(pergunta, base) {
-  // Busca simples: prioriza TÍTULO, depois CATEGORIA, depois MENSAGEM
+  // Aliases fortes
+  const aliases = {
+    mpt: 'Ultraformer MPT',
+    ultraformer: 'Ultraformer MPT',
+    'ultraformer mpt': 'Ultraformer MPT',
+    botox: 'Botox',
+    lavieen: 'Lavieen',
+    bioestimulador: 'Bioestimulador Diamond',
+    preenchedor: 'Preenchedor',
+    scizer: 'Scizer',
+    endymed: 'Endymed',
+    ifine: 'Endymed Ifine',
+    'microagulhamento': 'Microagulhamento Robótico'
+  };
   const proibidas = ['preço','preco','valor','quanto','promo','promoção','oferta','comprar','compra','pagar','pagamento','pix','link','desconto','cartao','cartão'];
   const saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem'];
   const perguntaNorm = normalizar(pergunta);
@@ -55,13 +85,25 @@ function selecionarTrechosRelevantes(pergunta, base) {
   if (saudacoes.includes(perguntaNorm)) return [];
   const stopwords = new Set(['o','a','os','as','de','do','da','dos','das','em','para','com','que','qual','quais','como','por','é','e','ou','um','uma','sobre','procedimento','tratamento','cr','laser','no','na','nos','nas','ao','aos','à','às','se','sua','seu','minha','meu','pra','pro','pelo','pela','pelos','pelas']);
   const tokens = perguntaNorm.split(' ').filter(p => p && !stopwords.has(p));
-  if (tokens.length === 0) return [];
-  // Score
+  // Detecta alias
+  let aliasMatch = null;
+  for (const key in aliases) {
+    if (perguntaNorm.includes(key)) {
+      aliasMatch = aliases[key];
+      break;
+    }
+  }
   let scored = base.map(linha => {
     let score = 0;
-    const titulo = normalizar(linha['TÍTULO']||'');
+    const titulo = normalizar(linha['TITULO']||'');
     const categoria = normalizar(linha['CATEGORIA']||'');
     const mensagem = normalizar(linha['MENSAGEM']||'');
+    // Se alias, dar boost para linhas que contenham o termo expandido
+    if (aliasMatch) {
+      if (titulo.includes(normalizar(aliasMatch))) score += 20;
+      if (categoria.includes(normalizar(aliasMatch))) score += 12;
+      if (mensagem.includes(normalizar(aliasMatch))) score += 6;
+    }
     for (const t of tokens) {
       if (titulo.includes(t)) score += 6;
       if (categoria.includes(t)) score += 3;
@@ -71,7 +113,14 @@ function selecionarTrechosRelevantes(pergunta, base) {
   });
   scored = scored.filter(l => l.score > 0);
   scored.sort((a,b) => b.score - a.score);
-  return scored.slice(0, 4); // até 4 trechos mais relevantes
+  // Logging: top 5 títulos
+  console.log('[LIA-IA] Pergunta:', pergunta);
+  for (let i = 0; i < Math.min(5, scored.length); i++) {
+    console.log(`[LIA-IA] Top${i+1}:`, scored[i]['TITULO'], 'Pontuação:', scored[i].score);
+  }
+  // Se alias, retorna até 10 trechos
+  if (aliasMatch) return scored.slice(0, 10);
+  return scored.slice(0, 4);
 }
 
 async function fetchCSV() {
