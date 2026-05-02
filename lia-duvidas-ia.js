@@ -13,7 +13,7 @@ function adicionarMensagem(texto, tipo = 'lia') {
 }
 
 function mostrarMensagemInicial() {
-  adicionarMensagem('Oi, eu sou a Lia IA 😊<br><br>Estou aqui para tirar dúvidas sobre os procedimentos da CR Laser®.<br><br>Digite sua dúvida abaixo.', 'lia');
+  adicionarMensagem('Oi, eu sou a Lia, assistente virtual da CR Laser® 😊<br><br>Estou aqui para tirar dúvidas sobre os procedimentos da CR Laser®.<br><br>Digite sua dúvida abaixo.', 'lia');
 }
 
 liaForm.addEventListener('submit', async (e) => {
