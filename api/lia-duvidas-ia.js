@@ -19,11 +19,11 @@ function parseCSVSeguro(csv) {
   // Mapeamento para nomes padronizados
   const headerMap = {};
   cabecalho.forEach((h, i) => {
-    if (/categoria/.test(h)) headerMap[i] = 'CATEGORIA';
-    else if (/titulo|título/.test(h)) headerMap[i] = 'TITULO';
-    else if (/mensagem/.test(h)) headerMap[i] = 'MENSAGEM';
-    else if (/linkcomplementar|linkcomplementar|linkcomplementar/.test(h) || /link/.test(h)) headerMap[i] = 'LINK_COMPLEMENTAR';
-    else headerMap[i] = h.toUpperCase();
+    if (/categoria/.test(h)) headerMap[i] = 'categoria';
+    else if (/titulo|título/.test(h)) headerMap[i] = 'titulo';
+    else if (/mensagem/.test(h)) headerMap[i] = 'mensagem';
+    else if (/linkcomplementar|link\s*complementar/.test(h) || h === 'link') headerMap[i] = 'link';
+    else headerMap[i] = h;
   });
   const dados = [];
   for (let i = 1; i < linhas.length; i++) {
@@ -38,15 +38,19 @@ function parseCSVSeguro(csv) {
     }
     campos.push(atual);
     if (campos.length < 4) continue;
-    const obj = {};
+    const obj = { categoria: '', titulo: '', mensagem: '', link: '' };
     for (let j = 0; j < cabecalho.length; j++) {
-      obj[headerMap[j]] = (campos[j] || '').trim();
+      const key = headerMap[j];
+      if (key === 'categoria') obj.categoria = (campos[j] || '').trim();
+      else if (key === 'titulo') obj.titulo = (campos[j] || '').trim();
+      else if (key === 'mensagem') obj.mensagem = (campos[j] || '').trim();
+      else if (key === 'link') obj.link = (campos[j] || '').trim();
     }
     dados.push(obj);
   }
-  // Logging: quantidade de linhas e nomes de colunas
-  console.log('[LIA-IA] Linhas carregadas:', dados.length);
-  console.log('[LIA-IA] Colunas detectadas:', Object.keys(dados[0] || {}));
+  // Logging: quantidade de linhas e primeiros 3 títulos normalizados
+  console.log('[LIA-IA] Linhas normalizadas:', dados.length);
+  console.log('[LIA-IA] Primeiros 3 títulos:', dados.slice(0,3).map(l => l.titulo));
   return dados;
 }
 
@@ -92,9 +96,9 @@ function selecionarTrechosRelevantes(pergunta, base) {
   }
   let scored = base.map(linha => {
     let score = 0;
-    const titulo = normalizar(linha['TITULO']||'');
-    const categoria = normalizar(linha['CATEGORIA']||'');
-    const mensagem = normalizar(linha['MENSAGEM']||'');
+    const titulo = normalizar(linha.titulo||'');
+    const categoria = normalizar(linha.categoria||'');
+    const mensagem = normalizar(linha.mensagem||'');
     // Se alias, dar boost para linhas que contenham o termo expandido
     if (aliasMatch) {
       if (titulo.includes(normalizar(aliasMatch))) score += 20;
@@ -110,10 +114,10 @@ function selecionarTrechosRelevantes(pergunta, base) {
   });
   scored = scored.filter(l => l.score > 0);
   scored.sort((a,b) => b.score - a.score);
-  // Logging: top 5 títulos
+  // Logging: pergunta recebida e top 5 títulos
   console.log('[LIA-IA] Pergunta:', pergunta);
   for (let i = 0; i < Math.min(5, scored.length); i++) {
-    console.log(`[LIA-IA] Top${i+1}:`, scored[i]['TITULO'], 'Pontuação:', scored[i].score);
+    console.log(`[LIA-IA] Top${i+1}:`, scored[i].titulo, 'Pontuação:', scored[i].score);
   }
   // Se alias, retorna até 10 trechos
   if (aliasMatch) return scored.slice(0, 10);
@@ -142,7 +146,7 @@ async function baixarCSV() {
 async function callOpenAI(pergunta, trechos) {
   let contexto = '';
   trechos.forEach((t, i) => {
-    contexto += `Trecho ${i+1}:\nCategoria: ${t['CATEGORIA']}\nTítulo: ${t['TITULO'] || t['TÍTULO'] || ''}\nMensagem: ${t['MENSAGEM']}\n`;
+    contexto += `Trecho ${i+1}:\nCategoria: ${t.categoria}\nTítulo: ${t.titulo}\nMensagem: ${t.mensagem}\n`;
   });
   let prompt = `Você é a Lia IA, assistente da CR Laser®. Responda de forma curta, natural e segura, usando SOMENTE as informações dos trechos abaixo.\nSe não houver informação suficiente, diga: Ainda estou em treinamento para responder essa dúvida com segurança 😊 Por favor, fale com o WhatsApp da sua unidade de atendimento.\n\nPergunta: ${pergunta}\n\n${contexto}\nResposta:`;
   const response = await fetch(OPENAI_API_URL, {
@@ -210,8 +214,8 @@ export default async function handler(req, res) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
       }
-      // 8. Se houver LINK_COMPLEMENTAR, incluir
-      const link = trechos[0]['LINK_COMPLEMENTAR'];
+      // 8. Se houver link complementar, incluir
+      const link = trechos[0].link;
       if (link) {
         respostaFinal += `<br><br>Veja também:<br><a href="${link}" target="_blank" style="color:#18c7d1;word-break:break-all;">${link}</a>`;
       }
