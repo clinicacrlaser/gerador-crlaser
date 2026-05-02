@@ -91,7 +91,8 @@ async function callOpenAI(pergunta, base) {
     return `[${i+1}]\nCategoria: ${t.categoria}\nTítulo: ${t.titulo}\nMensagem: ${t.mensagem}\nLink: ${t.link}`;
   }).join("\n\n");
 
-  const prompt = `Você é a Lia IA, assistente da CR Laser®.\nResponda de forma natural, simpática e objetiva.\nUse exclusivamente as informações da BASE DE CONHECIMENTO.\nNão invente informações.\nNão use conhecimento externo.\nSe a resposta puder ser inferida claramente a partir da base, responda.\nSe a base não tiver informação suficiente, diga:\n"Ainda estou em treinamento para responder essa dúvida com segurança 😊\nPor favor, fale com o WhatsApp da sua unidade de atendimento."\n\nSe a pergunta for sobre preço, valor, promoção, desconto, compra, pagamento, Pix ou cartão, responda sempre:\n"Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade."\n\nSe a base tiver LINK_COMPLEMENTAR relevante para a resposta, incluir no final:\n"Veja também:\n[link]"\n\nBASE DE CONHECIMENTO:\n${baseTexto}\n\nPergunta do usuário: ${pergunta}\n\nResposta:`;
+  // Prompt ajustado: não peça para IA decidir sobre preço/oferta, só responder se a pergunta for clara
+  const prompt = `Você é a Lia IA, assistente da CR Laser®.\nResponda de forma natural, simpática e objetiva.\nUse exclusivamente as informações da BASE DE CONHECIMENTO.\nNão invente informações.\nNão use conhecimento externo.\nSe a resposta puder ser inferida claramente a partir da base, responda.\nSe a base não tiver informação suficiente, diga:\n"Ainda estou em treinamento para responder essa dúvida com segurança 😊\nPor favor, fale com o WhatsApp da sua unidade de atendimento."\n\nBASE DE CONHECIMENTO:\n${baseTexto}\n\nPergunta do usuário: ${pergunta}\n\nResposta:`;
 
   // Timeout de 20s
   const controller = new AbortController();
@@ -189,6 +190,22 @@ export default async function handler(req, res) {
         console.log('[LIA-IA] Chamando OpenAI...');
         const respostaIA = await callOpenAI(pergunta, base);
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.';
+
+        // 1. Corrigir regra de preço/oferta: só mostrar resposta de valores se pergunta realmente for sobre preço/compra
+        const precoRegex = /(pre[cç]o|valor|quanto\s*custa|promo[cç][aã]o|desconto|oferta|comprar|compra|pagamento|pix|cart[aã]o|boleto|link de pagamento)/i;
+        if (precoRegex.test(pergunta)) {
+          respostaFinal = 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.';
+        } else {
+          // 2. Corrigir links: só incluir "Veja também" se link complementar for URL real
+          // Extrai todos os links http(s) da base
+          const linksValidos = base
+            .map(l => l.link)
+            .filter(link => typeof link === 'string' && /^https?:\/\//i.test(link));
+          // Se houver link válido e a resposta não contiver "Veja também", incluir
+          if (linksValidos.length > 0 && !/Veja também/i.test(respostaFinal)) {
+            respostaFinal += `<br><br>Veja também:<br><a href="${linksValidos[0]}" target="_blank" style="color:#18c7d1;word-break:break-all;">${linksValidos[0]}</a>`;
+          }
+        }
       } catch (err) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
