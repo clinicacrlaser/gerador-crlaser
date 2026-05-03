@@ -97,12 +97,12 @@ function aplicarLayoutMobileBotoes() {
     btnComprar.style.setProperty('overflow', 'hidden', 'important');
     btnComprar.style.setProperty('text-overflow', 'ellipsis', 'important');
     btnComprar.style.setProperty('text-align', 'center', 'important');
-  } else if (btnZap && btnDuvidas && btnComprar) {
-    // Desktop: remove estilos mobile
-    [btnZap, btnDuvidas, btnComprar].forEach(btn => {
-      btn.removeAttribute('style');
-    });
-  }
+ } else if (btnZap && btnDuvidas && btnComprar) {
+  // Desktop: mantém os estilos originais dos botões criados abaixo
+  btnZap.textContent = 'WhatsApp';
+  btnDuvidas.textContent = 'Tire dúvidas com a Lia';
+  btnComprar.textContent = 'Comprar com Lia';
+}
 }
 
 // Chama a função nos pontos necessários
