@@ -187,6 +187,8 @@ btnLia.style.cursor = 'pointer';
 btnLia.style.whiteSpace = 'nowrap';
 btnLia.style.pointerEvents = 'auto';
 btnLia.style.boxShadow = '0 2px 12px rgba(0,0,0,0.13)';
+// Oculta temporariamente o botão de dúvidas da Lia
+btnLia.style.display = 'none';
 
 // Comprar
 const btnComprar = document.createElement('button');
