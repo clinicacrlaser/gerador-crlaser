@@ -232,41 +232,6 @@ async function callOpenAI(pergunta, linhasRelevantes) {
 }
 
 export default async function handler(req, res) {
-    // Regras de segurança ANTES de chamar IA
-    const perguntaNorm = normalizar(pergunta);
-    // 1. Sculptra: resposta fixa
-    if (contemSculptra(pergunta)) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com Sculptra. O bioestimulador que consta na CR Laser® é o Bioestimulador Diamond. Se quiser, posso te explicar melhor sobre ele 😊' }));
-      return;
-    }
-    // 2. Proibidos: nunca afirmar que tem
-    if (contemProibido(pergunta)) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com esse procedimento. Se quiser, posso te explicar sobre os procedimentos que constam na CR Laser® 😊' }));
-      return;
-    }
-    // 3. Pergunta "diamond é o que" ou variantes
-    if (isPerguntaDiamond(pergunta)) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ resposta: 'O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular colágeno e melhorar firmeza e qualidade da pele, conforme avaliação profissional.' }));
-      return;
-    }
-    // 4. Se perguntar se "tem" ou "faz" algum procedimento, só afirmar se estiver na lista permitida
-    if (/\b(tem|faz|trabalha|oferece|possui|vende|realiza|fazem|oferecem|trabalham)\b/i.test(perguntaNorm)) {
-      let achouPermitido = false;
-      for (const proc of PROCEDIMENTOS_PERMITIDOS) {
-        if (perguntaNorm.includes(normalizar(proc))) {
-          achouPermitido = true;
-          break;
-        }
-      }
-      if (!achouPermitido) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei uma confirmação segura sobre esse procedimento 😊 Posso te explicar sobre os procedimentos que constam na CR Laser®.' }));
-        return;
-      }
-    }
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ erro: 'Método não permitido' }));
@@ -277,6 +242,49 @@ export default async function handler(req, res) {
   req.on('end', async () => {
     try {
       const { pergunta, historico } = JSON.parse(body);
+      // Se pergunta não vier, retorna resposta amigável
+      if (!pergunta || !String(pergunta).trim()) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Pode me enviar sua dúvida sobre os procedimentos da CR Laser® 😊' }));
+        return;
+      }
+
+      // Regras de segurança ANTES de chamar IA
+      const perguntaNorm = normalizar(pergunta);
+      // 1. Sculptra: resposta fixa
+      if (contemSculptra(pergunta)) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com Sculptra. O bioestimulador que consta na CR Laser® é o Bioestimulador Diamond. Se quiser, posso te explicar melhor sobre ele 😊' }));
+        return;
+      }
+      // 2. Proibidos: nunca afirmar que tem
+      if (contemProibido(pergunta)) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com esse procedimento. Se quiser, posso te explicar sobre os procedimentos que constam na CR Laser® 😊' }));
+        return;
+      }
+      // 3. Pergunta "diamond é o que" ou variantes
+      if (isPerguntaDiamond(pergunta)) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular colágeno e melhorar firmeza e qualidade da pele, conforme avaliação profissional.' }));
+        return;
+      }
+      // 4. Se perguntar se "tem" ou "faz" algum procedimento, só afirmar se estiver na lista permitida
+      if (/\b(tem|faz|trabalha|oferece|possui|vende|realiza|fazem|oferecem|trabalham)\b/i.test(perguntaNorm)) {
+        let achouPermitido = false;
+        for (const proc of PROCEDIMENTOS_PERMITIDOS) {
+          if (perguntaNorm.includes(normalizar(proc))) {
+            achouPermitido = true;
+            break;
+          }
+        }
+        if (!achouPermitido) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei uma confirmação segura sobre esse procedimento 😊 Posso te explicar sobre os procedimentos que constam na CR Laser®.' }));
+          return;
+        }
+      }
+
       // Logs
       console.log('[LIA-IA] Pergunta recebida:', pergunta);
       // 1. Perguntas proibidas (preço, valor, compra, etc)
