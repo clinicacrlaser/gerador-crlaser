@@ -260,13 +260,13 @@ export default async function handler(req, res) {
       // 2. Proibidos: nunca afirmar que tem
       if (contemProibido(pergunta)) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com esse procedimento. Se quiser, posso te explicar sobre os procedimentos que constam na CR Laser® 😊' }));
+        res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei esse procedimento como disponível na CR Laser®. Se quiser, posso te explicar sobre os procedimentos que temos 😊' }));
         return;
       }
       // 3. Pergunta "diamond é o que" ou variantes
       if (isPerguntaDiamond(pergunta)) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular colágeno e melhorar firmeza e qualidade da pele, conforme avaliação profissional.' }));
+        res.end(JSON.stringify({ resposta: 'O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular a produção de colágeno, melhorar a firmeza e a qualidade da pele, sempre conforme avaliação profissional. Se quiser, posso te explicar em quais regiões ele costuma ser indicado 😊' }));
         return;
       }
       // 4. Se perguntar se "tem" ou "faz" algum procedimento, só afirmar se estiver na lista permitida
@@ -280,26 +280,34 @@ export default async function handler(req, res) {
         }
         if (!achouPermitido) {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei uma confirmação segura sobre esse procedimento 😊 Posso te explicar sobre os procedimentos que constam na CR Laser®.' }));
+          res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei uma confirmação segura sobre esse procedimento. Se quiser, posso te explicar sobre os procedimentos que temos na CR Laser® 😊' }));
           return;
         }
       }
 
       // Logs
       console.log('[LIA-IA] Pergunta recebida:', pergunta);
-      // 1. Perguntas proibidas (preço, valor, compra, etc)
+      // 1. Perguntas sobre valores/ofertas
       const proibidas = ['preço','preco','valor','quanto','promo','promoção','oferta','comprar','compra','pagar','pagamento','pix','link','desconto','cartao','cartão'];
       if (proibidas.some(p => normalizar(pergunta).includes(p))) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.' }));
+        res.end(JSON.stringify({ resposta: 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou clique no botão WhatsApp da página.' }));
         console.log('[LIA-IA] Respondeu: preço/compra');
         return;
       }
-      // 2. Saudações
+      // 2. Perguntas sobre agendamento/atendimento humano
+      const agendamento = ['agendar','agendamento','marcar','horário','horario','consulta','atendimento','falar com','unidade','endereço','telefone','disponibilidade'];
+      if (agendamento.some(p => normalizar(pergunta).includes(p))) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Para agendamento ou atendimento com a unidade, é só clicar no botão WhatsApp que fica na página 😊' }));
+        console.log('[LIA-IA] Respondeu: agendamento/atendimento');
+        return;
+      }
+      // 3. Saudações
       const saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem'];
       if (saudacoes.includes(normalizar(pergunta))) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Olá 😊<br>Sou a Lia IA e posso te ajudar com dúvidas sobre os procedimentos da CR Laser®. <br>Digite sua dúvida.' }));
+        res.end(JSON.stringify({ resposta: 'Olá 😊 Sou a Lia - Assistente Virtual da CR Laser®. Pode me mandar sua dúvida!' }));
         console.log('[LIA-IA] Respondeu: saudação');
         return;
       }
