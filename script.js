@@ -1,29 +1,113 @@
 // ====== BOTÃO E PAINEL DA LIA - ASSISTENTE VIRTUAL ======
-// Remove/oculta botões flutuantes antigos do sistema principal
-function hideOldFloatingButtons() {
-  // IDs e classes dos antigos
-  const oldIds = [
-    'btnWhatsappUnidades', // WhatsApp antigo
-    'btnAbrirLia'          // Comprar com Lia antigo
-  ];
-  oldIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.display = 'none';
-      el.style.visibility = 'hidden';
-      el.style.pointerEvents = 'none';
-    }
-  });
-  // Também oculta por classe se necessário
-  document.querySelectorAll('.floating-btn, .whatsapp-btn, .lia-btn').forEach(el => {
-    if (!el.closest('#lia-float-bar')) {
-      el.style.display = 'none';
-      el.style.visibility = 'hidden';
-      el.style.pointerEvents = 'none';
-    }
-  });
+// Oculta botões antigos APENAS no mobile, mantendo desktop intacto
+function hideOldFloatingButtonsMobile() {
+  if (window.innerWidth <= 600) {
+    // IDs dos antigos
+    const oldIds = [
+      'btnWhatsappUnidades', // WhatsApp antigo
+      'btnAbrirLia'          // Comprar com Lia antigo
+    ];
+    oldIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.display = 'none';
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+      }
+    });
+    // Também oculta por classe se necessário
+    document.querySelectorAll('.floating-btn, .whatsapp-btn, .lia-btn').forEach(el => {
+      if (!el.closest('#lia-float-bar')) {
+        el.style.display = 'none';
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+      }
+    });
+  } else {
+    // No desktop, reexibe se necessário
+    const oldIds = [
+      'btnWhatsappUnidades',
+      'btnAbrirLia'
+    ];
+    oldIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.display = '';
+        el.style.visibility = '';
+        el.style.pointerEvents = '';
+      }
+    });
+    document.querySelectorAll('.floating-btn, .whatsapp-btn, .lia-btn').forEach(el => {
+      if (!el.closest('#lia-float-bar')) {
+        el.style.display = '';
+        el.style.visibility = '';
+        el.style.pointerEvents = '';
+      }
+    });
+  }
 }
-hideOldFloatingButtons();
+window.addEventListener('resize', hideOldFloatingButtonsMobile);
+hideOldFloatingButtonsMobile();
+
+// Ajusta visual mobile dos botões da barra
+function styleBarMobile() {
+  const bar = document.getElementById('lia-float-bar');
+  if (!bar) return;
+  const btns = [
+    document.getElementById('lia-float-whatsapp'),
+    document.getElementById('lia-float-btn'),
+    document.getElementById('lia-float-comprar')
+  ];
+  if (window.innerWidth <= 600) {
+    bar.style.position = 'fixed';
+    bar.style.left = '8px';
+    bar.style.right = '8px';
+    bar.style.bottom = '12px';
+    bar.style.zIndex = '9999';
+    bar.style.display = 'flex';
+    bar.style.flexDirection = 'row';
+    bar.style.gap = '6px';
+    bar.style.justifyContent = 'center';
+    bar.style.alignItems = 'center';
+    bar.style.pointerEvents = 'auto';
+    bar.style.background = 'none';
+    btns.forEach(btn => {
+      if (btn) {
+        btn.style.flex = '1';
+        btn.style.minWidth = '0';
+        btn.style.fontSize = '12px';
+        btn.style.padding = '12px 8px';
+        btn.style.borderRadius = '18px';
+        btn.style.whiteSpace = 'nowrap';
+        btn.style.overflow = 'hidden';
+        btn.style.textOverflow = 'ellipsis';
+        btn.style.height = '44px';
+        btn.style.boxShadow = 'none';
+        btn.style.margin = '0';
+      }
+    });
+  } else {
+    // Desktop: mantém estilos originais
+    bar.style.pointerEvents = 'none';
+    btns.forEach(btn => {
+      if (btn) {
+        btn.style.flex = '';
+        btn.style.minWidth = '';
+        btn.style.fontSize = '';
+        btn.style.padding = '';
+        btn.style.borderRadius = '';
+        btn.style.whiteSpace = '';
+        btn.style.overflow = '';
+        btn.style.textOverflow = '';
+        btn.style.height = '';
+        btn.style.boxShadow = '';
+        btn.style.margin = '';
+      }
+    });
+  }
+}
+window.addEventListener('resize', styleBarMobile);
+styleBarMobile();
 
 // Cria barra de botões flutuantes única
 const bar = document.createElement('div');
