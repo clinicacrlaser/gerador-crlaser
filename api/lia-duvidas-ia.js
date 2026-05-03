@@ -1,3 +1,49 @@
+// ===== Regras de Procedimentos Permitidos e Proibidos =====
+const PROCEDIMENTOS_PERMITIDOS = [
+  'botox',
+  'ultraformer mpt',
+  'laser lavieen',
+  'preenchedor de ácido hialurônico',
+  'bioestimulador diamond',
+  'scizer',
+  'endymed',
+  'microagulhamento robótico'
+];
+const PROCEDIMENTOS_PROIBIDOS = [
+  'sculptra', 'elleva', 'ellansé', 'radiesse', 'profhilo', 'pdrn'
+];
+const SINONIMOS = {
+  'dimond': 'diamond',
+  'diamont': 'diamond',
+  'diamond': 'bioestimulador diamond',
+  'bioestimulador': 'bioestimulador diamond',
+  'mpt': 'ultraformer mpt',
+  'ultrafomer': 'ultraformer mpt',
+  'botx': 'botox',
+  'preenchimento': 'preenchedor de ácido hialurônico'
+};
+
+function normalizarProcedimento(str) {
+  let s = normalizar(str);
+  if (SINONIMOS[s]) s = SINONIMOS[s];
+  return s;
+}
+
+function contemPermitido(pergunta) {
+  const pNorm = normalizar(pergunta);
+  return PROCEDIMENTOS_PERMITIDOS.some(p => pNorm.includes(normalizar(p)));
+}
+function contemProibido(pergunta) {
+  const pNorm = normalizar(pergunta);
+  return PROCEDIMENTOS_PROIBIDOS.some(p => pNorm.includes(normalizar(p)));
+}
+function contemSculptra(pergunta) {
+  return normalizar(pergunta).includes('sculptra');
+}
+function isPerguntaDiamond(pergunta) {
+  const pNorm = normalizar(pergunta);
+  return /\b(diamond|dimond|diamont|bioestimulador)\b/.test(pNorm) && /(é o que|o que é|que é|que significa|para que|qual|como funciona)/.test(pNorm);
+}
 // api/lia-duvidas-ia.js - API para Lia IA
 
 
@@ -186,6 +232,41 @@ async function callOpenAI(pergunta, linhasRelevantes) {
 }
 
 export default async function handler(req, res) {
+    // Regras de segurança ANTES de chamar IA
+    const perguntaNorm = normalizar(pergunta);
+    // 1. Sculptra: resposta fixa
+    if (contemSculptra(pergunta)) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com Sculptra. O bioestimulador que consta na CR Laser® é o Bioestimulador Diamond. Se quiser, posso te explicar melhor sobre ele 😊' }));
+      return;
+    }
+    // 2. Proibidos: nunca afirmar que tem
+    if (contemProibido(pergunta)) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com esse procedimento. Se quiser, posso te explicar sobre os procedimentos que constam na CR Laser® 😊' }));
+      return;
+    }
+    // 3. Pergunta "diamond é o que" ou variantes
+    if (isPerguntaDiamond(pergunta)) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ resposta: 'O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular colágeno e melhorar firmeza e qualidade da pele, conforme avaliação profissional.' }));
+      return;
+    }
+    // 4. Se perguntar se "tem" ou "faz" algum procedimento, só afirmar se estiver na lista permitida
+    if (/\b(tem|faz|trabalha|oferece|possui|vende|realiza|fazem|oferecem|trabalham)\b/i.test(perguntaNorm)) {
+      let achouPermitido = false;
+      for (const proc of PROCEDIMENTOS_PERMITIDOS) {
+        if (perguntaNorm.includes(normalizar(proc))) {
+          achouPermitido = true;
+          break;
+        }
+      }
+      if (!achouPermitido) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei uma confirmação segura sobre esse procedimento 😊 Posso te explicar sobre os procedimentos que constam na CR Laser®.' }));
+        return;
+      }
+    }
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ erro: 'Método não permitido' }));
