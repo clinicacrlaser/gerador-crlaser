@@ -1,3 +1,23 @@
+// ===== CONTEXTO DE CONTINUIDADE =====
+const CONTEXTO_CONTINUACAO = [
+  'dele','dela','esse','essa','isso','ele','ela','quanto dura','durabilidade','dói','como funciona','quais regiões','onde aplica','quantas sessões'
+];
+
+function extrairUltimoProcedimento(historico) {
+  if (!Array.isArray(historico)) return null;
+  for (let i = historico.length - 1; i >= 0; i--) {
+    const texto = (historico[i]?.texto || '').toLowerCase();
+    if (texto.includes('diamond') || texto.includes('dimond') || texto.includes('diamont') || texto.includes('bioestimulador')) return 'Bioestimulador Diamond';
+    if (texto.includes('botox')) return 'Botox';
+    if (texto.includes('ultraformer')) return 'Ultraformer MPT';
+    if (texto.includes('lavieen')) return 'Laser Lavieen';
+    if (texto.includes('preenchedor')) return 'Preenchedor de Ácido Hialurônico';
+    if (texto.includes('scizer')) return 'Scizer';
+    if (texto.includes('endymed')) return 'Endymed';
+    if (texto.includes('microagulhamento')) return 'Microagulhamento Robótico';
+  }
+  return null;
+}
 // ===== Regras de Procedimentos Permitidos e Proibidos =====
 const PROCEDIMENTOS_PERMITIDOS = [
   'botox',
@@ -249,6 +269,37 @@ export default async function handler(req, res) {
         return;
       }
 
+      // ===== CONTEXTO DE CONTINUIDADE =====
+      let procedimentoContexto = null;
+      const perguntaNormLower = normalizar(pergunta).toLowerCase();
+      // Se a pergunta menciona diretamente um procedimento, ele é o contexto
+      if (perguntaNormLower.includes('diamond') || perguntaNormLower.includes('dimond') || perguntaNormLower.includes('diamont') || perguntaNormLower.includes('bioestimulador')) {
+        procedimentoContexto = 'Bioestimulador Diamond';
+      } else if (perguntaNormLower.includes('botox')) {
+        procedimentoContexto = 'Botox';
+      } else if (perguntaNormLower.includes('ultraformer')) {
+        procedimentoContexto = 'Ultraformer MPT';
+      } else if (perguntaNormLower.includes('lavieen')) {
+        procedimentoContexto = 'Laser Lavieen';
+      } else if (perguntaNormLower.includes('preenchedor')) {
+        procedimentoContexto = 'Preenchedor de Ácido Hialurônico';
+      } else if (perguntaNormLower.includes('scizer')) {
+        procedimentoContexto = 'Scizer';
+      } else if (perguntaNormLower.includes('endymed')) {
+        procedimentoContexto = 'Endymed';
+      } else if (perguntaNormLower.includes('microagulhamento')) {
+        procedimentoContexto = 'Microagulhamento Robótico';
+      }
+      // Se for pergunta de continuidade, extrai do histórico
+      if (!procedimentoContexto && CONTEXTO_CONTINUACAO.some(p => perguntaNormLower.includes(p))) {
+        procedimentoContexto = extrairUltimoProcedimento(historico);
+        if (!procedimentoContexto) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ resposta: 'Você está falando de qual procedimento? 😊' }));
+          return;
+        }
+      }
+
       // Regras de segurança ANTES de chamar IA
       const perguntaNorm = normalizar(pergunta);
       // 1. Sculptra: resposta fixa
@@ -344,7 +395,7 @@ export default async function handler(req, res) {
           historicoTexto = historico.map(m => (m.tipo === 'user' ? 'Usuário: ' : 'Lia: ') + m.texto).join('\n');
         }
         const promptExtra = historicoTexto ? `\n\nHISTÓRICO DA CONVERSA (use para entender perguntas curtas, de continuidade ou com erro de digitação):\n${historicoTexto}\n\nUse o histórico da conversa para entender perguntas curtas, incompletas ou com erro de digitação. Se o usuário fizer uma pergunta de continuidade, mantenha o procedimento do assunto anterior, salvo se ele mencionar outro procedimento claramente.` : '';
-        const respostaIA = await callOpenAI(pergunta + promptExtra, linhasRelevantes);
+        const respostaIA = await callOpenAI(pergunta + promptExtra, linhasRelevantes, procedimentoContexto);
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda não encontrei uma resposta segura para isso na minha base 😊 Se quiser, posso te orientar pelo botão WhatsApp da página.';
         // Troca qualquer frase pronta de agendamento por WhatsApp
         respostaFinal = respostaFinal.replace(/Se quiser mais informações ou agendar, posso ajudar!?/gi, 'Para mais informações ou agendamento, fale com o WhatsApp da sua unidade.');
