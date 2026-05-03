@@ -1,3 +1,24 @@
+// Oculta o botão antigo "Comprar com Lia" fora da barra inferior apenas no mobile
+function hideOldComprarMobileOnly() {
+  if (window.matchMedia('(max-width: 600px)').matches) {
+    const oldComprar = document.getElementById('btnAbrirLia');
+    if (oldComprar) {
+      oldComprar.style.display = 'none';
+      oldComprar.style.visibility = 'hidden';
+      oldComprar.style.pointerEvents = 'none';
+    }
+  } else {
+    const oldComprar = document.getElementById('btnAbrirLia');
+    if (oldComprar) {
+      oldComprar.style.display = '';
+      oldComprar.style.visibility = '';
+      oldComprar.style.pointerEvents = '';
+    }
+  }
+}
+window.addEventListener('resize', hideOldComprarMobileOnly);
+document.addEventListener('DOMContentLoaded', hideOldComprarMobileOnly);
+setTimeout(hideOldComprarMobileOnly, 300);
 // ====== BOTÃO E PAINEL DA LIA - ASSISTENTE VIRTUAL ======
 // Remove/oculta botões flutuantes antigos do sistema principal
 function hideOldFloatingButtons() {
