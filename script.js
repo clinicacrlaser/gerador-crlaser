@@ -1,3 +1,81 @@
+// ====== BOTÃO E PAINEL DA LIA - ASSISTENTE VIRTUAL ======
+if (!document.getElementById('lia-float-btn')) {
+  const btn = document.createElement('button');
+  btn.id = 'lia-float-btn';
+  btn.textContent = 'Tire dúvidas com a Lia';
+  btn.style.position = 'fixed';
+  btn.style.bottom = '32px';
+  btn.style.right = '32px';
+  btn.style.zIndex = '9999';
+  btn.style.background = 'linear-gradient(90deg, #18c7d1 0%, #1e5faf 100%)';
+  btn.style.color = '#fff';
+  btn.style.fontSize = '1.1rem';
+  btn.style.fontWeight = '600';
+  btn.style.border = 'none';
+  btn.style.borderRadius = '32px';
+  btn.style.padding = '16px 28px';
+  btn.style.boxShadow = '0 4px 24px #0006';
+  btn.style.cursor = 'pointer';
+  btn.style.transition = 'background 0.2s';
+  btn.style.outline = 'none';
+  btn.style.letterSpacing = '0.01em';
+  btn.style.display = 'block';
+  btn.style.userSelect = 'none';
+  btn.addEventListener('mouseenter', () => btn.style.background = '#18c7d1');
+  btn.addEventListener('mouseleave', () => btn.style.background = 'linear-gradient(90deg, #18c7d1 0%, #1e5faf 100%)');
+  document.body.appendChild(btn);
+
+  // Painel flutuante
+  const panel = document.createElement('div');
+  panel.id = 'lia-float-panel';
+  panel.style.position = 'fixed';
+  panel.style.bottom = '90px';
+  panel.style.right = '32px';
+  panel.style.width = '410px';
+  panel.style.maxWidth = '98vw';
+  panel.style.height = '600px';
+  panel.style.maxHeight = '90vh';
+  panel.style.background = '#10131a';
+  panel.style.borderRadius = '20px';
+  panel.style.boxShadow = '0 8px 32px #000b';
+  panel.style.zIndex = '10000';
+  panel.style.display = 'none';
+  panel.style.flexDirection = 'column';
+  panel.style.overflow = 'hidden';
+  panel.style.padding = '0';
+
+  // Botão fechar
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '×';
+  closeBtn.style.position = 'absolute';
+  closeBtn.style.top = '8px';
+  closeBtn.style.right = '16px';
+  closeBtn.style.background = 'none';
+  closeBtn.style.color = '#fff';
+  closeBtn.style.fontSize = '2rem';
+  closeBtn.style.border = 'none';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.style.zIndex = '10001';
+  closeBtn.addEventListener('click', () => { panel.style.display = 'none'; });
+  panel.appendChild(closeBtn);
+
+  // Iframe da Lia
+  const iframe = document.createElement('iframe');
+  iframe.src = '/lia-duvidas-ia.html';
+  iframe.style.width = '100%';
+  iframe.style.height = '100%';
+  iframe.style.border = 'none';
+  iframe.style.borderRadius = '20px';
+  iframe.style.background = 'transparent';
+  iframe.setAttribute('allow', 'clipboard-write');
+  panel.appendChild(iframe);
+
+  document.body.appendChild(panel);
+
+  btn.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  });
+}
 'use strict';
 
 console.log('SCRIPT.JS CARREGOU');
