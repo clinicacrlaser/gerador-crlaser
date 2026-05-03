@@ -4,6 +4,9 @@ const liaMessages = document.getElementById('liaMessages');
 const liaForm = document.getElementById('liaForm');
 const liaInput = document.getElementById('liaInput');
 
+// Histórico de mensagens (máximo 6)
+let historico = [];
+
 function adicionarMensagem(texto, tipo = 'lia') {
   const msg = document.createElement('div');
   msg.className = 'lia-msg ' + tipo;
@@ -24,13 +27,14 @@ liaForm.addEventListener('submit', async (e) => {
   liaInput.value = '';
   adicionarMensagem('<span style="color:#aaa">Aguarde, consultando IA...</span>', 'lia');
   try {
+    // Monta histórico para enviar (sem tags HTML)
+    const historicoParaAPI = historico.slice(-6).map(m => ({ tipo: m.tipo, texto: m.texto }));
     const resp = await fetch('/api/lia-duvidas-ia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pergunta })
+      body: JSON.stringify({ pergunta, historico: historicoParaAPI })
     });
     const data = await resp.json();
-    // Remove "Aguarde" msg
     liaMessages.removeChild(liaMessages.lastChild);
     if (data && data.resposta) {
       adicionarMensagem(data.resposta, 'lia');

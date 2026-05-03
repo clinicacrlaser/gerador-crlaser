@@ -195,7 +195,7 @@ export default async function handler(req, res) {
   req.on('data', chunk => body += chunk);
   req.on('end', async () => {
     try {
-      const { pergunta } = JSON.parse(body);
+      const { pergunta, historico } = JSON.parse(body);
       // Logs
       console.log('[LIA-IA] Pergunta recebida:', pergunta);
       // 1. Perguntas proibidas (preço, valor, compra, etc)
@@ -237,11 +237,17 @@ export default async function handler(req, res) {
         return;
       }
 
-      // 5. Chamar OpenAI com as linhas relevantes
+      // 5. Chamar OpenAI com as linhas relevantes e histórico
       let respostaFinal;
       try {
         console.log('[LIA-IA] Chamando OpenAI...');
-        const respostaIA = await callOpenAI(pergunta, linhasRelevantes);
+        // Monta histórico para o prompt
+        let historicoTexto = '';
+        if (Array.isArray(historico) && historico.length > 0) {
+          historicoTexto = historico.map(m => (m.tipo === 'user' ? 'Usuário: ' : 'Lia: ') + m.texto).join('\n');
+        }
+        const promptExtra = historicoTexto ? `\n\nHISTÓRICO DA CONVERSA (use para entender perguntas curtas, de continuidade ou com erro de digitação):\n${historicoTexto}\n\nUse o histórico da conversa para entender perguntas curtas, incompletas ou com erro de digitação. Se o usuário fizer uma pergunta de continuidade, mantenha o procedimento do assunto anterior, salvo se ele mencionar outro procedimento claramente.` : '';
+        const respostaIA = await callOpenAI(pergunta + promptExtra, linhasRelevantes);
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda não encontrei uma resposta segura para isso na minha base 😊 Se quiser, posso te orientar pelo botão WhatsApp da página.';
         // Troca qualquer frase pronta de agendamento por WhatsApp
         respostaFinal = respostaFinal.replace(/Se quiser mais informações ou agendar, posso ajudar!?/gi, 'Para mais informações ou agendamento, fale com o WhatsApp da sua unidade.');
