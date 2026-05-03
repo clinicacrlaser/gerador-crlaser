@@ -4,33 +4,12 @@ function aplicarLayoutMobileBotoes() {
   // Esconde botões antigos no mobile
   const btnAntigoZap = document.getElementById('btnWhatsappUnidades');
   const btnAntigoComprar = document.getElementById('btnAbrirLia');
-  if (isMobile) {
-    if (btnAntigoZap) {
-      btnAntigoZap.style.setProperty('display', 'none', 'important');
-      btnAntigoZap.style.setProperty('visibility', 'hidden', 'important');
-    }
-    if (btnAntigoComprar) {
-      btnAntigoComprar.style.setProperty('display', 'none', 'important');
-      btnAntigoComprar.style.setProperty('visibility', 'hidden', 'important');
-    }
-  } else {
-    if (btnAntigoZap) {
-      btnAntigoZap.style.removeProperty('display');
-      btnAntigoZap.style.removeProperty('visibility');
-    }
-    if (btnAntigoComprar) {
-      btnAntigoComprar.style.removeProperty('display');
-      btnAntigoComprar.style.removeProperty('visibility');
-    }
-  }
-
-  // Seleciona os 3 botões novos
+  const bar = document.getElementById('lia-float-bar');
   const btnZap = document.getElementById('lia-float-whatsapp');
   let btnDuvidas = document.getElementById('lia-float-duvidas');
   const btnComprar = document.getElementById('lia-float-comprar');
   // Garante ID fixo para Dúvidas Lia
   if (!btnDuvidas) {
-    // Procura pelo botão com texto "Dúvidas Lia" ou "Tire dúvidas com a Lia"
     const possiveis = Array.from(document.querySelectorAll('button')).filter(b =>
       b.textContent && (b.textContent.trim() === 'Dúvidas Lia' || b.textContent.trim() === 'Tire dúvidas com a Lia')
     );
@@ -40,20 +19,19 @@ function aplicarLayoutMobileBotoes() {
     }
   }
 
-  if (isMobile && btnZap && btnDuvidas && btnComprar) {
+  if (isMobile && btnZap && btnDuvidas && btnComprar && bar) {
+    // MOBILE: aplica layout mobile (como antes)
+    // ...existing code for mobile layout...
+    // (mantém igual ao patch anterior)
     // Textos mobile
     btnZap.textContent = 'WhatsApp';
     btnDuvidas.textContent = 'Dúvidas Lia';
     btnComprar.textContent = 'Comprar';
-
-    // Cálculo de largura e posições
     const gap = 6;
     const side = 8;
     const totalGap = gap * 2;
     const totalSide = side * 2;
     const width = `calc((100vw - ${totalSide + totalGap}px) / 3)`;
-
-    // WhatsApp (esquerda)
     btnZap.style.setProperty('position', 'fixed', 'important');
     btnZap.style.setProperty('left', side + 'px', 'important');
     btnZap.style.setProperty('bottom', '10px', 'important');
@@ -67,8 +45,6 @@ function aplicarLayoutMobileBotoes() {
     btnZap.style.setProperty('overflow', 'hidden', 'important');
     btnZap.style.setProperty('text-overflow', 'ellipsis', 'important');
     btnZap.style.setProperty('text-align', 'center', 'important');
-
-    // Dúvidas Lia (meio)
     btnDuvidas.style.setProperty('position', 'fixed', 'important');
     btnDuvidas.style.setProperty('left', `calc(${side}px + ${width} + ${gap}px)`, 'important');
     btnDuvidas.style.setProperty('bottom', '10px', 'important');
@@ -82,8 +58,6 @@ function aplicarLayoutMobileBotoes() {
     btnDuvidas.style.setProperty('overflow', 'hidden', 'important');
     btnDuvidas.style.setProperty('text-overflow', 'ellipsis', 'important');
     btnDuvidas.style.setProperty('text-align', 'center', 'important');
-
-    // Comprar (direita)
     btnComprar.style.setProperty('position', 'fixed', 'important');
     btnComprar.style.setProperty('right', side + 'px', 'important');
     btnComprar.style.setProperty('bottom', '10px', 'important');
@@ -97,11 +71,26 @@ function aplicarLayoutMobileBotoes() {
     btnComprar.style.setProperty('overflow', 'hidden', 'important');
     btnComprar.style.setProperty('text-overflow', 'ellipsis', 'important');
     btnComprar.style.setProperty('text-align', 'center', 'important');
-  } else if (btnZap && btnDuvidas && btnComprar) {
-    // Desktop: remove estilos mobile
+    bar.style.setProperty('display', 'block', 'important');
+  } else if (btnZap && btnDuvidas && btnComprar && bar) {
+    // DESKTOP: remove estilos mobile e oculta barra mobile
     [btnZap, btnDuvidas, btnComprar].forEach(btn => {
       btn.removeAttribute('style');
     });
+    bar.style.setProperty('display', 'none', 'important');
+    // Aplica estilos flutuantes bonitos para cada botão
+    // WhatsApp à esquerda
+    btnZap.className = 'floating-btn whatsapp-btn';
+    btnZap.textContent = 'WhatsApp';
+    btnZap.style.removeProperty('display');
+    // Dúvidas Lia centralizado bonito
+    btnDuvidas.className = 'floating-btn';
+    btnDuvidas.textContent = 'Tire dúvidas com a Lia';
+    btnDuvidas.style.removeProperty('display');
+    // Comprar à direita
+    btnComprar.className = 'floating-btn lia-btn';
+    btnComprar.textContent = 'Comprar com Lia';
+    btnComprar.style.removeProperty('display');
   }
 }
 
@@ -137,154 +126,125 @@ function hideOldFloatingButtons() {
 }
 hideOldFloatingButtons();
 
-// Cria barra de botões flutuantes única
-const bar = document.createElement('div');
-bar.id = 'lia-float-bar';
-bar.style.position = 'fixed';
-bar.style.left = '8px';
-bar.style.right = '8px';
-bar.style.bottom = '12px';
-bar.style.zIndex = '9999';
-bar.style.display = 'flex';
-bar.style.flexDirection = 'row';
-bar.style.gap = '6px';
-bar.style.justifyContent = 'center';
-bar.style.alignItems = 'center';
-bar.style.pointerEvents = 'none';
+// Cria barra/botões crus SOMENTE no mobile
+function criarBarraMobileBotoes() {
+  if (window.innerWidth > 600) return; // Só cria no mobile
+  if (document.getElementById('lia-float-bar')) return; // Já existe
 
-// WhatsApp
-const btnZap = document.createElement('button');
-btnZap.type = 'button';
-btnZap.id = 'lia-float-whatsapp';
-btnZap.textContent = window.innerWidth <= 600 ? 'WhatsApp' : 'WhatsApp';
-btnZap.style.flex = '1';
-btnZap.style.minWidth = '0';
-btnZap.style.fontSize = '12px';
-btnZap.style.padding = '12px 8px';
-btnZap.style.borderRadius = '18px';
-btnZap.style.background = '#25d366';
-btnZap.style.color = '#fff';
-btnZap.style.border = 'none';
-btnZap.style.fontWeight = '600';
-btnZap.style.cursor = 'pointer';
-btnZap.style.whiteSpace = 'nowrap';
-btnZap.style.pointerEvents = 'auto';
-btnZap.style.boxShadow = '0 2px 12px rgba(0,0,0,0.13)';
-btnZap.onclick = function() {
-  if (typeof window.abrirModalWhatsappUnidades === 'function') {
-    window.abrirModalWhatsappUnidades();
-  } else {
-    const modal = document.getElementById('modalWhatsappUnidades');
-    if (modal) modal.style.display = 'flex';
-  }
-};
+  const bar = document.createElement('div');
+  bar.id = 'lia-float-bar';
+  bar.style.position = 'fixed';
+  bar.style.left = '8px';
+  bar.style.right = '8px';
+  bar.style.bottom = '12px';
+  bar.style.zIndex = '9999';
+  bar.style.display = 'flex';
+  bar.style.flexDirection = 'row';
+  bar.style.gap = '6px';
+  bar.style.justifyContent = 'center';
+  bar.style.alignItems = 'center';
+  bar.style.pointerEvents = 'none';
 
-// Dúvidas Lia
-const btnLia = document.createElement('button');
-btnLia.type = 'button';
-btnLia.id = 'lia-float-btn';
-btnLia.textContent = window.innerWidth <= 600 ? 'Dúvidas Lia' : 'Tire dúvidas com a Lia';
-btnLia.style.flex = '1';
-btnLia.style.minWidth = '0';
-btnLia.style.fontSize = '12px';
-btnLia.style.padding = '12px 8px';
-btnLia.style.borderRadius = '18px';
-btnLia.style.background = 'linear-gradient(90deg, #18c7d1 0%, #1e5faf 100%)';
-btnLia.style.color = '#fff';
-btnLia.style.border = 'none';
-btnLia.style.fontWeight = '600';
-btnLia.style.cursor = 'pointer';
-btnLia.style.whiteSpace = 'nowrap';
-btnLia.style.pointerEvents = 'auto';
-btnLia.style.boxShadow = '0 2px 12px rgba(0,0,0,0.13)';
+  // WhatsApp
+  const btnZap = document.createElement('button');
+  btnZap.type = 'button';
+  btnZap.id = 'lia-float-whatsapp';
+  btnZap.textContent = 'WhatsApp';
+  bar.appendChild(btnZap);
 
-// Comprar
-const btnComprar = document.createElement('button');
-btnComprar.type = 'button';
-btnComprar.id = 'lia-float-comprar';
-btnComprar.textContent = window.innerWidth <= 600 ? 'Comprar' : 'Comprar com Lia';
-btnComprar.style.flex = '1';
-btnComprar.style.minWidth = '0';
-btnComprar.style.fontSize = '12px';
-btnComprar.style.padding = '12px 8px';
-btnComprar.style.borderRadius = '18px';
-btnComprar.style.background = 'linear-gradient(135deg,#00c6ff,#0072ff)';
-btnComprar.style.color = '#fff';
-btnComprar.style.border = 'none';
-btnComprar.style.fontWeight = '600';
-btnComprar.style.cursor = 'pointer';
-btnComprar.style.whiteSpace = 'nowrap';
-btnComprar.style.pointerEvents = 'auto';
-btnComprar.style.boxShadow = '0 2px 12px rgba(0,0,0,0.13)';
+  // Dúvidas Lia
+  const btnLia = document.createElement('button');
+  btnLia.type = 'button';
+  btnLia.id = 'lia-float-duvidas';
+  btnLia.textContent = 'Dúvidas Lia';
+  bar.appendChild(btnLia);
 
-// Painel flutuante da Lia
-const panel = document.createElement('div');
-panel.id = 'lia-float-panel';
-panel.style.position = 'fixed';
-panel.style.bottom = '60px';
-panel.style.right = '12px';
-panel.style.width = '410px';
-panel.style.maxWidth = '98vw';
-panel.style.height = '600px';
-panel.style.maxHeight = '90vh';
-panel.style.background = '#10131a';
-panel.style.borderRadius = '20px';
-panel.style.boxShadow = '0 8px 32px #000b';
-panel.style.zIndex = '10000';
-panel.style.display = 'none';
-panel.style.flexDirection = 'column';
-panel.style.overflow = 'hidden';
-panel.style.padding = '0';
+  // Comprar
+  const btnComprar = document.createElement('button');
+  btnComprar.type = 'button';
+  btnComprar.id = 'lia-float-comprar';
+  btnComprar.textContent = 'Comprar';
+  bar.appendChild(btnComprar);
 
-// Botão fechar
-const closeBtn = document.createElement('button');
-closeBtn.textContent = '×';
-closeBtn.style.position = 'absolute';
-closeBtn.style.top = '8px';
-closeBtn.style.right = '16px';
-closeBtn.style.background = 'none';
-closeBtn.style.color = '#fff';
-closeBtn.style.fontSize = '2rem';
-closeBtn.style.border = 'none';
-closeBtn.style.cursor = 'pointer';
-closeBtn.style.zIndex = '10001';
-closeBtn.addEventListener('click', () => { panel.style.display = 'none'; });
-panel.appendChild(closeBtn);
+  document.body.appendChild(bar);
 
-// Iframe da Lia
-const iframe = document.createElement('iframe');
-iframe.src = '/lia-duvidas-ia.html';
-iframe.style.width = '100%';
-iframe.style.height = '100%';
-iframe.style.border = 'none';
-iframe.style.borderRadius = '20px';
-iframe.style.background = 'transparent';
-iframe.setAttribute('allow', 'clipboard-write');
-panel.appendChild(iframe);
-
-document.body.appendChild(panel);
-
-// Eventos
-btnLia.onclick = function() {
-  panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
-};
-btnComprar.onclick = function(e) {
-  if (typeof window.abrirChatLia === 'function') {
-    window.abrirChatLia();
-  } else {
-    const chat = document.querySelector("#lia-chat, .lia-chat, .lia-modal, #liaModal, .lia-widget");
-    if (chat) {
-      chat.style.display = "block";
-      chat.classList.add("open", "ativo", "active");
+  // Eventos mobile
+  btnZap.onclick = function() {
+    if (typeof window.abrirModalWhatsappUnidades === 'function') {
+      window.abrirModalWhatsappUnidades();
+    } else {
+      const modal = document.getElementById('modalWhatsappUnidades');
+      if (modal) modal.style.display = 'flex';
     }
-  }
-};
+  };
+  btnLia.onclick = function() {
+    // Abre painel/iframe da Lia IA
+    let panel = document.getElementById('lia-float-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'lia-float-panel';
+      panel.style.position = 'fixed';
+      panel.style.bottom = '60px';
+      panel.style.right = '12px';
+      panel.style.width = '410px';
+      panel.style.maxWidth = '98vw';
+      panel.style.height = '600px';
+      panel.style.maxHeight = '90vh';
+      panel.style.background = '#10131a';
+      panel.style.borderRadius = '20px';
+      panel.style.boxShadow = '0 8px 32px #000b';
+      panel.style.zIndex = '10000';
+      panel.style.display = 'none';
+      panel.style.flexDirection = 'column';
+      panel.style.overflow = 'hidden';
+      panel.style.padding = '0';
+      // Botão fechar
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '×';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '8px';
+      closeBtn.style.right = '16px';
+      closeBtn.style.background = 'none';
+      closeBtn.style.color = '#fff';
+      closeBtn.style.fontSize = '2rem';
+      closeBtn.style.border = 'none';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.zIndex = '10001';
+      closeBtn.addEventListener('click', () => { panel.style.display = 'none'; });
+      panel.appendChild(closeBtn);
+      // Iframe da Lia
+      const iframe = document.createElement('iframe');
+      iframe.src = '/lia-duvidas-ia.html';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '20px';
+      iframe.style.background = 'transparent';
+      iframe.setAttribute('allow', 'clipboard-write');
+      panel.appendChild(iframe);
+      document.body.appendChild(panel);
+    }
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  };
+  btnComprar.onclick = function(e) {
+    if (typeof window.abrirChatLia === 'function') {
+      window.abrirChatLia();
+    } else {
+      const chat = document.querySelector("#lia-chat, .lia-chat, .lia-modal, #liaModal, .lia-widget");
+      if (chat) {
+        chat.style.display = "block";
+        chat.classList.add("open", "ativo", "active");
+      }
+    }
+  };
+}
 
-// Adiciona botões na barra
-bar.appendChild(btnZap);
-bar.appendChild(btnLia);
-bar.appendChild(btnComprar);
-document.body.appendChild(bar);
+// Cria barra mobile só no mobile
+if (window.innerWidth <= 600) criarBarraMobileBotoes();
+window.addEventListener('resize', () => {
+  if (window.innerWidth <= 600 && !document.getElementById('lia-float-bar')) criarBarraMobileBotoes();
+  if (window.innerWidth > 600 && document.getElementById('lia-float-bar')) document.getElementById('lia-float-bar').remove();
+});
 
 // Responsividade: textos curtos no mobile
 function updateBtnTexts() {
