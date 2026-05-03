@@ -1,3 +1,115 @@
+// Força layout mobile dos botões flutuantes via JS inline
+function aplicarLayoutMobileBotoes() {
+  const isMobile = window.innerWidth <= 600;
+  // Esconde botões antigos no mobile
+  const btnAntigoZap = document.getElementById('btnWhatsappUnidades');
+  const btnAntigoComprar = document.getElementById('btnAbrirLia');
+  if (isMobile) {
+    if (btnAntigoZap) {
+      btnAntigoZap.style.setProperty('display', 'none', 'important');
+      btnAntigoZap.style.setProperty('visibility', 'hidden', 'important');
+    }
+    if (btnAntigoComprar) {
+      btnAntigoComprar.style.setProperty('display', 'none', 'important');
+      btnAntigoComprar.style.setProperty('visibility', 'hidden', 'important');
+    }
+  } else {
+    if (btnAntigoZap) {
+      btnAntigoZap.style.removeProperty('display');
+      btnAntigoZap.style.removeProperty('visibility');
+    }
+    if (btnAntigoComprar) {
+      btnAntigoComprar.style.removeProperty('display');
+      btnAntigoComprar.style.removeProperty('visibility');
+    }
+  }
+
+  // Seleciona os 3 botões novos
+  const btnZap = document.getElementById('lia-float-whatsapp');
+  let btnDuvidas = document.getElementById('lia-float-duvidas');
+  const btnComprar = document.getElementById('lia-float-comprar');
+  // Garante ID fixo para Dúvidas Lia
+  if (!btnDuvidas) {
+    // Procura pelo botão com texto "Dúvidas Lia" ou "Tire dúvidas com a Lia"
+    const possiveis = Array.from(document.querySelectorAll('button')).filter(b =>
+      b.textContent && (b.textContent.trim() === 'Dúvidas Lia' || b.textContent.trim() === 'Tire dúvidas com a Lia')
+    );
+    if (possiveis.length > 0) {
+      btnDuvidas = possiveis[0];
+      btnDuvidas.id = 'lia-float-duvidas';
+    }
+  }
+
+  if (isMobile && btnZap && btnDuvidas && btnComprar) {
+    // Textos mobile
+    btnZap.textContent = 'WhatsApp';
+    btnDuvidas.textContent = 'Dúvidas Lia';
+    btnComprar.textContent = 'Comprar';
+
+    // Cálculo de largura e posições
+    const gap = 6;
+    const side = 8;
+    const totalGap = gap * 2;
+    const totalSide = side * 2;
+    const width = `calc((100vw - ${totalSide + totalGap}px) / 3)`;
+
+    // WhatsApp (esquerda)
+    btnZap.style.setProperty('position', 'fixed', 'important');
+    btnZap.style.setProperty('left', side + 'px', 'important');
+    btnZap.style.setProperty('bottom', '10px', 'important');
+    btnZap.style.setProperty('width', width, 'important');
+    btnZap.style.setProperty('height', '44px', 'important');
+    btnZap.style.setProperty('font-size', '11px', 'important');
+    btnZap.style.setProperty('padding', '8px 4px', 'important');
+    btnZap.style.setProperty('border-radius', '16px', 'important');
+    btnZap.style.setProperty('z-index', '99999', 'important');
+    btnZap.style.setProperty('white-space', 'nowrap', 'important');
+    btnZap.style.setProperty('overflow', 'hidden', 'important');
+    btnZap.style.setProperty('text-overflow', 'ellipsis', 'important');
+    btnZap.style.setProperty('text-align', 'center', 'important');
+
+    // Dúvidas Lia (meio)
+    btnDuvidas.style.setProperty('position', 'fixed', 'important');
+    btnDuvidas.style.setProperty('left', `calc(${side}px + ${width} + ${gap}px)`, 'important');
+    btnDuvidas.style.setProperty('bottom', '10px', 'important');
+    btnDuvidas.style.setProperty('width', width, 'important');
+    btnDuvidas.style.setProperty('height', '44px', 'important');
+    btnDuvidas.style.setProperty('font-size', '11px', 'important');
+    btnDuvidas.style.setProperty('padding', '8px 4px', 'important');
+    btnDuvidas.style.setProperty('border-radius', '16px', 'important');
+    btnDuvidas.style.setProperty('z-index', '99999', 'important');
+    btnDuvidas.style.setProperty('white-space', 'nowrap', 'important');
+    btnDuvidas.style.setProperty('overflow', 'hidden', 'important');
+    btnDuvidas.style.setProperty('text-overflow', 'ellipsis', 'important');
+    btnDuvidas.style.setProperty('text-align', 'center', 'important');
+
+    // Comprar (direita)
+    btnComprar.style.setProperty('position', 'fixed', 'important');
+    btnComprar.style.setProperty('right', side + 'px', 'important');
+    btnComprar.style.setProperty('bottom', '10px', 'important');
+    btnComprar.style.setProperty('width', width, 'important');
+    btnComprar.style.setProperty('height', '44px', 'important');
+    btnComprar.style.setProperty('font-size', '11px', 'important');
+    btnComprar.style.setProperty('padding', '8px 4px', 'important');
+    btnComprar.style.setProperty('border-radius', '16px', 'important');
+    btnComprar.style.setProperty('z-index', '99999', 'important');
+    btnComprar.style.setProperty('white-space', 'nowrap', 'important');
+    btnComprar.style.setProperty('overflow', 'hidden', 'important');
+    btnComprar.style.setProperty('text-overflow', 'ellipsis', 'important');
+    btnComprar.style.setProperty('text-align', 'center', 'important');
+  } else if (btnZap && btnDuvidas && btnComprar) {
+    // Desktop: remove estilos mobile
+    [btnZap, btnDuvidas, btnComprar].forEach(btn => {
+      btn.removeAttribute('style');
+    });
+  }
+}
+
+// Chama a função nos pontos necessários
+document.addEventListener('DOMContentLoaded', aplicarLayoutMobileBotoes);
+window.addEventListener('resize', aplicarLayoutMobileBotoes);
+setTimeout(aplicarLayoutMobileBotoes, 300);
+setTimeout(aplicarLayoutMobileBotoes, 1000);
 // ====== BOTÃO E PAINEL DA LIA - ASSISTENTE VIRTUAL ======
 // Remove/oculta botões flutuantes antigos do sistema principal
 function hideOldFloatingButtons() {
