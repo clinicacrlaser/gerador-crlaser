@@ -1,6 +1,29 @@
 // ====== BOTÃO E PAINEL DA LIA - ASSISTENTE VIRTUAL ======
-// Remove botões flutuantes duplicados/antigos se existirem
-document.querySelectorAll('#lia-float-btn, #lia-float-bar, #lia-float-whatsapp, #lia-float-comprar').forEach(el => el.remove());
+// Remove/oculta botões flutuantes antigos do sistema principal
+function hideOldFloatingButtons() {
+  // IDs e classes dos antigos
+  const oldIds = [
+    'btnWhatsappUnidades', // WhatsApp antigo
+    'btnAbrirLia'          // Comprar com Lia antigo
+  ];
+  oldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = 'none';
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
+    }
+  });
+  // Também oculta por classe se necessário
+  document.querySelectorAll('.floating-btn, .whatsapp-btn, .lia-btn').forEach(el => {
+    if (!el.closest('#lia-float-bar')) {
+      el.style.display = 'none';
+      el.style.visibility = 'hidden';
+      el.style.pointerEvents = 'none';
+    }
+  });
+}
+hideOldFloatingButtons();
 
 // Cria barra de botões flutuantes única
 const bar = document.createElement('div');
