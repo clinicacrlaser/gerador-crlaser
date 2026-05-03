@@ -1,29 +1,19 @@
 // Força layout mobile dos botões flutuantes via JS inline
 function aplicarLayoutMobileBotoes() {
   const isMobile = window.innerWidth <= 600;
-  // Esconde botões antigos no mobile
+  // Esconde botões antigos duplicados no mobile
   const btnAntigoZap = document.getElementById('btnWhatsappUnidades');
   const btnAntigoComprar = document.getElementById('btnAbrirLia');
-  if (isMobile) {
     if (btnAntigoZap) {
-      btnAntigoZap.style.setProperty('display', 'none', 'important');
-      btnAntigoZap.style.setProperty('visibility', 'hidden', 'important');
-    }
-    if (btnAntigoComprar) {
-      btnAntigoComprar.style.setProperty('display', 'none', 'important');
-      btnAntigoComprar.style.setProperty('visibility', 'hidden', 'important');
-    }
-  } else {
-    if (btnAntigoZap) {
-      btnAntigoZap.style.removeProperty('display');
-      btnAntigoZap.style.removeProperty('visibility');
-    }
-    if (btnAntigoComprar) {
-      btnAntigoComprar.style.removeProperty('display');
-      btnAntigoComprar.style.removeProperty('visibility');
-    }
-  }
-
+  btnAntigoZap.style.setProperty('display', 'none', 'important');
+  btnAntigoZap.style.setProperty('visibility', 'hidden', 'important');
+  btnAntigoZap.style.setProperty('pointer-events', 'none', 'important');
+}
+if (btnAntigoComprar) {
+  btnAntigoComprar.style.setProperty('display', 'none', 'important');
+  btnAntigoComprar.style.setProperty('visibility', 'hidden', 'important');
+  btnAntigoComprar.style.setProperty('pointer-events', 'none', 'important');
+}
   // Seleciona os 3 botões novos
   const btnZap = document.getElementById('lia-float-whatsapp');
   let btnDuvidas = document.getElementById('lia-float-duvidas');
