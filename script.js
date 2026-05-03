@@ -4,16 +4,17 @@ if (!document.getElementById('lia-float-btn')) {
   btn.id = 'lia-float-btn';
   btn.textContent = 'Tire dúvidas com a Lia';
   btn.style.position = 'fixed';
+  btn.style.left = '50%';
+  btn.style.transform = 'translateX(-50%)';
   btn.style.bottom = '32px';
-  btn.style.right = '32px';
   btn.style.zIndex = '9999';
   btn.style.background = 'linear-gradient(90deg, #18c7d1 0%, #1e5faf 100%)';
   btn.style.color = '#fff';
-  btn.style.fontSize = '1.1rem';
+  btn.style.fontSize = '1rem';
   btn.style.fontWeight = '600';
   btn.style.border = 'none';
-  btn.style.borderRadius = '32px';
-  btn.style.padding = '16px 28px';
+  btn.style.borderRadius = '28px';
+  btn.style.padding = '12px 22px';
   btn.style.boxShadow = '0 4px 24px #0006';
   btn.style.cursor = 'pointer';
   btn.style.transition = 'background 0.2s';
@@ -21,9 +22,30 @@ if (!document.getElementById('lia-float-btn')) {
   btn.style.letterSpacing = '0.01em';
   btn.style.display = 'block';
   btn.style.userSelect = 'none';
+  btn.style.maxWidth = '90vw';
+  btn.style.whiteSpace = 'nowrap';
   btn.addEventListener('mouseenter', () => btn.style.background = '#18c7d1');
   btn.addEventListener('mouseleave', () => btn.style.background = 'linear-gradient(90deg, #18c7d1 0%, #1e5faf 100%)');
   document.body.appendChild(btn);
+
+  // Responsividade mobile
+  function updateLiaBtnMobile() {
+    if (window.innerWidth <= 600) {
+      btn.style.fontSize = '0.95rem';
+      btn.style.padding = '10px 10vw';
+      btn.style.bottom = '16px';
+      btn.style.borderRadius = '22px';
+      btn.style.maxWidth = '98vw';
+    } else {
+      btn.style.fontSize = '1rem';
+      btn.style.padding = '12px 22px';
+      btn.style.bottom = '32px';
+      btn.style.borderRadius = '28px';
+      btn.style.maxWidth = '90vw';
+    }
+  }
+  window.addEventListener('resize', updateLiaBtnMobile);
+  updateLiaBtnMobile();
 
   // Painel flutuante
   const panel = document.createElement('div');
