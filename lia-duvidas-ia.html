@@ -18,14 +18,12 @@
       font-family: 'Inter', Arial, sans-serif;
       height: 100vh;
       width: 100vw;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: stretch;
-      justify-content: flex-start;
       overflow: hidden;
     }
     .lia-title {
+      flex-shrink: 0;
       font-size: 2rem;
       font-weight: 700;
       color: #18c7d1;
@@ -41,24 +39,23 @@
       width: 100%;
       max-width: 420px;
       margin: 0 0 40px 0;
+      flex: 1;
+      min-height: 0;
+      height: auto;
+      max-height: none;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      max-height: 100vh;
-      min-height: 420px;
       position: relative;
       overflow: hidden;
     }
     .lia-messages {
-      flex: 1 1 0%;
-      padding: 18px 16px 12px 16px;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 12px;
       background: #181e2a;
-      min-height: 0;
-      max-height: 100%;
     }
     .lia-msg {
       max-width: 90%;
@@ -82,43 +79,29 @@
       border-bottom-right-radius: 4px;
     }
     .lia-input-row {
-      display: flex;
       flex-shrink: 0;
-      padding: 12px 12px 12px 12px;
-      background: #151a23;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #10131a;
       border-top: 1px solid #1e5faf33;
-      z-index: 2;
+      padding: 10px 12px;
+      z-index: 50;
     }
     .lia-input-row input {
       flex: 1;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-      background: #232b3d;
-      color: #eafaff;
-      outline: none;
-      margin-right: 8px;
+      min-width: 0;
     }
     .lia-input-row button {
-      background: linear-gradient(90deg, #18c7d1 0%, #1e5faf 100%);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 0 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .lia-input-row button:active {
-      background: #18c7d1;
+      flex-shrink: 0;
     }
     @media (max-width: 600px) {
       .lia-chat-container {
         max-width: 100vw;
-        min-height: 100vh;
-        height: 100vh;
+        flex: 1;
+        min-height: 0;
+        height: auto;
+        max-height: none;
         border-radius: 0;
         margin: 0;
       }
@@ -134,9 +117,13 @@
       }
       .lia-messages {
         padding-bottom: 8px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
       }
       .lia-input-row {
         padding: 10px 6px 10px 6px;
+        flex-shrink: 0;
       }
     }
   </style>
