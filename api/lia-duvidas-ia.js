@@ -388,6 +388,16 @@ export default async function handler(req, res) {
 
       // Regras de segurança ANTES de chamar IA
       const perguntaNorm = normalizar(pergunta);
+            // Regra direta para perguntas sobre Ultraformer MPT / MPT
+      if (
+        procDetectado === 'ultraformer mpt' &&
+        /\b(tem|temos|faz|fazem|trabalha|trabalham|vocês fazem|voces fazem)\b/i.test(perguntaNorm)
+      ) {
+        const resposta = limparResposta('Sim, temos Ultraformer MPT na CR Laser®. Trabalhamos com o Ultraformer MPT original e ponteiras originais. Ele é indicado para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
       // 1. Sculptra: resposta positiva e comercial
       if (contemSculptra(pergunta)) {
         const resposta = limparResposta('Na CR Laser® trabalhamos com o Bioestimulador Diamond. Ele é indicado para estimular colágeno, melhorar firmeza e qualidade da pele, sempre conforme avaliação profissional. 😊');
