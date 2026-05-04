@@ -1,3 +1,11 @@
+// Remove caracteres quebrados das respostas
+function limparResposta(texto) {
+  return String(texto || "")
+    .replace(/\uFFFD/g, "")
+    .replace(/�/g, "")
+    .replace(/\s+([.,!?])/g, "$1")
+    .trim();
+}
 // Lista de termos concorrentes/relacionados ao Ultraformer MPT
 const CONCORRENTES_ULTRA = [
   'liftera','liftera a','liftera v','liftera 2','liftera lifting','litfera','lifetra','lifitera',
@@ -321,8 +329,9 @@ export default async function handler(req, res) {
       const { pergunta, historico } = JSON.parse(body);
       // Se pergunta não vier, retorna resposta amigável
       if (!pergunta || !String(pergunta).trim()) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Pode me enviar sua dúvida sobre os procedimentos da CR Laser® 😊' }));
+        const resposta = limparResposta('Pode me enviar sua dúvida sobre os procedimentos da CR Laser® 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
         return;
       }
 
@@ -353,8 +362,9 @@ export default async function handler(req, res) {
       const perguntaNormUltra = normalizar(pergunta);
       if (CONCORRENTES_ULTRA.some(t => perguntaNormUltra.includes(normalizar(t)))) {
         // Sempre responde de forma positiva e comercial, valorizando o Ultraformer MPT
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Na CR Laser® trabalhamos com o Ultraformer MPT original e ponteiras originais. É uma tecnologia de ultrassom micro e macrofocado, indicada para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.' }));
+        const resposta = limparResposta('Na CR Laser® trabalhamos com o Ultraformer MPT original e ponteiras originais. É uma tecnologia de ultrassom micro e macrofocado, indicada para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
         return;
       }
       // Se for pergunta de continuidade, extrai do histórico
@@ -371,20 +381,23 @@ export default async function handler(req, res) {
       const perguntaNorm = normalizar(pergunta);
       // 1. Sculptra: resposta positiva e comercial
       if (contemSculptra(pergunta)) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Na CR Laser® trabalhamos com o Bioestimulador Diamond. Ele é indicado para estimular colágeno, melhorar firmeza e qualidade da pele, sempre conforme avaliação profissional. 😊' }));
+        const resposta = limparResposta('Na CR Laser® trabalhamos com o Bioestimulador Diamond. Ele é indicado para estimular colágeno, melhorar firmeza e qualidade da pele, sempre conforme avaliação profissional. 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
         return;
       }
       // 2. Proibidos: nunca afirmar que tem
       if (contemProibido(pergunta)) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei esse procedimento como disponível na CR Laser®. Se quiser, posso te explicar sobre os procedimentos que temos 😊' }));
+        const resposta = limparResposta('Na minha base, não encontrei esse procedimento como disponível na CR Laser®. Se quiser, posso te explicar sobre os procedimentos que temos 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
         return;
       }
       // 3. Pergunta "diamond é o que" ou variantes
       if (isPerguntaDiamond(pergunta)) {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular a produção de colágeno, melhorar a firmeza e a qualidade da pele, sempre conforme avaliação profissional. Se quiser, posso te explicar em quais regiões ele costuma ser indicado 😊' }));
+        const resposta = limparResposta('O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular a produção de colágeno, melhorar a firmeza e a qualidade da pele, sempre conforme avaliação profissional. Se quiser, posso te explicar em quais regiões ele costuma ser indicado 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
         return;
       }
       // 4. Se perguntar se "tem" ou "faz" algum procedimento, só afirmar se estiver na lista permitida
@@ -397,8 +410,9 @@ export default async function handler(req, res) {
           }
         }
         if (!achouPermitido) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ resposta: 'Na minha base, não encontrei uma confirmação segura sobre esse procedimento. Se quiser, posso te explicar sobre os procedimentos que temos na CR Laser® 😊' }));
+          const resposta = limparResposta('Na minha base, não encontrei uma confirmação segura sobre esse procedimento. Se quiser, posso te explicar sobre os procedimentos que temos na CR Laser® 😊');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
           return;
         }
       }
@@ -510,7 +524,8 @@ export default async function handler(req, res) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
       }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      respostaFinal = limparResposta(respostaFinal);
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ resposta: respostaFinal }));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
