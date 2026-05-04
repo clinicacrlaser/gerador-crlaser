@@ -1,14 +1,19 @@
 // Remove caracteres quebrados das respostas
 function limparResposta(texto) {
-  return String(texto || "")
-    .replace(/\uFFFD/g, "")
-    .replace(/�/g, "")
-    .replace(/ï¿½/g, "")
-    .replace(/� /g, "")
-    .replace(/ � /g, " ")
-    .replace(/\s+([.,!?])/g, "$1")
-    .replace(/\s{2,}/g, " ")
-    .trim();
+  let t = String(texto || "");
+  // 1. Remove caracteres quebrados e combinações
+  t = t.replace(/\uFFFD|�|ï¿½/g, "");
+  t = t.replace(/�\.|\.�|\. �|� | � /g, "");
+  // 2. Remove linhas/parágrafos contendo apenas ponto
+  t = t.replace(/(<br><br>\.|<br>\.|\.\s*<br>|<br>\.\s*<br>|\n\.\n|^\.\s*$)/g, "");
+  // 3. Remove linha isolada com ponto
+  t = t.split(/(<br>|\n)/).filter(l => l.trim() !== ".").join("");
+  // 4. Troca '..' por '.'
+  t = t.replace(/\.\./g, ".");
+  // 5. Espaços antes de pontuação
+  t = t.replace(/\s+([.,!?])/g, "$1");
+  t = t.replace(/\s{2,}/g, " ");
+  return t.trim();
 }
 // Lista de termos concorrentes/relacionados ao Ultraformer MPT
 const CONCORRENTES_ULTRA = [
