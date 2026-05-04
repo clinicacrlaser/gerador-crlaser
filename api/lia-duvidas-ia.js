@@ -309,39 +309,6 @@ async function callOpenAI(pergunta, linhasRelevantes) {
 }
 
 export default async function handler(req, res) {
-        // --- Ultraformer MPT: respostas sobre ponteiras e rosto/full face ---
-        const perguntaNormPonteira = normalizar(pergunta);
-        // Palavras-chave para ponteiras
-        const termosPonteira = [
-          'quantas ponteiras','ponteiras','ponteira','ponteiras no rosto','ponteiras no full face','rosto','face','full face','duas ponteiras','2 ponteiras'
-        ];
-        const termosDuasPonteiras = [
-          'é só duas ponteiras','fazem com duas ponteiras','2 ponteiras resolve','duas ponteiras resolve','duas ponteiras','2 ponteiras'
-        ];
-        // Se pergunta mencionar explicitamente "duas ponteiras" ou variações
-        if (termosDuasPonteiras.some(t => perguntaNormPonteira.includes(normalizar(t)))) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ resposta: 'No rosto/Full Face, um protocolo completo de Ultraformer MPT costuma envolver 6 a 7 ponteiras, conforme avaliação profissional. Usar poucas ponteiras pode limitar o alcance do tratamento, porque cada ponteira atua em uma profundidade diferente.' }));
-          return;
-        }
-        // Se pergunta mencionar ponteiras, rosto, face, full face
-        if (termosPonteira.some(t => perguntaNormPonteira.includes(normalizar(t)))) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ resposta: 'No Ultraformer MPT, a quantidade de ponteiras varia conforme a área tratada e a avaliação profissional. No rosto/Full Face, a CR Laser® costuma trabalhar com protocolo completo, geralmente com 6 a 7 ponteiras, para tratar diferentes camadas e buscar um resultado mais completo.' }));
-          return;
-        }
-
-        // Continuidade: se pergunta anterior foi sobre ponteiras ou Ultraformer MPT e a atual é só "rosto", "face", "full face"
-        if (Array.isArray(historico) && historico.length > 0) {
-          const ultPergunta = (historico[historico.length-1]?.texto || '').toLowerCase();
-          const ultPonteira = termosPonteira.some(t => normalizar(ultPergunta).includes(normalizar(t))) || ultPergunta.includes('ultraformer');
-          const perguntaCurta = ['rosto','face','full face','e no rosto','quero saber do rosto','e no full face'].some(t => perguntaNormPonteira === normalizar(t));
-          if (ultPonteira && perguntaCurta) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ resposta: 'No Ultraformer MPT, a quantidade de ponteiras varia conforme a área tratada e a avaliação profissional. No rosto/Full Face, a CR Laser® costuma trabalhar com protocolo completo, geralmente com 6 a 7 ponteiras, para tratar diferentes camadas e buscar um resultado mais completo.' }));
-            return;
-          }
-        }
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ erro: 'Método não permitido' }));
