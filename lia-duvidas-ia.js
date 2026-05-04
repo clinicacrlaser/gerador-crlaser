@@ -1,3 +1,12 @@
+// Remove caracteres quebrados das respostas da Lia (frontend)
+function limparTextoLia(texto) {
+  return String(texto || "")
+    .replace(/\uFFFD/g, "")
+    .replace(/�/g, "")
+    .replace(/\s+([.,!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 // lia-duvidas-ia.js - Frontend Lia IA
 
 const liaMessages = document.getElementById('liaMessages');
@@ -37,9 +46,9 @@ liaForm.addEventListener('submit', async (e) => {
     const data = await resp.json();
     liaMessages.removeChild(liaMessages.lastChild);
     if (data && data.resposta) {
-      adicionarMensagem(data.resposta, 'lia');
+      adicionarMensagem(limparTextoLia(data.resposta), 'lia');
     } else {
-      adicionarMensagem('Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.', 'lia');
+      adicionarMensagem(limparTextoLia('Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.'), 'lia');
     }
   } catch (e) {
     liaMessages.removeChild(liaMessages.lastChild);
