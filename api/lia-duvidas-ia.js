@@ -491,63 +491,24 @@ export default async function handler(req, res) {
         respostaFinal = respostaFinal.replace(/Se quiser mais informações ou agendar, posso ajudar!?/gi, 'Para mais informações ou agendamento, fale com o WhatsApp da sua unidade.');
 
         // 1. Corrigir regra de preço/oferta: só mostrar resposta de valores se pergunta realmente for sobre preço/compra
-        const precoRegex = /(pre[cç]o|valor|quanto\s*custa|promo[cç][aã]o|desconto|oferta|comprar|compra|pagamento|pix|cart[aã]o|boleto|link de pagamento)/i;
+          const precoRegex = /(pre[cç]o|valor|quanto\s*custa|promo[cç][aã]o|desconto|oferta|comprar|compra|pagamento|pix|cart[aã]o|boleto|link de pagamento)/i;
+
         if (precoRegex.test(pergunta)) {
           respostaFinal = 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.';
         } else {
-          // 2. Corrigir links: só incluir "Veja também" se link complementar for URL real
           const linksValidos = linhasRelevantes
             .map(l => l.link)
             .filter(link => typeof link === 'string' && /^https?:\/\//i.test(link));
+
           if (linksValidos.length > 0 && !/Veja também/i.test(respostaFinal)) {
             respostaFinal += `<br><br>Veja também:<br><a href="${linksValidos[0]}" target="_blank" style="color:#18c7d1;word-break:break-all;">${linksValidos[0]}</a>`;
-          }
-          // 3. Ajuste de tom de finalização: evitar finais vagos e estimular perguntas objetivas
-          const finaisVagos = [
-            /Se quiser, posso te explicar melhor( como funciona)? ?[😊\.]?/gi,
-            /Estou aqui para ajudar[.!]?/gi,
-            /É só chamar[.!]?/gi,
-            /Se quiser, posso te explicar melhor/gi,
-            /Se quiser posso te explicar melhor/gi,
-            /Se quiser posso te explicar/gi,
-            /Se quiser, posso explicar melhor/gi
-          ];
-          let fraseFinal = 'Pode mandar sua dúvida de forma objetiva, que eu respondo com base nas informações da CR Laser® 😊';
-          let respostaSemVago = respostaFinal;
-          finaisVagos.forEach(rx => {
-            respostaSemVago = respostaSemVago.replace(rx, '').replace(/\s+([\.!?])/g, '$1');
-          });
-          // Só adiciona a frase orientativa se a resposta não for de preço, agendamento ou fallback, e se a resposta não for muito curta
-          if (
-            !precoRegex.test(pergunta) &&
-            !/WhatsApp|agendamento|valores|oferta|compra|fale com o WhatsApp|treinamento|não encontrei uma resposta segura|base vazia|unitad[ea]/i.test(respostaSemVago) &&
-            respostaSemVago.length > 60 &&
-            !respostaSemVago.includes(fraseFinal)
-          ) {
-            respostaFinal = respostaSemVago.trim().replace(/([\.!?])$/, '$1') + '\n\n' + fraseFinal;
-          } else {
-            respostaFinal = respostaSemVago.trim();
           }
         }
       } catch (err) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
       }
-      // Separar frase final por <br><br> se necessário, sem regex dinâmica
-      let fraseFinal = 'Pode mandar sua dúvida de forma objetiva, que eu respondo com base nas informações da CR Laser® 😊';
-      if (respostaFinal.includes(fraseFinal)) {
-        // Remove qualquer caractere estranho antes da frase final
-        let idx = respostaFinal.indexOf(fraseFinal);
-        let antes = respostaFinal.substring(0, idx).replace(/[�ï¿½]+$/g, '').trim();
-        // Garante separação por <br><br>
-        if (antes.endsWith('.')) {
-          respostaFinal = antes + '<br><br>' + fraseFinal;
-        } else if (antes.length > 0) {
-          respostaFinal = antes + '.<br><br>' + fraseFinal;
-        } else {
-          respostaFinal = fraseFinal;
-        }
-      }
+      
       respostaFinal = limparResposta(respostaFinal);
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ resposta: respostaFinal }));
