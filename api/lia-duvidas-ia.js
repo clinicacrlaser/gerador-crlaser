@@ -1,3 +1,158 @@
+// Remove frases finais abertas indesejadas
+function removerFinaisAbertos(texto) {
+  return String(texto || "")
+    .replace(/Se quiser, posso te explicar melhor como funciona 😊/gi, "")
+    .replace(/Se quiser, posso te explicar melhor como funciona/gi, "")
+    .replace(/Se quiser, posso te explicar melhor 😊/gi, "")
+    .replace(/Se quiser, posso te explicar melhor/gi, "")
+    .replace(/Se quiser posso te explicar melhor como funciona 😊/gi, "")
+    .replace(/Se quiser posso te explicar melhor como funciona/gi, "")
+    .replace(/Se quiser posso te explicar melhor 😊/gi, "")
+    .replace(/Se quiser posso te explicar melhor/gi, "")
+    .replace(/\s+([.,!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+// Remove caracteres quebrados das respostas
+function limparResposta(texto) {
+  let t = String(texto || "");
+  // 1. Remove caracteres quebrados e combinações
+  t = t.replace(/\uFFFD|�|ï¿½/g, "");
+  t = t.replace(/�\.|\.�|\. �|� | � /g, "");
+  // 2. Remove linhas/parágrafos contendo apenas ponto
+  t = t.replace(/(<br><br>\.|<br>\.|\.\s*<br>|<br>\.\s*<br>|\n\.\n|^\.\s*$)/g, "");
+  // 3. Remove linha isolada com ponto
+  t = t.split(/(<br>|\n)/).filter(l => l.trim() !== ".").join("");
+  // 4. Troca '..' por '.'
+  t = t.replace(/\.\./g, ".");
+  // 5. Espaços antes de pontuação
+  t = t.replace(/\s+([.,!?])/g, "$1");
+  t = t.replace(/\s{2,}/g, " ");
+  return t.trim();
+}
+// Lista de termos concorrentes/relacionados ao Ultraformer MPT
+const CONCORRENTES_ULTRA = [
+  'liftera','liftera a','liftera v','liftera 2','liftera lifting','litfera','lifetra','lifitera',
+  'hifu','hifu facial','ultrassom microfocado','ultrassom macrofocado','ultrassom micro e macrofocado',
+  'ultrassom focado','aparelho para flacidez','lifting sem corte','lifting facial sem cirurgia',
+  'ulthera','ultherapy','doublo'
+];
+
+// ===== CONTEXTO DE CONTINUIDADE =====
+const CONTEXTO_CONTINUACAO = [
+  'dele','dela','esse','essa','isso','ele','ela','quanto dura','durabilidade','dói','como funciona','quais regiões','onde aplica','quantas sessões'
+];
+
+function extrairUltimoProcedimento(historico) {
+  if (!Array.isArray(historico)) return null;
+  for (let i = historico.length - 1; i >= 0; i--) {
+    const texto = (historico[i]?.texto || '').toLowerCase();
+    if (texto.includes('diamond') || texto.includes('dimond') || texto.includes('diamont') || texto.includes('bioestimulador')) return 'Bioestimulador Diamond';
+    if (texto.includes('botox')) return 'Botox';
+    if (texto.includes('ultraformer')) return 'Ultraformer MPT';
+    if (texto.includes('lavieen')) return 'Laser Lavieen';
+    if (texto.includes('preenchedor')) return 'Preenchedor de Ácido Hialurônico';
+    if (texto.includes('scizer')) return 'Scizer';
+    if (texto.includes('endymed')) return 'Endymed';
+    if (texto.includes('microagulhamento')) return 'Microagulhamento Robótico';
+  }
+  return null;
+}
+// ===== Regras de Procedimentos Permitidos e Proibidos =====
+const PROCEDIMENTOS_PERMITIDOS = [
+  'botox',
+  'ultraformer mpt',
+  'laser lavieen',
+  'preenchedor de ácido hialurônico',
+  'bioestimulador diamond',
+  'scizer',
+  'endymed',
+  'microagulhamento robótico'
+];
+const PROCEDIMENTOS_PROIBIDOS = [
+  'sculptra', 'elleva', 'ellansé', 'radiesse', 'profhilo', 'pdrn'
+];
+const SINONIMOS = {
+  // Botox
+  'btoxo': 'botox',
+  'botxo': 'botox',
+  'bottox': 'botox',
+  'botoxx': 'botox',
+  'botox facial': 'botox',
+  'toxina': 'botox',
+  'toxina botulínica': 'botox',
+  'toxina botulinica': 'botox',
+  'botx': 'botox',
+  // Bioestimulador Diamond
+  'bioestimulador': 'bioestimulador diamond',
+  'bio estimulador': 'bioestimulador diamond',
+  'bioestimuladores': 'bioestimulador diamond',
+  'estimulador de colágeno': 'bioestimulador diamond',
+  'estimulador de colageno': 'bioestimulador diamond',
+  'diamond': 'bioestimulador diamond',
+  'dimond': 'bioestimulador diamond',
+  'diamont': 'bioestimulador diamond',
+  // Ultraformer MPT
+  'ultrafomer': 'ultraformer mpt',
+  'ultraformer': 'ultraformer mpt',
+  'ultraformer mpt': 'ultraformer mpt',
+  'mpt': 'ultraformer mpt',
+  'ultra mpt': 'ultraformer mpt',
+  'ultrassom microfocado': 'ultraformer mpt',
+  // Preenchedor
+  'preenchimento': 'preenchedor de ácido hialurônico',
+  'preenchedor': 'preenchedor de ácido hialurônico',
+  'ácido hialurônico': 'preenchedor de ácido hialurônico',
+  'acido hialuronico': 'preenchedor de ácido hialurônico',
+  // Lavieen
+  'lavien': 'laser lavieen',
+  'lavieen': 'laser lavieen',
+  'bb laser': 'laser lavieen',
+  'laser bb': 'laser lavieen',
+  // Endymed
+  'endymed': 'endymed',
+  'ifine': 'endymed',
+  'i fine': 'endymed',
+  'shapper': 'endymed',
+  'small': 'endymed',
+  // Scizer
+  'scizer': 'scizer',
+  'gordura localizada': 'scizer',
+  // Microagulhamento Robótico
+  'microagulhamento': 'microagulhamento robótico',
+  'microagulhamento robotico': 'microagulhamento robótico',
+  'microagulhamento robótico': 'microagulhamento robótico'
+};
+
+function normalizarProcedimento(str) {
+  let s = normalizar(str);
+  // Busca sinônimo por palavra ou expressão (prioriza o maior match)
+  let match = null;
+  let matchLen = 0;
+  for (const [k, v] of Object.entries(SINONIMOS)) {
+    if (s.includes(k) && k.length > matchLen) {
+      match = v;
+      matchLen = k.length;
+    }
+  }
+  return match || s;
+}
+
+function contemPermitido(pergunta) {
+  const pNorm = normalizar(pergunta);
+  return PROCEDIMENTOS_PERMITIDOS.some(p => pNorm.includes(normalizar(p)));
+}
+function contemProibido(pergunta) {
+  const pNorm = normalizar(pergunta);
+  return PROCEDIMENTOS_PROIBIDOS.some(p => pNorm.includes(normalizar(p)));
+}
+function contemSculptra(pergunta) {
+  return normalizar(pergunta).includes('sculptra');
+}
+function isPerguntaDiamond(pergunta) {
+  const pNorm = normalizar(pergunta);
+  return /\b(diamond|dimond|diamont|bioestimulador)\b/.test(pNorm) && /(é o que|o que é|que é|que significa|para que|qual|como funciona)/.test(pNorm);
+}
 // api/lia-duvidas-ia.js - API para Lia IA
 
 
@@ -196,21 +351,129 @@ export default async function handler(req, res) {
   req.on('end', async () => {
     try {
       const { pergunta, historico } = JSON.parse(body);
+      // Se pergunta não vier, retorna resposta amigável
+      if (!pergunta || !String(pergunta).trim()) {
+        const resposta = limparResposta('Pode me enviar sua dúvida sobre os procedimentos da CR Laser® 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
+
+      // ===== CONTEXTO DE CONTINUIDADE =====
+      let procedimentoContexto = null;
+      const perguntaNormLower = normalizar(pergunta).toLowerCase();
+      // Reconhecimento de sinônimos e erros comuns
+      const procDetectado = normalizarProcedimento(perguntaNormLower);
+      if (procDetectado === 'botox') {
+        procedimentoContexto = 'Botox';
+      } else if (procDetectado === 'bioestimulador diamond') {
+        procedimentoContexto = 'Bioestimulador Diamond';
+      } else if (procDetectado === 'ultraformer mpt') {
+        procedimentoContexto = 'Ultraformer MPT';
+      } else if (procDetectado === 'preenchedor de ácido hialurônico') {
+        procedimentoContexto = 'Preenchedor de Ácido Hialurônico';
+      } else if (procDetectado === 'laser lavieen') {
+        procedimentoContexto = 'Laser Lavieen';
+      } else if (perguntaNormLower.includes('scizer')) {
+        procedimentoContexto = 'Scizer';
+      } else if (perguntaNormLower.includes('endymed')) {
+        procedimentoContexto = 'Endymed';
+      } else if (perguntaNormLower.includes('microagulhamento')) {
+        procedimentoContexto = 'Microagulhamento Robótico';
+      }
+
+      // --- Ultraformer MPT concorrentes: resposta especial ---
+      const perguntaNormUltra = normalizar(pergunta);
+      if (CONCORRENTES_ULTRA.some(t => perguntaNormUltra.includes(normalizar(t)))) {
+        // Sempre responde de forma positiva e comercial, valorizando o Ultraformer MPT
+        const resposta = limparResposta('Na CR Laser® trabalhamos com o Ultraformer MPT original e ponteiras originais. É uma tecnologia de ultrassom micro e macrofocado, indicada para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
+      // Se for pergunta de continuidade, extrai do histórico
+      if (!procedimentoContexto && CONTEXTO_CONTINUACAO.some(p => perguntaNormLower.includes(p))) {
+        procedimentoContexto = extrairUltimoProcedimento(historico);
+        if (!procedimentoContexto) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ resposta: 'Você está falando de qual procedimento? 😊' }));
+          return;
+        }
+      }
+
+      // Regras de segurança ANTES de chamar IA
+      const perguntaNorm = normalizar(pergunta);
+            // Regra direta para perguntas sobre Ultraformer MPT / MPT
+      if (
+        procDetectado === 'ultraformer mpt' &&
+        /\b(tem|temos|faz|fazem|trabalha|trabalham|vocês fazem|voces fazem)\b/i.test(perguntaNorm)
+      ) {
+        const resposta = limparResposta('Sim, temos Ultraformer MPT na CR Laser®. Trabalhamos com o Ultraformer MPT original e ponteiras originais. Ele é indicado para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
+      // 1. Sculptra: resposta positiva e comercial
+      if (contemSculptra(pergunta)) {
+        const resposta = limparResposta('Na CR Laser® trabalhamos com o Bioestimulador Diamond. Ele é indicado para estimular colágeno, melhorar firmeza e qualidade da pele, sempre conforme avaliação profissional. 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
+      // 2. Proibidos: nunca afirmar que tem
+      if (contemProibido(pergunta)) {
+        const resposta = limparResposta('Na minha base, não encontrei esse procedimento como disponível na CR Laser®. Se quiser, posso te explicar sobre os procedimentos que temos 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
+      // 3. Pergunta "diamond é o que" ou variantes
+      if (isPerguntaDiamond(pergunta)) {
+        const resposta = limparResposta('O Bioestimulador Diamond é o bioestimulador usado na CR Laser®. Ele é indicado para estimular a produção de colágeno, melhorar a firmeza e a qualidade da pele, sempre conforme avaliação profissional. Se quiser, posso te explicar em quais regiões ele costuma ser indicado 😊');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ resposta }));
+        return;
+      }
+      // 4. Se perguntar se "tem" ou "faz" algum procedimento, só afirmar se estiver na lista permitida
+      if (/\b(tem|faz|trabalha|oferece|possui|vende|realiza|fazem|oferecem|trabalham)\b/i.test(perguntaNorm)) {
+        let achouPermitido = false;
+        for (const proc of PROCEDIMENTOS_PERMITIDOS) {
+          if (perguntaNorm.includes(normalizar(proc))) {
+            achouPermitido = true;
+            break;
+          }
+        }
+        if (!achouPermitido) {
+          const resposta = limparResposta('Na minha base, não encontrei uma confirmação segura sobre esse procedimento. Se quiser, posso te explicar sobre os procedimentos que temos na CR Laser® 😊');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
+          return;
+        }
+      }
+
       // Logs
       console.log('[LIA-IA] Pergunta recebida:', pergunta);
-      // 1. Perguntas proibidas (preço, valor, compra, etc)
+      // 1. Perguntas sobre valores/ofertas
       const proibidas = ['preço','preco','valor','quanto','promo','promoção','oferta','comprar','compra','pagar','pagamento','pix','link','desconto','cartao','cartão'];
       if (proibidas.some(p => normalizar(pergunta).includes(p))) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.' }));
+        res.end(JSON.stringify({ resposta: 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou clique no botão WhatsApp da página.' }));
         console.log('[LIA-IA] Respondeu: preço/compra');
         return;
       }
-      // 2. Saudações
+      // 2. Perguntas sobre agendamento/atendimento humano
+      const agendamento = ['agendar','agendamento','marcar','horário','horario','consulta','atendimento','falar com','unidade','endereço','telefone','disponibilidade'];
+      if (agendamento.some(p => normalizar(pergunta).includes(p))) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Para agendamento ou atendimento com a unidade, é só clicar no botão WhatsApp que fica na página 😊' }));
+        console.log('[LIA-IA] Respondeu: agendamento/atendimento');
+        return;
+      }
+      // 3. Saudações
       const saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem'];
       if (saudacoes.includes(normalizar(pergunta))) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Olá 😊<br>Sou a Lia IA e posso te ajudar com dúvidas sobre os procedimentos da CR Laser®. <br>Digite sua dúvida.' }));
+        res.end(JSON.stringify({ resposta: 'Olá 😊 Sou a Lia - Assistente Virtual da CR Laser®. Pode me mandar sua dúvida!' }));
         console.log('[LIA-IA] Respondeu: saudação');
         return;
       }
@@ -247,20 +510,21 @@ export default async function handler(req, res) {
           historicoTexto = historico.map(m => (m.tipo === 'user' ? 'Usuário: ' : 'Lia: ') + m.texto).join('\n');
         }
         const promptExtra = historicoTexto ? `\n\nHISTÓRICO DA CONVERSA (use para entender perguntas curtas, de continuidade ou com erro de digitação):\n${historicoTexto}\n\nUse o histórico da conversa para entender perguntas curtas, incompletas ou com erro de digitação. Se o usuário fizer uma pergunta de continuidade, mantenha o procedimento do assunto anterior, salvo se ele mencionar outro procedimento claramente.` : '';
-        const respostaIA = await callOpenAI(pergunta + promptExtra, linhasRelevantes);
+        const respostaIA = await callOpenAI(pergunta + promptExtra, linhasRelevantes, procedimentoContexto);
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda não encontrei uma resposta segura para isso na minha base 😊 Se quiser, posso te orientar pelo botão WhatsApp da página.';
         // Troca qualquer frase pronta de agendamento por WhatsApp
         respostaFinal = respostaFinal.replace(/Se quiser mais informações ou agendar, posso ajudar!?/gi, 'Para mais informações ou agendamento, fale com o WhatsApp da sua unidade.');
 
         // 1. Corrigir regra de preço/oferta: só mostrar resposta de valores se pergunta realmente for sobre preço/compra
-        const precoRegex = /(pre[cç]o|valor|quanto\s*custa|promo[cç][aã]o|desconto|oferta|comprar|compra|pagamento|pix|cart[aã]o|boleto|link de pagamento)/i;
+          const precoRegex = /(pre[cç]o|valor|quanto\s*custa|promo[cç][aã]o|desconto|oferta|comprar|compra|pagamento|pix|cart[aã]o|boleto|link de pagamento)/i;
+
         if (precoRegex.test(pergunta)) {
           respostaFinal = 'Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou fale com o WhatsApp da sua unidade.';
         } else {
-          // 2. Corrigir links: só incluir "Veja também" se link complementar for URL real
           const linksValidos = linhasRelevantes
             .map(l => l.link)
             .filter(link => typeof link === 'string' && /^https?:\/\//i.test(link));
+
           if (linksValidos.length > 0 && !/Veja também/i.test(respostaFinal)) {
             respostaFinal += `<br><br>Veja também:<br><a href="${linksValidos[0]}" target="_blank" style="color:#18c7d1;word-break:break-all;">${linksValidos[0]}</a>`;
           }
@@ -269,7 +533,9 @@ export default async function handler(req, res) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
       }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      
+      respostaFinal = removerFinaisAbertos(limparResposta(respostaFinal));
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ resposta: respostaFinal }));
     } catch (e) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
