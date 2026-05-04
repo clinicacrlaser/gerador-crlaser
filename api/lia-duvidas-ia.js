@@ -1,3 +1,18 @@
+// Remove frases finais abertas indesejadas
+function removerFinaisAbertos(texto) {
+  return String(texto || "")
+    .replace(/Se quiser, posso te explicar melhor como funciona 😊/gi, "")
+    .replace(/Se quiser, posso te explicar melhor como funciona/gi, "")
+    .replace(/Se quiser, posso te explicar melhor 😊/gi, "")
+    .replace(/Se quiser, posso te explicar melhor/gi, "")
+    .replace(/Se quiser posso te explicar melhor como funciona 😊/gi, "")
+    .replace(/Se quiser posso te explicar melhor como funciona/gi, "")
+    .replace(/Se quiser posso te explicar melhor 😊/gi, "")
+    .replace(/Se quiser posso te explicar melhor/gi, "")
+    .replace(/\s+([.,!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 // Remove caracteres quebrados das respostas
 function limparResposta(texto) {
   let t = String(texto || "");
@@ -519,7 +534,7 @@ export default async function handler(req, res) {
         respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
       }
       
-      respostaFinal = limparResposta(respostaFinal);
+      respostaFinal = removerFinaisAbertos(limparResposta(respostaFinal));
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ resposta: respostaFinal }));
     } catch (e) {
