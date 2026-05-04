@@ -1,11 +1,27 @@
 // Remove caracteres quebrados das respostas da Lia (frontend)
 function limparTextoLia(texto) {
-  return String(texto || "")
+  let t = String(texto || "")
     .replace(/\uFFFD/g, "")
     .replace(/�/g, "")
+    .replace(/ï¿½/g, "")
+    .replace(/� /g, "")
+    .replace(/ � /g, " ")
     .replace(/\s+([.,!?])/g, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
+  // Garante <br><br> antes da frase final, se necessário
+  const fraseFinal = 'Pode mandar sua dúvida de forma objetiva, que eu respondo com base nas informações da CR Laser® 😊';
+  if (t.includes(fraseFinal)) {
+    t = t.replace(fraseFinal, '').trim();
+    if (t.endsWith('.')) {
+      t = t + '<br><br>' + fraseFinal;
+    } else if (t.length > 0) {
+      t = t + '.<br><br>' + fraseFinal;
+    } else {
+      t = fraseFinal;
+    }
+  }
+  return t;
 }
 // lia-duvidas-ia.js - Frontend Lia IA
 

@@ -3,7 +3,11 @@ function limparResposta(texto) {
   return String(texto || "")
     .replace(/\uFFFD/g, "")
     .replace(/�/g, "")
+    .replace(/ï¿½/g, "")
+    .replace(/� /g, "")
+    .replace(/ � /g, " ")
     .replace(/\s+([.,!?])/g, "$1")
+    .replace(/\s{2,}/g, " ")
     .trim();
 }
 // Lista de termos concorrentes/relacionados ao Ultraformer MPT
@@ -523,6 +527,21 @@ export default async function handler(req, res) {
       } catch (err) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
         respostaFinal = 'Não consegui consultar a IA agora. Verifique os logs da Vercel.';
+      }
+      // Separar frase final por <br><br> se necessário, sem regex dinâmica
+      let fraseFinal = 'Pode mandar sua dúvida de forma objetiva, que eu respondo com base nas informações da CR Laser® 😊';
+      if (respostaFinal.includes(fraseFinal)) {
+        // Remove qualquer caractere estranho antes da frase final
+        let idx = respostaFinal.indexOf(fraseFinal);
+        let antes = respostaFinal.substring(0, idx).replace(/[�ï¿½]+$/g, '').trim();
+        // Garante separação por <br><br>
+        if (antes.endsWith('.')) {
+          respostaFinal = antes + '<br><br>' + fraseFinal;
+        } else if (antes.length > 0) {
+          respostaFinal = antes + '.<br><br>' + fraseFinal;
+        } else {
+          respostaFinal = fraseFinal;
+        }
       }
       respostaFinal = limparResposta(respostaFinal);
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
