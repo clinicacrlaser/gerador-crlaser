@@ -55,6 +55,7 @@ const SINONIMOS = {
   // Ultraformer MPT
   'ultrafomer': 'ultraformer mpt',
   'ultraformer': 'ultraformer mpt',
+  'ultraformer mpt': 'ultraformer mpt',
   'mpt': 'ultraformer mpt',
   'ultra mpt': 'ultraformer mpt',
   'ultrassom microfocado': 'ultraformer mpt',
@@ -66,16 +67,35 @@ const SINONIMOS = {
   // Lavieen
   'lavien': 'laser lavieen',
   'lavieen': 'laser lavieen',
-  'bb laser': 'laser lavieen'
+  'bb laser': 'laser lavieen',
+  'laser bb': 'laser lavieen',
+  // Endymed
+  'endymed': 'endymed',
+  'ifine': 'endymed',
+  'i fine': 'endymed',
+  'shapper': 'endymed',
+  'small': 'endymed',
+  // Scizer
+  'scizer': 'scizer',
+  'gordura localizada': 'scizer',
+  // Microagulhamento Robótico
+  'microagulhamento': 'microagulhamento robótico',
+  'microagulhamento robotico': 'microagulhamento robótico',
+  'microagulhamento robótico': 'microagulhamento robótico'
 };
 
 function normalizarProcedimento(str) {
   let s = normalizar(str);
-  // Busca sinônimo por palavra ou expressão
+  // Busca sinônimo por palavra ou expressão (prioriza o maior match)
+  let match = null;
+  let matchLen = 0;
   for (const [k, v] of Object.entries(SINONIMOS)) {
-    if (s.includes(k)) return v;
+    if (s.includes(k) && k.length > matchLen) {
+      match = v;
+      matchLen = k.length;
+    }
   }
-  return s;
+  return match || s;
 }
 
 function contemPermitido(pergunta) {
