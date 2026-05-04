@@ -351,25 +351,11 @@ export default async function handler(req, res) {
 
       // --- Ultraformer MPT concorrentes: resposta especial ---
       const perguntaNormUltra = normalizar(pergunta);
-      // 1. Se perguntar se tem/faz algum concorrente, resposta negativa e direciona para Ultraformer MPT
       if (CONCORRENTES_ULTRA.some(t => perguntaNormUltra.includes(normalizar(t)))) {
-        // Se for pergunta "tem/faz/trabalha/oferece/possui/vende/realiza" + concorrente
-        if (/\b(tem|faz|trabalha|oferece|possui|vende|realiza|fazem|oferecem|trabalham)\b/i.test(perguntaNormUltra)) {
-          // Descobre o termo perguntado para personalizar resposta
-          const termoPerguntado = CONCORRENTES_ULTRA.find(t => perguntaNormUltra.includes(normalizar(t)));
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ resposta: `Na minha base, não consta que a CR Laser® trabalhe com ${termoPerguntado}. Na CR Laser®, a tecnologia de ultrassom micro e macrofocado que consta é o Ultraformer MPT. Ele é usado para tratar flacidez, estimular colágeno e promover efeito lifting, conforme avaliação profissional.` }));
-          return;
-        }
-        // 2. Se perguntar genericamente por "ultrassom microfocado", "macro", "hifu", "lifting sem corte" etc
-        if ([
-          'ultrassom microfocado','ultrassom macrofocado','ultrassom micro e macrofocado',
-          'ultrassom focado','hifu','hifu facial','aparelho para flacidez','lifting sem corte','lifting facial sem cirurgia'
-        ].some(t => perguntaNormUltra.includes(normalizar(t)))) {
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ resposta: `Sim. Na CR Laser®, o tratamento com ultrassom micro e macrofocado é feito com o Ultraformer MPT. Ele é indicado para tratar flacidez, estimular colágeno e melhorar a firmeza da pele, conforme avaliação profissional.` }));
-          return;
-        }
+        // Sempre responde de forma positiva e comercial, valorizando o Ultraformer MPT
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ resposta: 'Na CR Laser® trabalhamos com o Ultraformer MPT original e ponteiras originais. É uma tecnologia de ultrassom micro e macrofocado, indicada para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.' }));
+        return;
       }
       // Se for pergunta de continuidade, extrai do histórico
       if (!procedimentoContexto && CONTEXTO_CONTINUACAO.some(p => perguntaNormLower.includes(p))) {
