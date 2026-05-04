@@ -326,14 +326,6 @@ async function callOpenAI(pergunta, linhasRelevantes) {
 }
 
 export default async function handler(req, res) {
-        // --- Ultraformer MPT: perguntas diretas ---
-        const ultraPerguntaDireta = /(\btem mpt\b|\btem ultra mpt\b|\btem ultraformer mpt\b|\btem ultraformer\b|voc[eê]s? fazem mpt|voc[eê]s? fazem ultra mpt|voc[eê]s? fazem ultraformer mpt|voc[eê]s? fazem ultraformer)/i;
-        if (ultraPerguntaDireta.test(pergunta)) {
-          const resposta = limparResposta('Sim, temos Ultraformer MPT na CR Laser®. Trabalhamos com o Ultraformer MPT original e ponteiras originais. Ele é indicado para tratar flacidez, estimular colágeno e promover efeito lifting, sempre conforme avaliação profissional.');
-          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-          res.end(JSON.stringify({ resposta }));
-          return;
-        }
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ erro: 'Método não permitido' }));
