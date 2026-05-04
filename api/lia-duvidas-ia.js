@@ -326,6 +326,60 @@ async function callOpenAI(pergunta, linhasRelevantes) {
 }
 
 export default async function handler(req, res) {
+        // === Ultraformer MPT: regras diretas ===
+        // 1. Concorrentes e nomes relacionados (já tratado acima)
+
+        // 2. Perguntas diretas sobre ter/fazer Ultraformer MPT
+        const ultraPerguntas = [
+          /\btem ultraformer mpt\b/i,
+          /\btem ultraformer\b/i,
+          /\btem mpt\b/i,
+          /voc[eê]s? fazem mpt/i
+        ];
+        if (ultraPerguntas.some(rx => rx.test(pergunta))) {
+          const resposta = limparResposta('Sim, temos Ultraformer MPT na CR Laser®. Trabalhamos com o Ultraformer MPT original e ponteiras originais. Ele é indicado para tratar flacidez, estimular colágeno e promover efeito lifting, conforme avaliação profissional.');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
+          return;
+        }
+
+        // 3. Perguntas sobre originalidade do aparelho/ponteira
+        const ultraOriginal = [
+          /ultraformer.*original/i,
+          /aparelho.*original/i,
+          /ponteiras? original/i,
+          /voc[eê]s? usam ponteira original/i
+        ];
+        if (ultraOriginal.some(rx => rx.test(pergunta))) {
+          const resposta = limparResposta('Sim. Na CR Laser® trabalhamos com o Ultraformer MPT original e ponteiras originais, para garantir mais segurança e qualidade no tratamento.');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
+          return;
+        }
+
+        // 4. Pergunta sobre papada
+        if (/papada/i.test(pergunta)) {
+          const resposta = limparResposta('Sim, o Ultraformer MPT pode ser indicado para a região da papada, com foco em flacidez, contorno e estímulo de colágeno, sempre conforme avaliação profissional.');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
+          return;
+        }
+
+        // 5. Pergunta sobre rosto/face/full face
+        if (/(rosto|face|full face)/i.test(pergunta)) {
+          const resposta = limparResposta('Sim, o Ultraformer MPT pode ser indicado para o rosto/Full Face, com foco em firmeza, estímulo de colágeno e efeito lifting, sempre conforme avaliação profissional.');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
+          return;
+        }
+
+        // 6. Pergunta sobre pálpebras
+        if (/p[aá]lpebra/i.test(pergunta)) {
+          const resposta = limparResposta('Sim, o Ultraformer MPT pode ser indicado para pálpebras, com foco em firmeza e melhora da flacidez da região, sempre conforme avaliação profissional.');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ resposta }));
+          return;
+        }
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ erro: 'Método não permitido' }));
