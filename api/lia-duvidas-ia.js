@@ -462,6 +462,32 @@ export default async function handler(req, res) {
           if (linksValidos.length > 0 && !/Veja também/i.test(respostaFinal)) {
             respostaFinal += `<br><br>Veja também:<br><a href="${linksValidos[0]}" target="_blank" style="color:#18c7d1;word-break:break-all;">${linksValidos[0]}</a>`;
           }
+          // 3. Ajuste de tom de finalização: evitar finais vagos e estimular perguntas objetivas
+          const finaisVagos = [
+            /Se quiser, posso te explicar melhor( como funciona)? ?[😊\.]?/gi,
+            /Estou aqui para ajudar[.!]?/gi,
+            /É só chamar[.!]?/gi,
+            /Se quiser, posso te explicar melhor/gi,
+            /Se quiser posso te explicar melhor/gi,
+            /Se quiser posso te explicar/gi,
+            /Se quiser, posso explicar melhor/gi
+          ];
+          let fraseFinal = 'Pode mandar sua dúvida de forma objetiva, que eu respondo com base nas informações da CR Laser® 😊';
+          let respostaSemVago = respostaFinal;
+          finaisVagos.forEach(rx => {
+            respostaSemVago = respostaSemVago.replace(rx, '').replace(/\s+([\.!?])/g, '$1');
+          });
+          // Só adiciona a frase orientativa se a resposta não for de preço, agendamento ou fallback, e se a resposta não for muito curta
+          if (
+            !precoRegex.test(pergunta) &&
+            !/WhatsApp|agendamento|valores|oferta|compra|fale com o WhatsApp|treinamento|não encontrei uma resposta segura|base vazia|unitad[ea]/i.test(respostaSemVago) &&
+            respostaSemVago.length > 60 &&
+            !respostaSemVago.includes(fraseFinal)
+          ) {
+            respostaFinal = respostaSemVago.trim().replace(/([\.!?])$/, '$1') + '\n\n' + fraseFinal;
+          } else {
+            respostaFinal = respostaSemVago.trim();
+          }
         }
       } catch (err) {
         console.error('[LIA-IA] Falha ao consultar OpenAI:', err);
