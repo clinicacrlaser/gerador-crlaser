@@ -369,10 +369,10 @@ export default async function handler(req, res) {
 
       // Regras de segurança ANTES de chamar IA
       const perguntaNorm = normalizar(pergunta);
-      // 1. Sculptra: resposta fixa
+      // 1. Sculptra: resposta positiva e comercial
       if (contemSculptra(pergunta)) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ resposta: 'Na minha base, não consta que a CR Laser® trabalhe com Sculptra. O bioestimulador que consta na CR Laser® é o Bioestimulador Diamond. Se quiser, posso te explicar melhor sobre ele 😊' }));
+        res.end(JSON.stringify({ resposta: 'Na CR Laser® trabalhamos com o Bioestimulador Diamond. Ele é indicado para estimular colágeno, melhorar firmeza e qualidade da pele, sempre conforme avaliação profissional. 😊' }));
         return;
       }
       // 2. Proibidos: nunca afirmar que tem
