@@ -33,19 +33,48 @@ const PROCEDIMENTOS_PROIBIDOS = [
   'sculptra', 'elleva', 'ellansé', 'radiesse', 'profhilo', 'pdrn'
 ];
 const SINONIMOS = {
-  'dimond': 'diamond',
-  'diamont': 'diamond',
-  'diamond': 'bioestimulador diamond',
-  'bioestimulador': 'bioestimulador diamond',
-  'mpt': 'ultraformer mpt',
-  'ultrafomer': 'ultraformer mpt',
+  // Botox
+  'btoxo': 'botox',
+  'botxo': 'botox',
+  'bottox': 'botox',
+  'botoxx': 'botox',
+  'botox facial': 'botox',
+  'toxina': 'botox',
+  'toxina botulínica': 'botox',
+  'toxina botulinica': 'botox',
   'botx': 'botox',
-  'preenchimento': 'preenchedor de ácido hialurônico'
+  // Bioestimulador Diamond
+  'bioestimulador': 'bioestimulador diamond',
+  'bio estimulador': 'bioestimulador diamond',
+  'bioestimuladores': 'bioestimulador diamond',
+  'estimulador de colágeno': 'bioestimulador diamond',
+  'estimulador de colageno': 'bioestimulador diamond',
+  'diamond': 'bioestimulador diamond',
+  'dimond': 'bioestimulador diamond',
+  'diamont': 'bioestimulador diamond',
+  // Ultraformer MPT
+  'ultrafomer': 'ultraformer mpt',
+  'ultraformer': 'ultraformer mpt',
+  'mpt': 'ultraformer mpt',
+  'ultra mpt': 'ultraformer mpt',
+  'ultrassom microfocado': 'ultraformer mpt',
+  // Preenchedor
+  'preenchimento': 'preenchedor de ácido hialurônico',
+  'preenchedor': 'preenchedor de ácido hialurônico',
+  'ácido hialurônico': 'preenchedor de ácido hialurônico',
+  'acido hialuronico': 'preenchedor de ácido hialurônico',
+  // Lavieen
+  'lavien': 'laser lavieen',
+  'lavieen': 'laser lavieen',
+  'bb laser': 'laser lavieen'
 };
 
 function normalizarProcedimento(str) {
   let s = normalizar(str);
-  if (SINONIMOS[s]) s = SINONIMOS[s];
+  // Busca sinônimo por palavra ou expressão
+  for (const [k, v] of Object.entries(SINONIMOS)) {
+    if (s.includes(k)) return v;
+  }
   return s;
 }
 
@@ -272,17 +301,18 @@ export default async function handler(req, res) {
       // ===== CONTEXTO DE CONTINUIDADE =====
       let procedimentoContexto = null;
       const perguntaNormLower = normalizar(pergunta).toLowerCase();
-      // Se a pergunta menciona diretamente um procedimento, ele é o contexto
-      if (perguntaNormLower.includes('diamond') || perguntaNormLower.includes('dimond') || perguntaNormLower.includes('diamont') || perguntaNormLower.includes('bioestimulador')) {
-        procedimentoContexto = 'Bioestimulador Diamond';
-      } else if (perguntaNormLower.includes('botox')) {
+      // Reconhecimento de sinônimos e erros comuns
+      const procDetectado = normalizarProcedimento(perguntaNormLower);
+      if (procDetectado === 'botox') {
         procedimentoContexto = 'Botox';
-      } else if (perguntaNormLower.includes('ultraformer')) {
+      } else if (procDetectado === 'bioestimulador diamond') {
+        procedimentoContexto = 'Bioestimulador Diamond';
+      } else if (procDetectado === 'ultraformer mpt') {
         procedimentoContexto = 'Ultraformer MPT';
-      } else if (perguntaNormLower.includes('lavieen')) {
-        procedimentoContexto = 'Laser Lavieen';
-      } else if (perguntaNormLower.includes('preenchedor')) {
+      } else if (procDetectado === 'preenchedor de ácido hialurônico') {
         procedimentoContexto = 'Preenchedor de Ácido Hialurônico';
+      } else if (procDetectado === 'laser lavieen') {
+        procedimentoContexto = 'Laser Lavieen';
       } else if (perguntaNormLower.includes('scizer')) {
         procedimentoContexto = 'Scizer';
       } else if (perguntaNormLower.includes('endymed')) {
