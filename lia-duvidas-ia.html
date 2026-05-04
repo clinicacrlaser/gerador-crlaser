@@ -10,17 +10,18 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      overflow: hidden;
     }
     body {
       background: #10131a;
       color: #eafaff;
       font-family: 'Inter', Arial, sans-serif;
-      min-height: 100vh;
       height: 100vh;
       width: 100vw;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       justify-content: flex-start;
       overflow: hidden;
     }
@@ -42,14 +43,14 @@
       margin: 0 0 40px 0;
       display: flex;
       flex-direction: column;
-      height: 80vh;
+      height: 100vh;
+      max-height: 100vh;
       min-height: 420px;
-      max-height: 96vh;
       position: relative;
       overflow: hidden;
     }
     .lia-messages {
-      flex: 1 1 auto;
+      flex: 1 1 0%;
       padding: 18px 16px 12px 16px;
       overflow-y: auto;
       display: flex;
@@ -82,12 +83,10 @@
     }
     .lia-input-row {
       display: flex;
+      flex-shrink: 0;
       padding: 12px 12px 12px 12px;
       background: #151a23;
       border-top: 1px solid #1e5faf33;
-      position: sticky;
-      bottom: 0;
-      left: 0;
       z-index: 2;
     }
     .lia-input-row input {
