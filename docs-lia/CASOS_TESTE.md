@@ -44,6 +44,28 @@
   - Resultado esperado: explicar de forma simples que a Lia direciona esse tipo de dúvida para Ultraformer MPT.
   - Status: Pendente
 
+## Testes de Botox
+
+- Pergunta: quanto tempo dura o botox?
+  - Resultado esperado: explicar que a duração varia, com referência geral de 3 a 4 meses e sem prometer resultado exato.
+  - Status: Pendente
+
+- Pergunta: botox tira ruga profunda?
+  - Resultado esperado: responder que o Botox ajuda principalmente em rugas de movimento e não substitui avaliação de casos mais profundos.
+  - Status: Pendente
+
+- Pergunta: botox serve para flacidez?
+  - Resultado esperado: explicar que Botox não é o principal tratamento para flacidez e direcionar para tecnologias adequadas quando fizer sentido.
+  - Status: Pendente
+
+- Pergunta: tem botox para suor?
+  - Resultado esperado: responder que o Botox axilar pode ser usado para reduzir suor excessivo de forma temporária, conforme indicação.
+  - Status: Pendente
+
+- Pergunta: quando começa a fazer efeito?
+  - Resultado esperado: explicar que o efeito costuma aparecer de forma progressiva e que a avaliação costuma ocorrer em torno de 15 dias.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?

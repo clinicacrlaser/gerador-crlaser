@@ -5,7 +5,7 @@
 - [x] Criar base organizada por procedimento.
 - [ ] Criar casos de teste obrigatórios.
 - [x] Melhorar respostas sobre Ultraformer MPT.
-- [ ] Melhorar respostas sobre Botox.
+- [x] Melhorar respostas sobre Botox.
 - [ ] Melhorar respostas sobre Bioestimulador Diamond.
 - [ ] Garantir que a Lia não invente procedimentos.
 - [ ] Garantir que a Lia não diga que a CR Laser® faz procedimentos que não oferece.
