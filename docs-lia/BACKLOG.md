@@ -2,9 +2,9 @@
 
 ## Prioridade Alta
 
-- [ ] Criar base organizada por procedimento.
+- [x] Criar base organizada por procedimento.
 - [ ] Criar casos de teste obrigatórios.
-- [ ] Melhorar respostas sobre Ultraformer MPT.
+- [x] Melhorar respostas sobre Ultraformer MPT.
 - [ ] Melhorar respostas sobre Botox.
 - [ ] Melhorar respostas sobre Bioestimulador Diamond.
 - [ ] Garantir que a Lia não invente procedimentos.

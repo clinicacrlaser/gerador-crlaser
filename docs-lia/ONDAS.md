@@ -12,6 +12,8 @@ Objetivo: criar documentação central do projeto Lia dentro de /docs-lia.
 
 Objetivo: separar conhecimento da Lia por procedimento.
 
+Primeiro arquivo criado: docs-lia/base-procedimentos/ultraformer-mpt.md.
+
 ## Onda 3 — Testes obrigatórios
 
 Objetivo: criar rotina de testes antes de promover mudanças.
