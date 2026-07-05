@@ -26,6 +26,14 @@
   - Alternativas descartadas: Manter as regras do Botox misturadas apenas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas da Lia sobre Botox.
 
+## Nova decisão
+
+- D-008 — Base do Bioestimulador Diamond
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Bioestimulador Diamond dentro da base por procedimento da Lia.
+  - Por quê: O Diamond é um procedimento estratégico da CR Laser® e precisa responder corretamente dúvidas sobre colágeno, flacidez, naturalidade e comparação com Sculptra.
+  - Alternativas descartadas: Manter Diamond e Sculptra apenas como regras soltas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas sobre bioestimulador e menor risco de a Lia dizer que a CR Laser® oferece Sculptra.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

@@ -66,6 +66,32 @@
   - Resultado esperado: explicar que o efeito costuma aparecer de forma progressiva e que a avaliação costuma ocorrer em torno de 15 dias.
   - Status: Pendente
 
+## Testes de Bioestimulador Diamond
+
+- Pergunta: tem bioestimulador?
+  - Resultado esperado: responder que a CR Laser® trabalha com Bioestimulador Diamond, explicando de forma curta que estimula colágeno e melhora firmeza e qualidade da pele.
+  - Status: Pendente
+
+- Pergunta: o que é Diamond?
+  - Resultado esperado: explicar que o Diamond é um bioestimulador de colágeno, cujo efeito é progressivo e busca naturalidade.
+  - Status: Pendente
+
+- Pergunta: bioestimulador dá volume?
+  - Resultado esperado: esclarecer que o foco do bioestimulador é estimular colágeno e melhorar firmeza, não ser preenchimento de volume.
+  - Status: Pendente
+
+- Pergunta: tem Sculptra?
+  - Resultado esperado: responder que a CR Laser® trabalha com Bioestimulador Diamond e não oferece Sculptra.
+  - Status: Pendente
+
+- Pergunta: bioestimulador serve para flacidez?
+  - Resultado esperado: explicar que o Bioestimulador Diamond pode ser indicado para melhorar firmeza e flacidez de forma progressiva.
+  - Status: Pendente
+
+- Pergunta: pode combinar bioestimulador com Ultraformer?
+  - Resultado esperado: responder que em muitos casos pode combinar Diamond com Ultraformer MPT para sinergia, conforme indicação.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?
