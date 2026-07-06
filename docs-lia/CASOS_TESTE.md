@@ -190,6 +190,40 @@
   - Resultado esperado: responder que o abdome é uma das regiões em que o Scizer pode ser indicado quando a queixa principal é gordura localizada.
   - Status: Pendente
 
+## Testes de Laser Lavieen
+
+- Pergunta: tem Lavieen?
+  - Resultado esperado: responder que a CR Laser® trabalha com Laser Lavieen, usado para melhorar qualidade da pele, textura, viço, poros e manchas superficiais, conforme a indicação de cada caso.
+  - Status: Pendente
+
+- Pergunta: Lavieen serve para manchas?
+  - Resultado esperado: responder que o Lavieen pode ser indicado para melhorar manchas superficiais e a qualidade da pele, conforme o caso.
+  - Status: Pendente
+
+- Pergunta: Lavieen serve para melasma?
+  - Resultado esperado: explicar que o Lavieen pode fazer parte de estratégias para melhorar a qualidade da pele e algumas manchas, mas melasma precisa de cuidado e não deve ter promessa de cura ou clareamento definitivo.
+  - Status: Pendente
+
+- Pergunta: Lavieen descama?
+  - Resultado esperado: explicar que pode descamar dependendo do protocolo e da resposta da pele, e que a recuperação varia conforme a intensidade.
+  - Status: Pendente
+
+- Pergunta: Lavieen é igual CO2?
+  - Resultado esperado: explicar que o CO2 é mais agressivo e com recuperação maior, enquanto o Lavieen costuma ter recuperação mais leve.
+  - Status: Pendente
+
+- Pergunta: Lavieen serve para olheiras?
+  - Resultado esperado: responder que o Lavieen pode ser indicado para olheiras em alguns casos, dependendo do tipo de olheira e da indicação.
+  - Status: Pendente
+
+- Pergunta: Lavieen serve para poros?
+  - Resultado esperado: explicar que o Lavieen pode ajudar na melhora da textura da pele, poros e viço, conforme o caso.
+  - Status: Pendente
+
+- Pergunta: Lavieen pode fazer nas mãos?
+  - Resultado esperado: responder que pode ser indicado para mãos em alguns casos, principalmente para melhora da qualidade da pele e manchas superficiais.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?
