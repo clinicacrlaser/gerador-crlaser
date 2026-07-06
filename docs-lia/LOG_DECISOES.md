@@ -115,6 +115,15 @@
   - Por quê: A base foi organizada, mas ainda não deve ser conectada ao código sem planejamento, testes e estratégia de reversão.
   - Alternativas descartadas: Alterar diretamente a API da Lia sem plano técnico.
   - Impacto esperado: Reduzir risco de quebrar a Lia funcionando e orientar o Codex nas próximas etapas.
+
+## Nova decisão
+
+- D-018 — Mapa do Código Atual da Lia
+  - Data: 06/07/2026
+  - Decisão: Criar um mapa do código atual antes de alterar a API ou conectar a nova base de conhecimento.
+  - Por quê: Antes de mexer no código da Lia, é necessário saber exatamente onde estão prompt, sinônimos, regras, filtros e arquivos críticos.
+  - Alternativas descartadas: Alterar diretamente a API sem mapear o código atual.
+  - Impacto esperado: Reduzir risco de quebrar a Lia funcionando e orientar mudanças pequenas e reversíveis.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

@@ -27,6 +27,11 @@
 - [x] Garantir que a Lia não invente procedimentos.
 - [x] Garantir que a Lia não diga que a CR Laser® faz procedimentos que não oferece.
 - [x] Criar plano de integração da base ao código.
+- [x] Mapear código atual da Lia.
+- [ ] Identificar onde está o prompt principal.
+- [ ] Identificar onde estão sinônimos e regras.
+- [ ] Identificar filtros de segurança.
+- [ ] Planejar primeira alteração pequena no código.
 - [ ] Criar função de identificação de procedimento.
 - [ ] Criar carregamento de base por procedimento.
 - [ ] Conectar base ao prompt da Lia em etapa futura.
