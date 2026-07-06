@@ -52,6 +52,15 @@
   - Por quê: Endymed precisa ser diferenciado corretamente de Ultraformer MPT e Scizer, principalmente porque sua indicação principal é flacidez sem gordura importante.
   - Alternativas descartadas: Manter as regras do Endymed misturadas apenas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas sobre flacidez, firmeza da pele e diferença entre tecnologias.
+
+## Nova decisão
+
+- D-011 — Base do Scizer
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Scizer dentro da base por procedimento da Lia.
+  - Por quê: Scizer precisa ser diferenciado corretamente de Endymed e Ultraformer MPT, principalmente porque sua indicação principal é gordura localizada.
+  - Alternativas descartadas: Manter as regras do Scizer misturadas apenas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas sobre gordura localizada e menor risco de a Lia confundir Scizer com tecnologias de flacidez.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

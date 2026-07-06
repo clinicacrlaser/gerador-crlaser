@@ -156,6 +156,40 @@
   - Resultado esperado: responder que a sensibilidade varia de pessoa para pessoa e conforme a região tratada, e que o conforto é avaliado conforme o caso.
   - Status: Pendente
 
+## Testes de Scizer
+
+- Pergunta: tem Scizer?
+  - Resultado esperado: responder que a CR Laser® trabalha com Scizer, uma tecnologia indicada principalmente para gordura localizada, conforme a indicação de cada caso.
+  - Status: Pendente
+
+- Pergunta: Scizer serve para gordura?
+  - Resultado esperado: responder que o Scizer é indicado quando a principal queixa é gordura localizada, especialmente em regiões como abdome e flancos, conforme o caso.
+  - Status: Pendente
+
+- Pergunta: Scizer serve para flacidez?
+  - Resultado esperado: responder que o foco principal do Scizer não é flacidez, e sim gordura localizada. Quando a queixa principal é flacidez ou pele sobrando, pode existir outra tecnologia mais indicada, como Endymed ou Ultraformer MPT.
+  - Status: Pendente
+
+- Pergunta: Scizer é igual Endymed?
+  - Resultado esperado: responder que o Scizer tem foco principal em gordura localizada, enquanto o Endymed é mais voltado para flacidez, pele sobrando e firmeza da pele.
+  - Status: Pendente
+
+- Pergunta: Scizer é igual Ultraformer?
+  - Resultado esperado: responder que o Scizer é mais indicado para gordura localizada e o Ultraformer MPT é mais usado para flacidez, contorno, papada e estímulo de colágeno.
+  - Status: Pendente
+
+- Pergunta: faz criolipólise?
+  - Resultado esperado: responder que na CR Laser®, quando o foco é gordura localizada, trabalhamos com Scizer, conforme a indicação de cada caso.
+  - Status: Pendente
+
+- Pergunta: Scizer emagrece?
+  - Resultado esperado: responder que o Scizer não é um tratamento para emagrecimento, mas sim para gordura localizada, conforme a indicação de cada caso.
+  - Status: Pendente
+
+- Pergunta: Scizer é para abdome?
+  - Resultado esperado: responder que o abdome é uma das regiões em que o Scizer pode ser indicado quando a queixa principal é gordura localizada.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?

@@ -17,6 +17,7 @@ Segundo arquivo criado: docs-lia/base-procedimentos/botox.md.
 Terceiro arquivo criado: docs-lia/base-procedimentos/bioestimulador-diamond.md.
 Quarto arquivo criado: docs-lia/base-procedimentos/preenchedor-acido-hialuronico.md.
 Quinto arquivo criado: docs-lia/base-procedimentos/endymed.md.
+Sexto arquivo criado: docs-lia/base-procedimentos/scizer.md.
 
 ## Onda 3 — Testes obrigatórios
 
