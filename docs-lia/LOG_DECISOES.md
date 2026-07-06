@@ -88,6 +88,15 @@
   - Por quê: Harmony pode gerar dúvidas sobre laser, manchas, rejuvenescimento, comparação com Lavieen e disponibilidade por unidade.
   - Alternativas descartadas: Manter as regras do Harmony misturadas apenas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas e menor risco de a Lia prometer disponibilidade ou resultado sem confirmação.
+
+## Nova decisão
+
+- D-015 — Base da Depilação a Laser
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Depilação a Laser dentro da base por procedimento da Lia.
+  - Por quê: A Depilação a Laser precisa de cuidado com disponibilidade por unidade, número de sessões, regiões tratadas e expectativa realista de resultado.
+  - Alternativas descartadas: Manter as regras de Depilação a Laser misturadas apenas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas e menor risco de a Lia prometer disponibilidade, resultado definitivo ou quantidade incorreta de sessões.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

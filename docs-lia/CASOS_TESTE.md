@@ -280,6 +280,36 @@
   - Resultado esperado: explicar que a disponibilidade pode variar por unidade e que, para confirmar, o ideal é falar com o atendimento da CR Laser®.
   - Status: Pendente
 
+## Testes de Depilação a Laser
+
+- Pergunta: tem depilação a laser?
+  - Resultado esperado: responder que a CR Laser® trabalha com Depilação a Laser, especialmente em Goiânia, em pacotes de 10 sessões conforme a regra atual.
+  - Status: Pendente
+
+- Pergunta: depilação são quantas sessões?
+  - Resultado esperado: explicar que, pela regra atual, os pacotes em Goiânia são de 10 sessões e que o resultado é progressivo.
+  - Status: Pendente
+
+- Pergunta: depilação acaba com todos os pelos?
+  - Resultado esperado: explicar que a Depilação a Laser ajuda na redução progressiva dos pelos, mas não deve prometer eliminação definitiva de todos os pelos.
+  - Status: Pendente
+
+- Pergunta: faz depilação de axilas?
+  - Resultado esperado: responder que axilas pode fazer parte dos pacotes, conforme disponibilidade e regra da unidade.
+  - Status: Pendente
+
+- Pergunta: faz depilação de virilha?
+  - Resultado esperado: responder que virilha completa pode fazer parte dos pacotes, conforme disponibilidade e regra da unidade.
+  - Status: Pendente
+
+- Pergunta: tem depilação em todas as unidades?
+  - Resultado esperado: explicar que a disponibilidade pode variar por unidade e que, pela regra atual, a Depilação a Laser é trabalhada especialmente em Goiânia.
+  - Status: Pendente
+
+- Pergunta: depilação a laser dói?
+  - Resultado esperado: explicar que a sensibilidade varia de pessoa para pessoa e conforme a região tratada.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?
