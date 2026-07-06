@@ -106,6 +106,15 @@
   - Por quê: A Lia precisa evitar inventar procedimentos, oferecer opções que a CR Laser® não trabalha ou recomendar condutas que a clínica não considera adequadas.
   - Alternativas descartadas: Manter essas regras espalhadas apenas no prompt principal da API.
   - Impacto esperado: Mais segurança nas respostas e menor risco de erro em perguntas sobre Sculptra, PMMA, rinomodelação, fios, criolipólise, Morpheus8, CO2 e preenchimento de glabela.
+
+## Nova decisão
+
+- D-017 — Plano de Integração da Base
+  - Data: 06/07/2026
+  - Decisão: Criar um plano técnico antes de integrar a base de conhecimento ao código da Lia.
+  - Por quê: A base foi organizada, mas ainda não deve ser conectada ao código sem planejamento, testes e estratégia de reversão.
+  - Alternativas descartadas: Alterar diretamente a API da Lia sem plano técnico.
+  - Impacto esperado: Reduzir risco de quebrar a Lia funcionando e orientar o Codex nas próximas etapas.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

@@ -26,6 +26,10 @@
 - [x] Melhorar respostas sobre Depilação a Laser.
 - [x] Garantir que a Lia não invente procedimentos.
 - [x] Garantir que a Lia não diga que a CR Laser® faz procedimentos que não oferece.
+- [x] Criar plano de integração da base ao código.
+- [ ] Criar função de identificação de procedimento.
+- [ ] Criar carregamento de base por procedimento.
+- [ ] Conectar base ao prompt da Lia em etapa futura.
 - [ ] Criar relatório de perguntas que a Lia não soube responder.
 
 ## Prioridade Futura

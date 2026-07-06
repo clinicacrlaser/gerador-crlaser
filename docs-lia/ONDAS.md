@@ -23,6 +23,7 @@ Oitavo arquivo criado: docs-lia/base-procedimentos/microagulhamento-robotico.md.
 Nono arquivo criado: docs-lia/base-procedimentos/laser-harmony.md.
 Décimo arquivo criado: docs-lia/base-procedimentos/depilacao-a-laser.md.
 Décimo primeiro arquivo criado: docs-lia/base-procedimentos/proibidos-e-substitutos.md.
+Plano técnico de integração criado antes de mexer no código: docs-lia/PLANO_INTEGRACAO_BASE.md.
 
 ## Onda 3 — Testes obrigatórios
 
