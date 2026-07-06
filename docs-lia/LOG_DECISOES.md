@@ -70,6 +70,15 @@
   - Por quê: Lavieen é uma das principais tecnologias da CR Laser® para qualidade da pele, textura, viço, manchas superficiais, olheiras e mãos.
   - Alternativas descartadas: Manter as regras do Lavieen misturadas apenas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas sobre laser, recuperação, manchas, textura da pele e comparação com CO2 ou Pixel.
+
+## Nova decisão
+
+- D-013 — Base do Microagulhamento Robótico
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Microagulhamento Robótico dentro da base por procedimento da Lia.
+  - Por quê: Microagulhamento Robótico precisa responder corretamente dúvidas sobre cicatriz de acne, poros, textura da pele e comparação com Morpheus8.
+  - Alternativas descartadas: Manter as regras do Microagulhamento Robótico misturadas apenas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas e menor risco de a Lia dizer que a CR Laser® oferece Morpheus8.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

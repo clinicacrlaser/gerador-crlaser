@@ -19,6 +19,7 @@ Quarto arquivo criado: docs-lia/base-procedimentos/preenchedor-acido-hialuronico
 Quinto arquivo criado: docs-lia/base-procedimentos/endymed.md.
 Sexto arquivo criado: docs-lia/base-procedimentos/scizer.md.
 Sétimo arquivo criado: docs-lia/base-procedimentos/laser-lavieen.md.
+Oitavo arquivo criado: docs-lia/base-procedimentos/microagulhamento-robotico.md.
 
 ## Onda 3 — Testes obrigatórios
 

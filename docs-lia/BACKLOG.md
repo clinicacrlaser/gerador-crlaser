@@ -11,6 +11,7 @@
 - [x] Melhorar respostas sobre Endymed.
 - [x] Melhorar respostas sobre Scizer.
 - [x] Melhorar respostas sobre Lavieen.
+- [x] Melhorar respostas sobre Microagulhamento Robótico.
 - [ ] Garantir que a Lia não invente procedimentos.
 - [ ] Garantir que a Lia não diga que a CR Laser® faz procedimentos que não oferece.
 

@@ -224,6 +224,36 @@
   - Resultado esperado: responder que pode ser indicado para mãos em alguns casos, principalmente para melhora da qualidade da pele e manchas superficiais.
   - Status: Pendente
 
+## Testes de Microagulhamento Robótico
+
+- Pergunta: tem microagulhamento?
+  - Resultado esperado: responder que a CR Laser® trabalha com Microagulhamento Robótico, indicado para melhorar textura da pele, poros e cicatrizes de acne, conforme o caso.
+  - Status: Pendente
+
+- Pergunta: microagulhamento serve para cicatriz de acne?
+  - Resultado esperado: responder que o Microagulhamento Robótico pode ser indicado para melhorar cicatrizes de acne, textura irregular e qualidade da pele.
+  - Status: Pendente
+
+- Pergunta: microagulhamento fecha poros?
+  - Resultado esperado: explicar que o Microagulhamento Robótico pode ajudar na melhora da textura da pele e dos poros, com resultado progressivo.
+  - Status: Pendente
+
+- Pergunta: tem Morpheus8?
+  - Resultado esperado: responder que a CR Laser® trabalha com Microagulhamento Robótico e não oferece Morpheus8.
+  - Status: Pendente
+
+- Pergunta: Microagulhamento Robótico é igual Lavieen?
+  - Resultado esperado: explicar que o Microagulhamento Robótico é mais voltado para cicatriz de acne, textura e poros, enquanto o Lavieen é mais voltado para qualidade global da pele e manchas superficiais.
+  - Status: Pendente
+
+- Pergunta: quantas sessões de microagulhamento?
+  - Resultado esperado: responder que o procedimento costuma ser trabalhado em pacote de 3 sessões, conforme indicação e oferta.
+  - Status: Pendente
+
+- Pergunta: microagulhamento descama?
+  - Resultado esperado: explicar que pode haver vermelhidão, sensibilidade e descamação leve, variando conforme a pele e o protocolo.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?
