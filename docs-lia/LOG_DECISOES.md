@@ -34,6 +34,15 @@
   - Por quê: O Diamond é um procedimento estratégico da CR Laser® e precisa responder corretamente dúvidas sobre colágeno, flacidez, naturalidade e comparação com Sculptra.
   - Alternativas descartadas: Manter Diamond e Sculptra apenas como regras soltas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas sobre bioestimulador e menor risco de a Lia dizer que a CR Laser® oferece Sculptra.
+
+## Nova decisão
+
+- D-009 — Base do Preenchedor com Ácido Hialurônico
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Preenchedor com Ácido Hialurônico dentro da base por procedimento da Lia.
+  - Por quê: O Preenchedor é uma área muito consultada e exige respostas claras sobre naturalidade, duração, uso de ampola e diferenças para bioestimuladores.
+  - Alternativas descartadas: Manter o conteúdo de preenchedor apenas como regras soltas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas sobre preenchimento e menor risco de recomendações imprecisas.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.

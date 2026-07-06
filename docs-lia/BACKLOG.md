@@ -6,8 +6,8 @@
 - [ ] Criar casos de teste obrigatórios.
 - [x] Melhorar respostas sobre Ultraformer MPT.
 - [x] Melhorar respostas sobre Botox.
-- [ ] Melhorar respostas sobre Bioestimulador Diamond.
 - [x] Melhorar respostas sobre Bioestimulador Diamond.
+- [ ] Melhorar respostas sobre Preenchedor.
 - [ ] Garantir que a Lia não invente procedimentos.
 - [ ] Garantir que a Lia não diga que a CR Laser® faz procedimentos que não oferece.
 

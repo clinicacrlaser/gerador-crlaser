@@ -15,6 +15,7 @@ Objetivo: separar conhecimento da Lia por procedimento.
 Primeiro arquivo criado: docs-lia/base-procedimentos/ultraformer-mpt.md.
 Segundo arquivo criado: docs-lia/base-procedimentos/botox.md.
 Terceiro arquivo criado: docs-lia/base-procedimentos/bioestimulador-diamond.md.
+Quarto arquivo criado: docs-lia/base-procedimentos/preenchedor-acido-hialuronico.md.
 
 ## Onda 3 — Testes obrigatórios
 

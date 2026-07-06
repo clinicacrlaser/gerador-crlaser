@@ -92,6 +92,40 @@
   - Resultado esperado: responder que em muitos casos pode combinar Diamond com Ultraformer MPT para sinergia, conforme indicação.
   - Status: Pendente
 
+## Testes de Preenchedor com Ácido Hialurônico
+
+- Pergunta: tem preenchimento?
+  - Resultado esperado: responder que a CR Laser® trabalha com Preenchedor com ácido hialurônico, usado para harmonizar áreas como lábios, olheiras e contorno facial de forma natural.
+  - Status: Pendente
+
+- Pergunta: preenchimento fica natural?
+  - Resultado esperado: explicar que, quando bem indicado, o preenchimento busca naturalidade e não deve deixar o rosto artificial.
+  - Status: Pendente
+
+- Pergunta: faz preenchimento labial?
+  - Resultado esperado: responder que a CR Laser® faz preenchimento labial com ácido hialurônico, sempre buscando naturalidade e conforme indicação.
+  - Status: Pendente
+
+- Pergunta: quanto dura o preenchimento?
+  - Resultado esperado: explicar que a duração varia; lábios podem durar menos de 6 meses, olheiras podem durar mais de 1 ano e bigode chinês em torno de 1 ano.
+  - Status: Pendente
+
+- Pergunta: uma ampola dá para qual região?
+  - Resultado esperado: esclarecer que em geral uma ampola costuma ser usada para uma região, mas depende do caso e da indicação.
+  - Status: Pendente
+
+- Pergunta: preenchimento é igual bioestimulador?
+  - Resultado esperado: explicar que o preenchimento busca volume e contorno imediato, enquanto o bioestimulador estimula colágeno para resultados progressivos.
+  - Status: Pendente
+
+- Pergunta: faz rinomodelação?
+  - Resultado esperado: responder que a CR Laser® não recomenda rinomodelação com preenchimento e que a indicação é avaliada com cuidado.
+  - Status: Pendente
+
+- Pergunta: faz preenchimento de glabela?
+  - Resultado esperado: responder que a CR Laser® não recomenda preenchimento de glabela, pois essa área exige atenção especial.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?
