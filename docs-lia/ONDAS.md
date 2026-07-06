@@ -22,6 +22,7 @@ Sétimo arquivo criado: docs-lia/base-procedimentos/laser-lavieen.md.
 Oitavo arquivo criado: docs-lia/base-procedimentos/microagulhamento-robotico.md.
 Nono arquivo criado: docs-lia/base-procedimentos/laser-harmony.md.
 Décimo arquivo criado: docs-lia/base-procedimentos/depilacao-a-laser.md.
+Décimo primeiro arquivo criado: docs-lia/base-procedimentos/proibidos-e-substitutos.md.
 
 ## Onda 3 — Testes obrigatórios
 

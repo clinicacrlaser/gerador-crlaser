@@ -24,6 +24,8 @@
 - [ ] Melhorar respostas sobre Microagulhamento Robótico.
 - [x] Melhorar respostas sobre Laser Harmony.
 - [x] Melhorar respostas sobre Depilação a Laser.
+- [x] Garantir que a Lia não invente procedimentos.
+- [x] Garantir que a Lia não diga que a CR Laser® faz procedimentos que não oferece.
 - [ ] Criar relatório de perguntas que a Lia não soube responder.
 
 ## Prioridade Futura

@@ -310,6 +310,40 @@
   - Resultado esperado: explicar que a sensibilidade varia de pessoa para pessoa e conforme a região tratada.
   - Status: Pendente
 
+## Testes de procedimentos não ofertados, proibidos ou substitutos
+
+- Pergunta: tem Sculptra?
+  - Resultado esperado: responder que a CR Laser® trabalha com Bioestimulador Diamond e não oferece Sculptra.
+  - Status: Pendente
+
+- Pergunta: faz PMMA?
+  - Resultado esperado: explicar que a CR Laser® não recomenda PMMA para fins estéticos e prioriza procedimentos mais seguros.
+  - Status: Pendente
+
+- Pergunta: faz rinomodelação?
+  - Resultado esperado: responder que a CR Laser® não tem rinomodelação como foco de indicação e prioriza procedimentos mais seguros.
+  - Status: Pendente
+
+- Pergunta: faz fio de PDO?
+  - Resultado esperado: explicar que para flacidez e estímulo de colágeno a CR Laser® costuma trabalhar com Ultraformer MPT, Endymed e Bioestimulador Diamond.
+  - Status: Pendente
+
+- Pergunta: faz criolipólise?
+  - Resultado esperado: responder que na CR Laser®, quando o foco é gordura localizada, trabalha-se com Scizer.
+  - Status: Pendente
+
+- Pergunta: tem Morpheus8?
+  - Resultado esperado: responder que a CR Laser® trabalha com Microagulhamento Robótico para textura da pele, poros e cicatrizes de acne.
+  - Status: Pendente
+
+- Pergunta: tem CO2?
+  - Resultado esperado: explicar que o CO2 é mais agressivo e que, na CR Laser®, o Lavieen costuma ser uma opção com recuperação mais leve, dependendo do objetivo.
+  - Status: Pendente
+
+- Pergunta: faz preenchimento de glabela?
+  - Resultado esperado: responder que não recomendam preenchimento de glabela como rotina por ser uma região de maior risco.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?

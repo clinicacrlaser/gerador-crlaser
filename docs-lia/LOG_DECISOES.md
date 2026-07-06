@@ -97,6 +97,15 @@
   - Por quê: A Depilação a Laser precisa de cuidado com disponibilidade por unidade, número de sessões, regiões tratadas e expectativa realista de resultado.
   - Alternativas descartadas: Manter as regras de Depilação a Laser misturadas apenas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas e menor risco de a Lia prometer disponibilidade, resultado definitivo ou quantidade incorreta de sessões.
+
+## Nova decisão
+
+- D-016 — Base de procedimentos não ofertados e substitutos
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para procedimentos não ofertados, proibidos ou que devem ser redirecionados para alternativas da CR Laser®.
+  - Por quê: A Lia precisa evitar inventar procedimentos, oferecer opções que a CR Laser® não trabalha ou recomendar condutas que a clínica não considera adequadas.
+  - Alternativas descartadas: Manter essas regras espalhadas apenas no prompt principal da API.
+  - Impacto esperado: Mais segurança nas respostas e menor risco de erro em perguntas sobre Sculptra, PMMA, rinomodelação, fios, criolipólise, Morpheus8, CO2 e preenchimento de glabela.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.
