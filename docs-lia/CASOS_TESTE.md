@@ -254,6 +254,32 @@
   - Resultado esperado: explicar que pode haver vermelhidão, sensibilidade e descamação leve, variando conforme a pele e o protocolo.
   - Status: Pendente
 
+## Testes de Laser Harmony
+
+- Pergunta: tem Harmony?
+  - Resultado esperado: responder que a CR Laser® trabalha com tecnologias de laser, incluindo Harmony conforme disponibilidade da unidade.
+  - Status: Pendente
+
+- Pergunta: Harmony serve para manchas?
+  - Resultado esperado: explicar que o Laser Harmony pode ser indicado para algumas queixas de manchas, conforme o tipo de mancha, protocolo e disponibilidade da unidade.
+  - Status: Pendente
+
+- Pergunta: Harmony é igual Lavieen?
+  - Resultado esperado: explicar que não são iguais, destacando que o Lavieen é mais associado à qualidade global da pele e o Harmony é uma plataforma de laser com indicações que dependem do protocolo e da tecnologia disponível.
+  - Status: Pendente
+
+- Pergunta: Harmony descama?
+  - Resultado esperado: explicar que pode haver descamação, vermelhidão ou sensibilidade, dependendo do protocolo, da intensidade e da resposta da pele.
+  - Status: Pendente
+
+- Pergunta: Harmony serve para rejuvenescimento?
+  - Resultado esperado: responder que pode ser indicado para algumas estratégias de rejuvenescimento da pele, conforme indicação e disponibilidade da unidade.
+  - Status: Pendente
+
+- Pergunta: Harmony tem em todas as unidades?
+  - Resultado esperado: explicar que a disponibilidade pode variar por unidade e que, para confirmar, o ideal é falar com o atendimento da CR Laser®.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?

@@ -22,6 +22,7 @@
 - [ ] Melhorar respostas sobre Endymed.
 - [ ] Melhorar respostas sobre Scizer.
 - [ ] Melhorar respostas sobre Microagulhamento Robótico.
+- [x] Melhorar respostas sobre Laser Harmony.
 - [ ] Criar relatório de perguntas que a Lia não soube responder.
 
 ## Prioridade Futura

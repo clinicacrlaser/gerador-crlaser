@@ -20,6 +20,7 @@ Quinto arquivo criado: docs-lia/base-procedimentos/endymed.md.
 Sexto arquivo criado: docs-lia/base-procedimentos/scizer.md.
 Sétimo arquivo criado: docs-lia/base-procedimentos/laser-lavieen.md.
 Oitavo arquivo criado: docs-lia/base-procedimentos/microagulhamento-robotico.md.
+Nono arquivo criado: docs-lia/base-procedimentos/laser-harmony.md.
 
 ## Onda 3 — Testes obrigatórios
 

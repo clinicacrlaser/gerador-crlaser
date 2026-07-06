@@ -79,6 +79,15 @@
   - Por quê: Microagulhamento Robótico precisa responder corretamente dúvidas sobre cicatriz de acne, poros, textura da pele e comparação com Morpheus8.
   - Alternativas descartadas: Manter as regras do Microagulhamento Robótico misturadas apenas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas e menor risco de a Lia dizer que a CR Laser® oferece Morpheus8.
+
+## Nova decisão
+
+- D-014 — Base do Laser Harmony
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Laser Harmony dentro da base por procedimento da Lia.
+  - Por quê: Harmony pode gerar dúvidas sobre laser, manchas, rejuvenescimento, comparação com Lavieen e disponibilidade por unidade.
+  - Alternativas descartadas: Manter as regras do Harmony misturadas apenas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas e menor risco de a Lia prometer disponibilidade ou resultado sem confirmação.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.
