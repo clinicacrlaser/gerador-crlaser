@@ -126,6 +126,36 @@
   - Resultado esperado: responder que a CR Laser® não recomenda preenchimento de glabela, pois essa área exige atenção especial.
   - Status: Pendente
 
+## Testes de Endymed
+
+- Pergunta: tem Endymed?
+  - Resultado esperado: responder que a CR Laser® trabalha com Endymed, uma tecnologia indicada principalmente para flacidez, firmeza da pele e estímulo de colágeno.
+  - Status: Pendente
+
+- Pergunta: Endymed serve para flacidez?
+  - Resultado esperado: responder que o Endymed é usado para melhorar flacidez e firmeza da pele, especialmente quando o foco é pele sobrando e não gordura localizada.
+  - Status: Pendente
+
+- Pergunta: Endymed serve para gordura?
+  - Resultado esperado: explicar que o foco principal do Endymed não é gordura localizada, e que quando a queixa principal for gordura localizada outra tecnologia pode ser mais indicada.
+  - Status: Pendente
+
+- Pergunta: Endymed é para pálpebras?
+  - Resultado esperado: responder que existe ponteira do Endymed para pálpebras, conforme a indicação de cada caso.
+  - Status: Pendente
+
+- Pergunta: Endymed é igual Ultraformer?
+  - Resultado esperado: explicar que não são iguais; Endymed foca em flacidez e firmeza, enquanto Ultraformer MPT também atua em contorno e estímulo de colágeno.
+  - Status: Pendente
+
+- Pergunta: Endymed é igual Scizer?
+  - Resultado esperado: explicar que o Endymed foca em flacidez e firmeza da pele, enquanto o Scizer foca em gordura localizada.
+  - Status: Pendente
+
+- Pergunta: Endymed dói?
+  - Resultado esperado: responder que a sensibilidade varia de pessoa para pessoa e conforme a região tratada, e que o conforto é avaliado conforme o caso.
+  - Status: Pendente
+
 ## Testes de procedimentos proibidos ou substitutos
 
 - Pergunta: tem sculptra?

@@ -43,6 +43,15 @@
   - Por quê: O Preenchedor é uma área muito consultada e exige respostas claras sobre naturalidade, duração, uso de ampola e diferenças para bioestimuladores.
   - Alternativas descartadas: Manter o conteúdo de preenchedor apenas como regras soltas no prompt principal da API.
   - Impacto esperado: Mais consistência nas respostas sobre preenchimento e menor risco de recomendações imprecisas.
+
+## Nova decisão
+
+- D-010 — Base do Endymed
+  - Data: 05/07/2026
+  - Decisão: Criar uma base específica para Endymed dentro da base por procedimento da Lia.
+  - Por quê: Endymed precisa ser diferenciado corretamente de Ultraformer MPT e Scizer, principalmente porque sua indicação principal é flacidez sem gordura importante.
+  - Alternativas descartadas: Manter as regras do Endymed misturadas apenas no prompt principal da API.
+  - Impacto esperado: Mais consistência nas respostas sobre flacidez, firmeza da pele e diferença entre tecnologias.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.
