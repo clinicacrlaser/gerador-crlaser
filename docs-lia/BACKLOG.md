@@ -32,7 +32,7 @@
 - [ ] Identificar onde estão sinônimos e regras.
 - [ ] Identificar filtros de segurança.
 - [ ] Planejar primeira alteração pequena no código.
-- [ ] Criar função de identificação de procedimento.
+- [x] Criar função de identificação de procedimento.
 - [ ] Criar carregamento de base por procedimento.
 - [ ] Conectar base ao prompt da Lia em etapa futura.
 - [ ] Criar relatório de perguntas que a Lia não soube responder.

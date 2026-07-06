@@ -25,6 +25,7 @@ Décimo arquivo criado: docs-lia/base-procedimentos/depilacao-a-laser.md.
 Décimo primeiro arquivo criado: docs-lia/base-procedimentos/proibidos-e-substitutos.md.
 Plano técnico de integração criado antes de mexer no código: docs-lia/PLANO_INTEGRACAO_BASE.md.
 Mapa do código atual criado antes da integração da base: docs-lia/MAPA_CODIGO_ATUAL.md.
+Identificador de procedimentos criado como primeira peça de código, ainda sem conexão com a API principal: api/lia-identificador-procedimentos.js.
 
 ## Onda 3 — Testes obrigatórios
 

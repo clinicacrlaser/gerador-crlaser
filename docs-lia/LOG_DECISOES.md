@@ -124,6 +124,15 @@
   - Por quê: Antes de mexer no código da Lia, é necessário saber exatamente onde estão prompt, sinônimos, regras, filtros e arquivos críticos.
   - Alternativas descartadas: Alterar diretamente a API sem mapear o código atual.
   - Impacto esperado: Reduzir risco de quebrar a Lia funcionando e orientar mudanças pequenas e reversíveis.
+
+## Nova decisão
+
+- D-019 — Identificador de Procedimentos da Lia
+  - Data: 06/07/2026
+  - Decisão: Criar um arquivo auxiliar para identificar o procedimento relacionado à pergunta do paciente antes de conectar a base ao prompt da Lia.
+  - Por quê: A integração da base precisa começar por uma peça pequena, testável e sem alterar a API principal.
+  - Alternativas descartadas: Conectar diretamente todos os arquivos da base na API principal.
+  - Impacto esperado: Permitir testes seguros antes de mudar o comportamento da Lia em produção.
 ## Observações
 
 - Este log é a base para registrar novas decisões relevantes.
