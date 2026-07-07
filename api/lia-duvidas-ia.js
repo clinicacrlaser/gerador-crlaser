@@ -155,9 +155,9 @@ function isPerguntaDiamond(pergunta) {
 }
 // api/lia-duvidas-ia.js - API para Lia IA
 
-const fs = require('fs');
-const path = require('path');
-const { identificarProcedimentoLia } = require('./lia-identificador-procedimentos.js');
+import fs from 'fs';
+import path from 'path';
+import { identificarProcedimentoLia } from './lia-identificador-procedimentos.js';
 
 function carregarBaseConhecimentoLia(arquivoBase) {
   if (!arquivoBase || !String(arquivoBase).trim()) {

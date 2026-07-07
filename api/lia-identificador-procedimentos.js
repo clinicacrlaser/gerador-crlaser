@@ -124,7 +124,7 @@ function identificarProcedimentoLia(texto) {
   };
 }
 
-module.exports = {
+export {
   identificarProcedimentoLia,
   normalizarTexto
 };
