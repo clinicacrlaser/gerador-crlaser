@@ -155,7 +155,27 @@ function isPerguntaDiamond(pergunta) {
 }
 // api/lia-duvidas-ia.js - API para Lia IA
 
+const fs = require('fs');
+const path = require('path');
+const { identificarProcedimentoLia } = require('./lia-identificador-procedimentos.js');
 
+function carregarBaseConhecimentoLia(arquivoBase) {
+  if (!arquivoBase || !String(arquivoBase).trim()) {
+    return '';
+  }
+
+  const caminhoBase = String(arquivoBase).trim();
+  const caminhoAbsoluto = path.isAbsolute(caminhoBase)
+    ? caminhoBase
+    : path.resolve(process.cwd(), caminhoBase);
+
+  try {
+    return fs.readFileSync(caminhoAbsoluto, 'utf8');
+  } catch (erro) {
+    console.warn('[LIA-IA] Não foi possível carregar a base de conhecimento:', caminhoAbsoluto, erro.message);
+    return '';
+  }
+}
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/17KgtQRbHpt4Pwif1Of5s3ukWXSaetfXJvcH7H6PKQlQ/export?format=csv&gid=7168740';
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -279,14 +299,18 @@ function buscarLinhasRelevantes(pergunta, base) {
   return scored.slice(0, 10);
 }
 
-async function callOpenAI(pergunta, linhasRelevantes) {
+async function callOpenAI(pergunta, linhasRelevantes, identificacaoProcedimento = null, baseConhecimentoProcedimento = '') {
   // Monta base reduzida
   let baseTexto = linhasRelevantes.map((t, i) => {
     return `[${i+1}]\nCategoria: ${t.categoria}\nTítulo: ${t.titulo}\nMensagem: ${t.mensagem}\nLink: ${t.link}`;
   }).join("\n\n");
 
+  const baseConhecimentoSecao = baseConhecimentoProcedimento && String(baseConhecimentoProcedimento).trim()
+    ? `\n\nBASE DE CONHECIMENTO RELEVANTE DA CR LASER:\n${String(baseConhecimentoProcedimento).trim()}\n\nIDENTIFICAÇÃO AUTOMÁTICA:\nprocedimento: ${identificacaoProcedimento?.procedimento || 'não identificado'}\nconfianca: ${identificacaoProcedimento?.confianca || 'baixa'}\nmotivo: ${identificacaoProcedimento?.motivo || 'nenhum'}\n`
+    : '';
+
   // Prompt reforçado para correspondência semântica com TÍTULO
-  const prompt = `Você é a Lia - Assistente Virtual da CR Laser®.\nResponda sempre de forma humana, simpática, objetiva e útil, usando exclusivamente as informações da BASE DE CONHECIMENTO.\nNão invente informações.\nNão use conhecimento externo.\n\nREGRAS DA LIA:\n- A Lia é apenas uma assistente virtual para tirar dúvidas.\n- NÃO agenda procedimentos, NÃO promete agendamento, NÃO fecha venda, NÃO envia Pix, NÃO envia link de pagamento, NÃO informa valores.\n- NÃO deve dizer frases como: "posso ajudar a agendar", "posso fazer seu agendamento", "vou agendar para você", "posso finalizar sua compra", "envio Pix", "envio link de pagamento".\n\n1. SAUDAÇÕES:\nSe o usuário disser bom dia, boa tarde, boa noite, oi, olá ou tudo bem, responda de forma curta, simpática e contextual, variando as respostas. Exemplos:\n- "Bom dia 😊 Sou a Lia - Assistente Virtual da CR Laser®. Estou à disposição para te ajudar com dúvidas sobre os procedimentos."\n- "Boa tarde 😊 Sou a Lia - Assistente Virtual da CR Laser®. Se quiser, pode me mandar sua dúvida."\n- "Boa noite 😊 Sou a Lia - Assistente Virtual da CR Laser®. Estou à disposição para te ajudar."\n\n2. AGENDAMENTO:\nSe o usuário perguntar sobre agendar, marcar horário, consulta, atendimento, falar com alguém, unidade, endereço ou telefone, responda:\n"Para agendamento ou atendimento com a unidade, é só clicar no botão WhatsApp que fica na página 😊"\nSe quiser, também pode complementar: "Se quiser, também posso te explicar melhor sobre o procedimento antes."\nNunca diga que a Lia agenda ou promete horário.\n\n3. PREÇO / VALOR:\nSe o usuário perguntar sobre valor, preço, quanto custa, oferta, desconto, promoção, pagamento, pix, cartão ou comprar, responda:\n"Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou clique no botão WhatsApp da página."\n\n4. RESPOSTAS TÉCNICAS:\nSe houver base suficiente na planilha, responda normalmente, de forma humana, simpática, objetiva e útil. Não caia no fallback cedo demais.\nExemplo:\nPergunta: "quais os pontos do botox?"\nResposta: "Na CR Laser®, o Botox facial é feito no terço superior da face. De modo geral, os pontos mais comuns envolvem testa, glabela e região dos olhos, sempre de acordo com a avaliação profissional. Se quiser, posso te explicar melhor 😊"\nPergunta: "tem botox?"\nResposta: "Sim, temos Botox na CR Laser®. O Botox facial é feito no terço superior e a proposta é manter um resultado natural. Se quiser, posso te explicar melhor como funciona 😊"\n\n5. FALLBACK:\nSó use fallback quando realmente não houver conteúdo útil na base.\nMensagem de fallback:\n"Ainda não encontrei uma resposta segura para isso na minha base 😊 Se quiser, posso te orientar pelo botão WhatsApp da página."\n\n6. TOM:\nSeja sempre humana, simpática, objetiva, sem enrolar e sem empurrar para WhatsApp sem necessidade.\n\n7. NOME:\nNas apresentações, use sempre: "Lia - Assistente Virtual"\n\nIMPORTANTE:\n- Se a pergunta do usuário for parecida com algum TÍTULO da base, use essa linha para responder, mesmo que as palavras não sejam exatamente iguais.\n- Dê prioridade alta para correspondência semântica com o TÍTULO da base.\n- Exemplo: Se a pergunta mencionar 'botox' e 'pontos' ou 'aplicação', use a linha sobre pontos de aplicação do Botox.\n- Não invente fora da base.\n\nBASE DE CONHECIMENTO:\n${baseTexto}\n\nPergunta do usuário: ${pergunta}\n\nResposta:`;
+  const prompt = `Você é a Lia - Assistente Virtual da CR Laser®.\nResponda sempre de forma humana, simpática, objetiva e útil, usando exclusivamente as informações da BASE DE CONHECIMENTO.\nNão invente informações.\nNão use conhecimento externo.\n\nREGRAS DA LIA:\n- A Lia é apenas uma assistente virtual para tirar dúvidas.\n- NÃO agenda procedimentos, NÃO promete agendamento, NÃO fecha venda, NÃO envia Pix, NÃO envia link de pagamento, NÃO informa valores.\n- NÃO deve dizer frases como: "posso ajudar a agendar", "posso fazer seu agendamento", "vou agendar para você", "posso finalizar sua compra", "envio Pix", "envio link de pagamento".\n\n1. SAUDAÇÕES:\nSe o usuário disser bom dia, boa tarde, boa noite, oi, olá ou tudo bem, responda de forma curta, simpática e contextual, variando as respostas. Exemplos:\n- "Bom dia 😊 Sou a Lia - Assistente Virtual da CR Laser®. Estou à disposição para te ajudar com dúvidas sobre os procedimentos."\n- "Boa tarde 😊 Sou a Lia - Assistente Virtual da CR Laser®. Se quiser, pode me mandar sua dúvida."\n- "Boa noite 😊 Sou a Lia - Assistente Virtual da CR Laser®. Estou à disposição para te ajudar."\n\n2. AGENDAMENTO:\nSe o usuário perguntar sobre agendar, marcar horário, consulta, atendimento, falar com alguém, unidade, endereço ou telefone, responda:\n"Para agendamento ou atendimento com a unidade, é só clicar no botão WhatsApp que fica na página 😊"\nSe quiser, também pode complementar: "Se quiser, também posso te explicar melhor sobre o procedimento antes."\nNunca diga que a Lia agenda ou promete horário.\n\n3. PREÇO / VALOR:\nSe o usuário perguntar sobre valor, preço, quanto custa, oferta, desconto, promoção, pagamento, pix, cartão ou comprar, responda:\n"Para valores, ofertas ou compra de procedimentos, use a Lia de compras ou clique no botão WhatsApp da página."\n\n4. RESPOSTAS TÉCNICAS:\nSe houver base suficiente na planilha, responda normalmente, de forma humana, simpática, objetiva e útil. Não caia no fallback cedo demais.\nExemplo:\nPergunta: "quais os pontos do botox?"\nResposta: "Na CR Laser®, o Botox facial é feito no terço superior da face. De modo geral, os pontos mais comuns envolvem testa, glabela e região dos olhos, sempre de acordo com a avaliação profissional. Se quiser, posso te explicar melhor 😊"\nPergunta: "tem botox?"\nResposta: "Sim, temos Botox na CR Laser®. O Botox facial é feito no terço superior e a proposta é manter um resultado natural. Se quiser, posso te explicar melhor como funciona 😊"\n\n5. FALLBACK:\nSó use fallback quando realmente não houver conteúdo útil na base.\nMensagem de fallback:\n"Ainda não encontrei uma resposta segura para isso na minha base 😊 Se quiser, posso te orientar pelo botão WhatsApp da página."\n\n6. TOM:\nSeja sempre humana, simpática, objetiva, sem enrolar e sem empurrar para WhatsApp sem necessidade.\n\n7. NOME:\nNas apresentações, use sempre: "Lia - Assistente Virtual"\n\nIMPORTANTE:\n- Se a pergunta do usuário for parecida com algum TÍTULO da base, use essa linha para responder, mesmo que as palavras não sejam exatamente iguais.\n- Dê prioridade alta para correspondência semântica com o TÍTULO da base.\n- Exemplo: Se a pergunta mencionar 'botox' e 'pontos' ou 'aplicação', use a linha sobre pontos de aplicação do Botox.\n- Não invente fora da base.\n\nBASE DE CONHECIMENTO:\n${baseTexto}${baseConhecimentoSecao}\n\nPergunta do usuário: ${pergunta}\n\nResposta:`;
 
   // Timeout de 20s
   const controller = new AbortController();
@@ -493,10 +517,14 @@ export default async function handler(req, res) {
       console.log('[LIA-IA] Linhas relevantes:', linhasRelevantes.length);
       console.log('[LIA-IA] Títulos enviados para IA:', linhasRelevantes.map(l => l.titulo));
 
-      if (!linhasRelevantes.length) {
+      const identificacaoProcedimento = identificarProcedimentoLia(pergunta);
+      const baseConhecimentoProcedimento = carregarBaseConhecimentoLia(identificacaoProcedimento?.arquivoBase);
+      const temBaseConhecimentoProcedimento = Boolean(baseConhecimentoProcedimento && String(baseConhecimentoProcedimento).trim());
+
+      if (!linhasRelevantes.length && !temBaseConhecimentoProcedimento) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ resposta: 'Ainda estou em treinamento para responder essa dúvida com segurança 😊<br>Por favor, fale com o WhatsApp da sua unidade de atendimento.' }));
-        console.log('[LIA-IA] Fallback: nenhuma linha relevante');
+        console.log('[LIA-IA] Fallback: nenhuma linha relevante e sem base de conhecimento');
         return;
       }
 
@@ -510,7 +538,12 @@ export default async function handler(req, res) {
           historicoTexto = historico.map(m => (m.tipo === 'user' ? 'Usuário: ' : 'Lia: ') + m.texto).join('\n');
         }
         const promptExtra = historicoTexto ? `\n\nHISTÓRICO DA CONVERSA (use para entender perguntas curtas, de continuidade ou com erro de digitação):\n${historicoTexto}\n\nUse o histórico da conversa para entender perguntas curtas, incompletas ou com erro de digitação. Se o usuário fizer uma pergunta de continuidade, mantenha o procedimento do assunto anterior, salvo se ele mencionar outro procedimento claramente.` : '';
-        const respostaIA = await callOpenAI(pergunta + promptExtra, linhasRelevantes, procedimentoContexto);
+        const respostaIA = await callOpenAI(
+          pergunta + promptExtra,
+          linhasRelevantes,
+          identificacaoProcedimento,
+          baseConhecimentoProcedimento
+        );
         respostaFinal = respostaIA && respostaIA.trim() ? respostaIA.trim() : 'Ainda não encontrei uma resposta segura para isso na minha base 😊 Se quiser, posso te orientar pelo botão WhatsApp da página.';
         // Troca qualquer frase pronta de agendamento por WhatsApp
         respostaFinal = respostaFinal.replace(/Se quiser mais informações ou agendar, posso ajudar!?/gi, 'Para mais informações ou agendamento, fale com o WhatsApp da sua unidade.');
